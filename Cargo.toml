@@ -1,0 +1,15 @@
+[package]
+name = "rosc"
+version = "0.1.0"
+authors = ["Andreas Linz <klingt.net@gmail.com>"]
+description = "An OSC library for Rust"
+keywords = ["audio", "osc"]
+# documentation = "..."
+# homepage = "https://klingt.net"
+# repository = "..."
+# license = "MIT"
+# license-file = "LICENSE"
+readme = "README.md"
+
+[dependencies]
+# none
