@@ -10,6 +10,9 @@ build: $(SOURCES)
 release: test $(SOURCES)
 	cargo build --release
 
+format: $(SOURCES)
+	@for f in $(SOURCES); do rustfmt $$f; done
+
 run: build
 	cargo run
 
