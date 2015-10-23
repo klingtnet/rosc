@@ -26,3 +26,10 @@ pub struct OscMidiType {
     data1: u8, // maybe use an enum for data?
     data2: u8,
 }
+
+/// An *osc packet* can contain an *osc message* or a bundle of nested messages
+/// which is called *osc bundle*.
+pub enum OscPacket {
+    OscMessage,
+    OscBundle,
+}
