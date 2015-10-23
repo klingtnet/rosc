@@ -11,8 +11,23 @@ fn main() {
 
     match rosc::utils::parse_ip_and_port(&args[1]) {
         Ok((ip, port)) => {
-            let sock = net::UdpSocket::bind((ip, port));
+            let sock = net::UdpSocket::bind((ip, port)).unwrap();
             println!("Listening to {}:{}", ip, port);
+
+            let mut buf: [u8; rosc::osc_server::MTP] = [0u8; rosc::osc_server::MTP];
+
+            loop {
+                match sock.recv_from(&mut buf) {
+                    Ok((size, addr)) => {
+                        println!("addr: {}, size: {}", addr, size)
+                    }
+                    Err(e) => {
+                        println!("Error receiving from socket: {}", e);
+                        break;
+                    }
+                }
+            }
+
             drop(sock);
         }
         Err(e) => println!("{}", e),
