@@ -4,6 +4,8 @@ pub mod osc_types;
 pub mod osc_server;
 /// Utilities, g.e. IP address parsing
 pub mod utils;
+/// Contains custom errors
+pub mod errors;
 
 #[test]
 fn it_works() {
