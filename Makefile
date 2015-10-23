@@ -1,6 +1,7 @@
 .PHONY: clean
 
 SOURCES:=$(wildcard ./src/*.rs)
+EXAMPLES:=$(wildcard ./examples/*.rs)
 
 all: build
 
@@ -10,8 +11,13 @@ build: $(SOURCES)
 release: test $(SOURCES)
 	cargo build --release
 
-format: $(SOURCES)
-	@for f in $(SOURCES); do rustfmt $$f; done
+format: $(SOURCES) $(EXAMPLES)
+	@for f in $(SOURCES) $(EXAMPLES); do rustfmt $$f; done
+
+examples: $(EXAMPLES)
+
+./examples/%.rs:
+	cargo build --example $(basename $(notdir $@))
 
 run: build
 	cargo run
