@@ -23,6 +23,18 @@ fn parse_port(raw_port: &str) -> Result<u16, num::ParseIntError> {
     raw_port.parse()
 }
 
+/// Parses a given IPv4 address with `:` seperated port and returns a `Result<(net::Ipv4Addr, u16), String>`
+///
+/// # Example
+///
+/// ```
+/// use std::net;
+/// use rosc::utils;
+/// match utils::parse_ip_and_port("127.0.0.1:1234") {
+///   Ok((ip, port)) => net::UdpSocket::bind((ip, port)),
+///   Err(e) => panic!(e)
+/// }
+/// ```
 pub fn parse_ip_and_port(raw_addr: &String) -> Result<(net::Ipv4Addr, u16), String> {
     let parts: Vec<&str> = raw_addr.splitn(2, ':').collect();
     match parts.len() {
