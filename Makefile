@@ -29,3 +29,6 @@ test:
 
 clean:
 	rm -r ./target
+
+doc:
+	cargo doc
