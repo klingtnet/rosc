@@ -30,5 +30,5 @@ test:
 clean:
 	rm -r ./target
 
-doc:
+doc: $(SOURCES)
 	cargo doc
