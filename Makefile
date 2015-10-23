@@ -1,6 +1,6 @@
 .PHONY: clean
 
-SOURCES:=$(shell find -type f -iname '*.rs')
+SOURCES:=$(wildcard ./src/*.rs)
 
 all: build
 
