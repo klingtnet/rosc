@@ -12,7 +12,9 @@ release: test $(SOURCES)
 	cargo build --release
 
 format: $(SOURCES) $(EXAMPLES)
-	@for f in $(SOURCES) $(EXAMPLES); do rustfmt $$f; done
+	@for f in $(SOURCES) $(EXAMPLES); \
+		do echo $$f && rustfmt $$f; \
+	done
 
 examples: $(EXAMPLES)
 
