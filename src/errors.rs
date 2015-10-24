@@ -1,3 +1,3 @@
 pub enum OscError {
-    BadOscPacket
+    BadOscPacket,
 }
