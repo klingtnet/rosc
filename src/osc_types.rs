@@ -30,6 +30,10 @@ pub struct OscMidiType {
 /// An *osc packet* can contain an *osc message* or a bundle of nested messages
 /// which is called *osc bundle*.
 pub enum OscPacket {
-    OscMessage,
-    OscBundle,
+    Message(OscMessage),
+    Bundle,
+}
+
+pub struct OscMessage {
+    pub addr: String,
 }
