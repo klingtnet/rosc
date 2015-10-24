@@ -2,14 +2,15 @@
 
 SOURCES:=$(wildcard ./src/*.rs)
 EXAMPLES:=$(wildcard ./examples/*.rs)
+BUILD_OPTS:=--jobs $(shell nproc)
 
 all: build
 
 build: $(SOURCES)
-	cargo build
+	cargo build $(BUILD_OPTS)
 
 release: test $(SOURCES)
-	cargo build --release
+	cargo build --release $(BUILD_OPTS)
 
 format: $(SOURCES) $(EXAMPLES)
 	@for f in $(SOURCES) $(EXAMPLES); \
