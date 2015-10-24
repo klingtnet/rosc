@@ -1,3 +1,5 @@
 pub enum OscError {
-    BadOscPacket,
+    BadOscPacket(String),
+    BadOscAddress(String),
+    BadOscBundle
 }
