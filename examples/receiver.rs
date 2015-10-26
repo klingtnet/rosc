@@ -11,7 +11,13 @@ fn main() {
 
     match rosc::utils::parse_ip_and_port(&args[1]) {
         Ok((ip, port)) => {
-            let sock = net::UdpSocket::bind((ip, port)).unwrap();
+            let sock = match net::UdpSocket::bind((ip, port)) {
+                Ok(sock_ok) => sock_ok,
+                Err(e) => {
+                    println!("Could not bind socket: {}", e);
+                    process::exit(1);
+                }
+            };
             println!("Listening to {}:{}", ip, port);
 
             let mut buf: [u8; rosc::osc_server::MTP] = [0u8; rosc::osc_server::MTP];
