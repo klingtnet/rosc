@@ -10,3 +10,7 @@
 ### Examples
 
 `cargo build --example examplefile` where `examplefile` is the name of a rust source file from the `examples/` folder withouth the `.rs` extension (TODO: make target)
+
+## TODO
+
+[ ] Rename server and receiver to decoder and encoder
