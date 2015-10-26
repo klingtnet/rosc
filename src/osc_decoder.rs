@@ -8,7 +8,6 @@ use byteorder::ReadBytesExt;
 /// Common MTP size for ethernet
 pub const MTP: usize = 1536;
 
-// TODO: rename to osc_parser and osc_encoder
 pub fn decode(msg: &[u8], size: usize) -> Result<osc_types::OscPacket, errors::OscError> {
     match msg[0] as char {
         '/' => {
