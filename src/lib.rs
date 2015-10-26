@@ -5,6 +5,8 @@ extern crate byteorder;
 pub mod osc_types;
 /// Provides a decoding method for OSC packets
 pub mod osc_decoder;
+/// TODO
+pub mod osc_encoder;
 /// Utilities, g.e. IP address parsing
 pub mod utils;
 /// Contains custom errors
