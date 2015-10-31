@@ -10,7 +10,7 @@ pub enum OscType {
     OscTimetag(u64),
     // nonstandard argument types
     // ignore them if not implemented
-    OscInt64(i64), // big-endian
+    OscLong(i64), // big-endian
     OscDouble(f64),
     OscChar(u8), // padding
     OscColor(u32), // RGBA
