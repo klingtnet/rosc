@@ -1,3 +1,5 @@
+use errors;
+
 // see OSC Type Tag String: http://opensoundcontrol.org/spec-1_0
 // padding: zero bytes (n*4)
 pub enum OscType {
@@ -36,3 +38,5 @@ pub enum OscPacket {
 
 pub struct OscMessage;
 pub struct OscBundle;
+
+pub type OscResult<T> = Result<T, errors::OscError>;
