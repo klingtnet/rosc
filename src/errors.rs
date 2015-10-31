@@ -9,6 +9,7 @@ pub enum OscError {
     BadOscAddress(String),
     BadOscMessage(String),
     BadOscString(String),
+    BadOscArg(String),
     BadOscBundle,
 }
 
