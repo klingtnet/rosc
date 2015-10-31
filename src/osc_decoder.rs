@@ -29,10 +29,17 @@ fn decode_message(msg: &[u8], size: usize) -> ot::OscResult<ot::OscPacket> {
     match read_osc_string(&mut cursor) {
         Ok(s) => {
             let addr: String = s;
-            println!("{}",try!(read_osc_string(&mut cursor)));
-        }
-        Err(e) => {
-            return Err(e)
+            match read_osc_string(&mut cursor) {
+                Ok(type_tags) => {
+                    if type_tags.len() > 1 {
+                        match read_osc_args(&mut cursor, type_tags) {
+                            Ok(args) => println!("{}", args.len()),
+                            Err(e) => ()
+                        };
+                    }
+                },
+                Err(e) => return Err(e)
+            }
         }
         Err(e) => return Err(e)
     }
