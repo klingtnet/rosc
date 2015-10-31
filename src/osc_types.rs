@@ -31,9 +31,10 @@ pub struct OscMidiType {
 /// which is called *osc bundle*.
 pub enum OscPacket {
     Message(OscMessage),
-    Bundle,
+    Bundle(OscBundle),
 }
 
 pub struct OscMessage {
     pub addr: String,
 }
+pub struct OscBundle;
