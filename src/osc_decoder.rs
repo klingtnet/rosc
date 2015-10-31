@@ -1,4 +1,5 @@
-use {osc_types, errors};
+use {osc_types as ot,
+    errors as oe};
 
 use std::{io, string, mem, error};
 use std::io::BufRead;
@@ -9,7 +10,7 @@ use byteorder::{BigEndian, ReadBytesExt};
 /// Common MTP size for ethernet
 pub const MTP: usize = 1536;
 
-pub fn decode(msg: &[u8], size: usize) -> osc_types::OscResult<osc_types::OscPacket> {
+pub fn decode(msg: &[u8], size: usize) -> ot::OscResult<ot::OscPacket> {
     match msg[0] as char {
         '/' => {
             decode_message(msg, size)
@@ -17,40 +18,40 @@ pub fn decode(msg: &[u8], size: usize) -> osc_types::OscResult<osc_types::OscPac
         '#' => {
             decode_bundle(msg)
         }
-        _ => Err(errors::OscError::BadOscPacket("Unknown message format.".to_string())),
+        _ => Err(oe::OscError::BadOscPacket("Unknown message format.".to_string())),
     }
 }
 
-fn decode_message(msg: &[u8], size: usize) -> osc_types::OscResult<osc_types::OscPacket> {
+fn decode_message(msg: &[u8], size: usize) -> ot::OscResult<ot::OscPacket> {
     let mut cursor: io::Cursor<&[u8]> = io::Cursor::new(msg);
     let mut pos: u64 = 0;
 
     match read_osc_string(&mut cursor) {
         Ok(s) => {
             let addr: String = s;
-            println!("{}, {}", addr, pos);
+            println!("{}",try!(read_osc_string(&mut cursor)));
         }
         Err(e) => {
             println!("{}", e)
         }
     }
 
-    Ok(osc_types::OscPacket::Message(osc_types::OscMessage))
+    Ok(ot::OscPacket::Message(ot::OscMessage))
 }
 
-fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> osc_types::OscResult<String> {
+fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> ot::OscResult<String> {
     let mut str_buf: Vec<u8> = Vec::new();
     match cursor.read_until(0, &mut str_buf) {
         Ok(_) => {
             pad_cursor(cursor);
-            String::from_utf8(str_buf).map_err(|e| errors::OscError::StringError(e))
+            String::from_utf8(str_buf).map_err(|e| oe::OscError::StringError(e))
         },
-        Err(e) => Err(errors::OscError::ReadError(e)),
+        Err(e) => Err(oe::OscError::ReadError(e)),
     }
 }
 
-fn decode_bundle(msg: &[u8]) -> osc_types::OscResult<osc_types::OscPacket> {
-    Err(errors::OscError::BadOscBundle)
+fn decode_bundle(msg: &[u8]) -> ot::OscResult<ot::OscPacket> {
+    Err(oe::OscError::BadOscBundle)
 }
 
 fn pad_cursor(cursor: &mut io::Cursor<&[u8]>) {
