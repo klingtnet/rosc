@@ -2,7 +2,7 @@ use {osc_types as ot,
     errors as oe};
 
 use std::{io, string, mem, error};
-use std::io::BufRead;
+use std::io::{Read, BufRead};
 
 use byteorder;
 use byteorder::{BigEndian, ReadBytesExt};
@@ -50,6 +50,67 @@ fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> ot::OscResult<String> {
                 .map(|s| s.trim_matches(0u8 as char).to_string())
         },
         Err(e) => Err(oe::OscError::ReadError(e)),
+    }
+}
+
+fn read_osc_args(cursor: &mut io::Cursor<&[u8]>, raw_type_tags: String) -> ot::OscResult<Vec<ot::OscType>> {
+    let type_tags: Vec<char> = raw_type_tags.chars()
+        .skip(1)
+        .map(|c| c as char)
+        .collect();
+    let mut args: Vec<ot::OscType> = Vec::with_capacity(type_tags.len());
+    for tag in type_tags {
+        match read_osc_arg(cursor, tag) {
+            Ok(arg) => {
+                args.push(arg);
+            },
+            Err(e) => return Err(e)
+        }
+    }
+    Ok(args)
+}
+
+fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> ot::OscResult<ot::OscType> {
+    match tag {
+        'f' => {
+            cursor.read_f32::<BigEndian>()
+            .map(|f| ot::OscType::OscFloat(f))
+            .map_err(|e| oe::OscError::ByteOrderError(e))
+        },
+        'd' => {
+            cursor.read_f64::<BigEndian>()
+            .map(|d| ot::OscType::OscDouble(d))
+            .map_err(|e| oe::OscError::ByteOrderError(e))
+        }
+        'i' => {
+            cursor.read_i32::<BigEndian>()
+            .map(|i| ot::OscType::OscInt(i))
+            .map_err(|e| oe::OscError::ByteOrderError(e))
+        },
+        'h' => {
+            cursor.read_i64::<BigEndian>()
+            .map(|l| ot::OscType::OscLong(l))
+            .map_err(|e| oe::OscError::ByteOrderError(e))
+        },
+        's' => {
+            read_osc_string(cursor)
+            .map(|s| ot::OscType::OscString(s))
+        },
+        'b' => {
+            match cursor.read_u32::<BigEndian>() {
+                Ok(size) => {
+                    let mut buf: Vec<u8> = Vec::with_capacity(size as usize);
+                    match cursor.take(size as u64).read(&mut buf) {
+                        Ok(blob_size) => Ok(ot::OscType::OscBlob(buf)),
+                        Err(e) => Err(oe::OscError::ReadError(e))
+                    }
+                },
+                Err(e) => return Err(oe::OscError::BadOscBundle)
+            }
+            // int32 byte count followed by as many bytes
+            // read blob ...
+        },
+        _ => Err(oe::OscError::BadOscArg(format!("Type tag \"{}\" is not implemented!", tag))),
     }
 }
 
