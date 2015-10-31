@@ -1,8 +1,10 @@
-use std::fmt;
+use std::{fmt, io, string};
 
 type OscResult<T> = Result<T, OscError>;
 
 pub enum OscError {
+    StringError(string::FromUtf8Error),
+    ReadError(io::Error),
     BadOscPacket(String),
     BadOscAddress(String),
     BadOscMessage(String),
