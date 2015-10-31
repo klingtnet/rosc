@@ -32,8 +32,9 @@ fn decode_message(msg: &[u8], size: usize) -> ot::OscResult<ot::OscPacket> {
             println!("{}",try!(read_osc_string(&mut cursor)));
         }
         Err(e) => {
-            println!("{}", e)
+            return Err(e)
         }
+        Err(e) => return Err(e)
     }
 
     Ok(ot::OscPacket::Message(ot::OscMessage))
