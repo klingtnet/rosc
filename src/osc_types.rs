@@ -12,8 +12,8 @@ pub enum OscType {
     // ignore them if not implemented
     OscLong(i64),
     OscDouble(f64),
-    OscColor(u32), // RGBA
     OscChar(u8),
+    OscColor(u32),  // byte-order: RGBA
     OscMidi(OscMidiType),
     OscTrue,
     OscFalse,
