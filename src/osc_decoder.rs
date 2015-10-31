@@ -28,8 +28,9 @@ fn decode_message(msg: &[u8], size: usize) -> osc_types::OscResult<osc_types::Os
     match read_osc_string(&mut cursor) {
         Ok(s) => {
             let addr: String = s;
-            pos = pad_four(cursor.position());
             println!("{}, {}", addr, pos);
+
+            pad_cursor(&mut cursor);
         }
         Err(e) => {
             println!("{}", e)
@@ -51,10 +52,10 @@ fn decode_bundle(msg: &[u8]) -> osc_types::OscResult<osc_types::OscPacket> {
     Err(errors::OscError::BadOscBundle)
 }
 
-fn pad_four(pos: u64) -> u64 {
-    let d: u64 = pos % 4;
-    match d {
-        0 => pos,
-        _ => pos + (4 - d),
+fn pad_cursor(cursor: &mut io::Cursor<&[u8]>) {
+    let pos = cursor.position();
+    match pos % 4 {
+        0 => (),
+        d => cursor.set_position(pos + (4 - d)),
     }
 }
