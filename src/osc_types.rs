@@ -11,7 +11,7 @@ pub enum OscType {
     // nonstandard argument types
     // ignore them if not implemented
     OscInt64(i64), // big-endian
-    OscDouble(u64),
+    OscDouble(f64),
     OscChar(u8), // padding
     OscColor(u32), // RGBA
     OscMidi(OscMidiType),
