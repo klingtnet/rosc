@@ -9,7 +9,7 @@ use byteorder::{BigEndian, ReadBytesExt};
 /// Common MTP size for ethernet
 pub const MTP: usize = 1536;
 
-pub fn decode(msg: &[u8], size: usize) -> Result<osc_types::OscPacket, errors::OscError> {
+pub fn decode(msg: &[u8], size: usize) -> osc_types::OscResult<osc_types::OscPacket> {
     match msg[0] as char {
         '/' => {
             decode_message(msg, size)
@@ -21,7 +21,7 @@ pub fn decode(msg: &[u8], size: usize) -> Result<osc_types::OscPacket, errors::O
     }
 }
 
-fn decode_message(msg: &[u8], size: usize) -> Result<osc_types::OscPacket, errors::OscError> {
+fn decode_message(msg: &[u8], size: usize) -> osc_types::OscResult<osc_types::OscPacket> {
     let mut cursor: io::Cursor<&[u8]> = io::Cursor::new(msg);
     let mut pos: u64 = 0;
 
@@ -39,7 +39,7 @@ fn decode_message(msg: &[u8], size: usize) -> Result<osc_types::OscPacket, error
     Ok(osc_types::OscPacket::Message(osc_types::OscMessage))
 }
 
-fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> Result<String, errors::OscError> {
+fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> osc_types::OscResult<String> {
     let mut str_buf: Vec<u8> = Vec::new();
     match cursor.read_until(0, &mut str_buf) {
         Ok(_) => String::from_utf8(str_buf).map_err(|e| errors::OscError::StringError(e)),
@@ -47,7 +47,7 @@ fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> Result<String, errors::Osc
     }
 }
 
-fn decode_bundle(msg: &[u8]) -> Result<osc_types::OscPacket, errors::OscError> {
+fn decode_bundle(msg: &[u8]) -> osc_types::OscResult<osc_types::OscPacket> {
     Err(errors::OscError::BadOscBundle)
 }
 
