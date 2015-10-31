@@ -5,15 +5,15 @@ use errors;
 pub enum OscType {
     OscInt(i32),
     OscFloat(f32),
-    OscString(String), // padding
-    OscBlob(Vec<u8>), // padding
+    OscString(String),
+    OscBlob(Vec<u8>),
     OscTimetag(u64),
     // nonstandard argument types
     // ignore them if not implemented
-    OscLong(i64), // big-endian
+    OscLong(i64),
     OscDouble(f64),
-    OscChar(u8), // padding
     OscColor(u32), // RGBA
+    OscChar(u8),
     OscMidi(OscMidiType),
     OscTrue,
     OscFalse,
