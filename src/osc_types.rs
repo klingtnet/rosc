@@ -34,7 +34,5 @@ pub enum OscPacket {
     Bundle(OscBundle),
 }
 
-pub struct OscMessage {
-    pub addr: String,
-}
+pub struct OscMessage;
 pub struct OscBundle;
