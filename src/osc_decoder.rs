@@ -45,7 +45,9 @@ fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> ot::OscResult<String> {
     match cursor.read_until(0, &mut str_buf) {
         Ok(_) => {
             pad_cursor(cursor);
-            String::from_utf8(str_buf).map_err(|e| oe::OscError::StringError(e))
+            String::from_utf8(str_buf)
+                .map_err(|e| oe::OscError::StringError(e))
+                .map(|s| s.trim_matches(0u8 as char).to_string())
         },
         Err(e) => Err(oe::OscError::ReadError(e)),
     }
