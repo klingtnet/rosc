@@ -1,5 +1,7 @@
 use std::fmt;
 
+type OscResult<T> = Result<T, OscError>;
+
 pub enum OscError {
     BadOscPacket(String),
     BadOscAddress(String),
