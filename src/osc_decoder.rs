@@ -29,8 +29,6 @@ fn decode_message(msg: &[u8], size: usize) -> osc_types::OscResult<osc_types::Os
         Ok(s) => {
             let addr: String = s;
             println!("{}, {}", addr, pos);
-
-            pad_cursor(&mut cursor);
         }
         Err(e) => {
             println!("{}", e)
@@ -43,7 +41,10 @@ fn decode_message(msg: &[u8], size: usize) -> osc_types::OscResult<osc_types::Os
 fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> osc_types::OscResult<String> {
     let mut str_buf: Vec<u8> = Vec::new();
     match cursor.read_until(0, &mut str_buf) {
-        Ok(_) => String::from_utf8(str_buf).map_err(|e| errors::OscError::StringError(e)),
+        Ok(_) => {
+            pad_cursor(cursor);
+            String::from_utf8(str_buf).map_err(|e| errors::OscError::StringError(e))
+        },
         Err(e) => Err(errors::OscError::ReadError(e)),
     }
 }
