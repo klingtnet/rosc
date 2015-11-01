@@ -19,3 +19,11 @@ fn test_parse_ip_and_port() {
     addr = rosc::utils::parse_ip_and_port(&bad_addr_port);
     assert!(addr.is_err());
 }
+
+#[test]
+fn test_pad() {
+    assert_eq!(4, rosc::utils::pad(4));
+    assert_eq!(8, rosc::utils::pad(5));
+    assert_eq!(8, rosc::utils::pad(6));
+    assert_eq!(8, rosc::utils::pad(7));
+}
