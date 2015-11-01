@@ -68,7 +68,7 @@ pub fn parse_ip_and_port(raw_addr: &String) -> Result<(net::Ipv4Addr, u16), Stri
 /// ```
 pub fn pad(pos: u64) -> u64 {
     match pos % 4 {
-        0 => 0,
+        0 => pos,
         d => pos + (4-d)
     }
 }
