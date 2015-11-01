@@ -1,4 +1,4 @@
-use {osc_types as ot, errors as oe};
+use {types as ot, errors as oe, utils};
 
 use std::{io, string, mem, error};
 use std::io::{Read, BufRead};
@@ -189,8 +189,5 @@ fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> ot::OscResult<ot::OscType> {
 
 fn pad_cursor(cursor: &mut io::Cursor<&[u8]>) {
     let pos = cursor.position();
-    match pos % 4 {
-        0 => (),
-        d => cursor.set_position(pos + (4 - d)),
-    }
+    cursor.set_position(utils::pad(pos));
 }

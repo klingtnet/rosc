@@ -13,7 +13,7 @@ pub enum OscType {
     OscLong(i64),
     OscDouble(f64),
     OscChar(u8),
-    OscColor(u32),  // byte-order: RGBA
+    OscColor(u32), // byte-order: RGBA
     OscMidi(OscMidiType),
     OscTrue,
     OscFalse,

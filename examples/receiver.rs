@@ -20,13 +20,13 @@ fn main() {
             };
             println!("Listening to {}:{}", ip, port);
 
-            let mut buf: [u8; rosc::osc_decoder::MTP] = [0u8; rosc::osc_decoder::MTP];
+            let mut buf: [u8; rosc::decoder::MTP] = [0u8; rosc::decoder::MTP];
 
             loop {
                 match sock.recv_from(&mut buf) {
                     Ok((size, addr)) => {
                         println!("addr: {}, size: {}", addr, size);
-                        rosc::osc_decoder::decode(&mut buf);
+                        rosc::decoder::decode(&mut buf);
                     }
                     Err(e) => {
                         println!("Error receiving from socket: {}", e);
