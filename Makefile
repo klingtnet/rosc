@@ -1,6 +1,7 @@
 .PHONY: clean
 
 SOURCES:=$(wildcard ./src/*.rs)
+TESTS:=$(wildcard ./tests/*.rs)
 EXAMPLES:=$(wildcard ./examples/*.rs)
 BUILD_OPTS:=--jobs $(shell nproc)
 
@@ -12,7 +13,7 @@ build: $(SOURCES)
 release: test $(SOURCES)
 	cargo build --release $(BUILD_OPTS)
 
-format: $(SOURCES) $(EXAMPLES)
+format: $(SOURCES) $(EXAMPLES) $(TESTS)
 	@for f in $(SOURCES) $(EXAMPLES); \
 		do echo $$f && rustfmt $$f; \
 	done
