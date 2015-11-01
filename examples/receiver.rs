@@ -26,7 +26,7 @@ fn main() {
                 match sock.recv_from(&mut buf) {
                     Ok((size, addr)) => {
                         println!("addr: {}, size: {}", addr, size);
-                        rosc::osc_decoder::decode(&mut buf, size);
+                        rosc::osc_decoder::decode(&mut buf);
                     }
                     Err(e) => {
                         println!("Error receiving from socket: {}", e);

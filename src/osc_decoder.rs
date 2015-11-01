@@ -9,10 +9,10 @@ use byteorder::{BigEndian, ReadBytesExt};
 /// Common MTP size for ethernet
 pub const MTP: usize = 1536;
 
-pub fn decode(msg: &[u8], size: usize) -> ot::OscResult<ot::OscPacket> {
+pub fn decode(msg: &[u8]) -> ot::OscResult<ot::OscPacket> {
     match msg[0] as char {
         '/' => {
-            decode_message(msg, size)
+            decode_message(msg)
         }
         '#' => {
             decode_bundle(msg)
@@ -21,7 +21,7 @@ pub fn decode(msg: &[u8], size: usize) -> ot::OscResult<ot::OscPacket> {
     }
 }
 
-fn decode_message(msg: &[u8], size: usize) -> ot::OscResult<ot::OscPacket> {
+fn decode_message(msg: &[u8]) -> ot::OscResult<ot::OscPacket> {
     let mut cursor: io::Cursor<&[u8]> = io::Cursor::new(msg);
 
     match read_osc_string(&mut cursor) {
