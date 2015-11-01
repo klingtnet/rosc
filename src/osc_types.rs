@@ -36,7 +36,14 @@ pub enum OscPacket {
     Bundle(OscBundle),
 }
 
-pub struct OscMessage;
-pub struct OscBundle;
+pub struct OscMessage {
+    pub addr: String,
+    pub args: Option<Vec<OscType>>,
+}
+
+pub struct OscBundle {
+    pub timetag: OscType,
+    pub content: Vec<OscPacket>,
+}
 
 pub type OscResult<T> = Result<T, errors::OscError>;
