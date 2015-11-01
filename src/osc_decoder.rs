@@ -24,7 +24,6 @@ pub fn decode(msg: &[u8], size: usize) -> ot::OscResult<ot::OscPacket> {
 
 fn decode_message(msg: &[u8], size: usize) -> ot::OscResult<ot::OscPacket> {
     let mut cursor: io::Cursor<&[u8]> = io::Cursor::new(msg);
-    let mut pos: u64 = 0;
 
     match read_osc_string(&mut cursor) {
         Ok(s) => {
