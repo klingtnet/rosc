@@ -118,8 +118,6 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> ot::OscResult<ot::
                 },
                 Err(e) => return Err(oe::OscError::BadOscBundle)
             }
-            // int32 byte count followed by as many bytes
-            // read blob ...
         },
         _ => Err(oe::OscError::BadOscArg(format!("Type tag \"{}\" is not implemented!", tag))),
     }
