@@ -71,13 +71,13 @@ fn decode_bundle(msg: &[u8]) -> ot::OscResult<ot::OscPacket> {
                                         if cnt == (size as usize) {
                                             match decode(&mut buf) {
                                                 Ok(p) => bundle.push(p),
-                                                Err(e) => return Err(e)
+                                                Err(e) => return Err(e),
                                             }
                                         } else {
-                                            return Err(oe::OscError::BadOscBundle)
+                                            return Err(oe::OscError::BadOscBundle);
                                         }
-                                    },
-                                    Err(e) => return Err(oe::OscError::ReadError(e))
+                                    }
+                                    Err(e) => return Err(oe::OscError::ReadError(e)),
                                 }
                             }
                             Err(e) => return Err(e),
