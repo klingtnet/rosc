@@ -30,6 +30,7 @@ test:
 
 clean:
 	rm -r ./target
+	rm -f src/*.rs.bk
 
 doc: $(SOURCES)
 	cargo doc
