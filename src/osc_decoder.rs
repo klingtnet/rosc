@@ -32,15 +32,25 @@ fn decode_message(msg: &[u8], size: usize) -> ot::OscResult<ot::OscPacket> {
                 Ok(type_tags) => {
                     if type_tags.len() > 1 {
                         match read_osc_args(&mut cursor, type_tags) {
-                            Ok(args) => println!("{}", args.len()),
-                            Err(e) => ()
-                        };
+                            Ok(args) => {
+                                Ok(ot::OscPacket::Message(ot::OscMessage{
+                                    addr: addr,
+                                    args: Some(args),
+                                }))
+                            },
+                            Err(e) => Err(e),
+                        }
+                    } else {
+                        Ok(ot::OscPacket::Message(ot::OscMessage{
+                            addr: addr,
+                            args: None
+                        }))
                     }
                 },
-                Err(e) => return Err(e)
+                Err(e) => Err(e),
             }
         }
-        Err(e) => return Err(e)
+        Err(e) => Err(e),
     }
 
     Ok(ot::OscPacket::Message(ot::OscMessage))
