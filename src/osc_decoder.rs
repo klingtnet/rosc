@@ -103,6 +103,10 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> ot::OscResult<ot::
             read_osc_string(cursor)
             .map(|s| ot::OscType::OscString(s))
         },
+        't' => {
+            // http://opensoundcontrol.org/node/3/#timetags
+            read_time_tag(cursor)
+        }
         'b' => {
             match cursor.read_u32::<BigEndian>() {
                 Ok(size) => {
@@ -118,6 +122,18 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> ot::OscResult<ot::
             // read blob ...
         },
         _ => Err(oe::OscError::BadOscArg(format!("Type tag \"{}\" is not implemented!", tag))),
+    }
+}
+
+fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> ot::OscResult<ot::OscType> {
+    match cursor.read_u32::<BigEndian>() {
+        Ok(date) => {
+            match cursor.read_u32::<BigEndian>() {
+                Ok(frac) => Ok(ot::OscType::OscTime(date, frac)),
+                Err(e) => Err(oe::OscError::ByteOrderError(e))
+            }
+        },
+        Err(e) => Err(oe::OscError::ByteOrderError(e))
     }
 }
 

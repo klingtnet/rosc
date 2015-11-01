@@ -7,7 +7,7 @@ pub enum OscType {
     OscFloat(f32),
     OscString(String),
     OscBlob(Vec<u8>),
-    OscTimetag(u64),
+    OscTime(u32, u32),
     // nonstandard argument types
     // ignore them if not implemented
     OscLong(i64),
