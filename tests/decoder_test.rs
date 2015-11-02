@@ -7,6 +7,7 @@ use rosc::{types, errors, decoder, utils};
 
 #[test]
 fn test_decode_no_args() {
+    // message to build: /some/valid/address/4 ,
     let raw_addr = "/some/valid/address/4";
     let addr = pad(raw_addr.as_bytes());
     // args
@@ -28,6 +29,8 @@ fn test_decode_no_args() {
 
 #[test]
 fn test_decode_args() {
+    // /another/valid/address/123 ,fdih 3.1415 3.14159265359 12345678i32
+    // -1234567891011
     let raw_addr = "/another/valid/address/123";
     let addr = pad(raw_addr.as_bytes());
     // args
