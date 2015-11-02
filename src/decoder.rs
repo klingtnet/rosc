@@ -23,32 +23,21 @@ pub fn decode(msg: &[u8]) -> ot::OscResult<ot::OscPacket> {
 fn decode_message(msg: &[u8]) -> ot::OscResult<ot::OscPacket> {
     let mut cursor: io::Cursor<&[u8]> = io::Cursor::new(msg);
 
-    match read_osc_string(&mut cursor) {
-        Ok(s) => {
-            let addr: String = s;
-            match read_osc_string(&mut cursor) {
-                Ok(type_tags) => {
-                    if type_tags.len() > 1 {
-                        match read_osc_args(&mut cursor, type_tags) {
-                            Ok(args) => {
-                                Ok(ot::OscPacket::Message(ot::OscMessage {
-                                    addr: addr,
-                                    args: Some(args),
-                                }))
-                            }
-                            Err(e) => Err(e),
-                        }
-                    } else {
-                        Ok(ot::OscPacket::Message(ot::OscMessage {
-                            addr: addr,
-                            args: None,
-                        }))
-                    }
-                }
-                Err(e) => Err(e),
-            }
-        }
-        Err(e) => Err(e),
+    let addr: String = try!(read_osc_string(&mut cursor));
+    let type_tags: String = try!(read_osc_string(&mut cursor));
+
+    if type_tags.len() > 1 {
+        let args: Vec<ot::OscType> = try!(read_osc_args(&mut cursor, type_tags));
+
+        Ok(ot::OscPacket::Message(ot::OscMessage {
+            addr: addr,
+            args: Some(args),
+        }))
+    } else {
+        Ok(ot::OscPacket::Message(ot::OscMessage {
+            addr: addr,
+            args: None,
+        }))
     }
 }
 
