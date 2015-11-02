@@ -2,6 +2,8 @@ use errors;
 
 // see OSC Type Tag String: http://opensoundcontrol.org/spec-1_0
 // padding: zero bytes (n*4)
+
+#[derive(Debug)]
 pub enum OscType {
     OscInt(i32),
     OscFloat(f32),
@@ -22,6 +24,8 @@ pub enum OscType {
     OscArray(Vec<OscType>),
 }
 
+
+#[derive(Debug)]
 pub struct OscMidiType {
     port: u8,
     status: u8,
@@ -31,16 +35,21 @@ pub struct OscMidiType {
 
 /// An *osc packet* can contain an *osc message* or a bundle of nested messages
 /// which is called *osc bundle*.
+#[derive(Debug)]
 pub enum OscPacket {
     Message(OscMessage),
     Bundle(OscBundle),
 }
 
+
+#[derive(Debug)]
 pub struct OscMessage {
     pub addr: String,
     pub args: Option<Vec<OscType>>,
 }
 
+
+#[derive(Debug)]
 pub struct OscBundle {
     pub timetag: OscType,
     pub content: Vec<OscPacket>,
