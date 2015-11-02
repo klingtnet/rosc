@@ -92,12 +92,8 @@ fn read_osc_args(cursor: &mut io::Cursor<&[u8]>, raw_type_tags: String) -> OscRe
                                             .collect();
     let mut args: Vec<OscType> = Vec::with_capacity(type_tags.len());
     for tag in type_tags {
-        match read_osc_arg(cursor, tag) {
-            Ok(arg) => {
-                args.push(arg);
-            }
-            Err(e) => return Err(e),
-        }
+        let arg: OscType = try!(read_osc_arg(cursor, tag));
+        args.push(arg);
     }
     Ok(args)
 }
