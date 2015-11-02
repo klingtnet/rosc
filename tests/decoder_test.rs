@@ -3,6 +3,7 @@ extern crate byteorder;
 
 use byteorder::{ByteOrder, BigEndian};
 use std::{mem, iter};
+use std::ascii::AsciiExt;
 
 use rosc::{types, errors, decoder, utils};
 
@@ -50,10 +51,17 @@ fn test_decode_args() {
     let l = -1234567891011i64;
     let h_bytes: [u8; 8] = unsafe { mem::transmute(l.to_be()) };
 
+    let s = "I am an osc test string.";
+    assert!(s.is_ascii());
+
+    // Osc strings are null terminated like in C!
+    let s_bytes: Vec<u8> = to_osc_string(s.as_bytes());
+
     let type_tags = to_osc_string(b",fdsih");
 
     let args: Vec<u8> = f_bytes.iter()
                                .chain(d_bytes.iter())
+                               .chain(s_bytes.iter())
                                .chain(i_bytes.iter())
                                .chain(h_bytes.iter())
                                .map(|x| *x)
