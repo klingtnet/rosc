@@ -1,9 +1,8 @@
 use {types as ot, errors as oe, utils};
 
-use std::{io, string, mem, error};
+use std::io;
 use std::io::{Read, BufRead};
 
-use byteorder;
 use byteorder::{BigEndian, ReadBytesExt};
 
 /// Common MTP size for ethernet

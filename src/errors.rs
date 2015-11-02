@@ -1,5 +1,5 @@
 use byteorder;
-use std::{fmt, io, string};
+use std::{io, string};
 
 #[derive(Debug)]
 pub enum OscError {
