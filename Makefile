@@ -14,7 +14,7 @@ release: test $(SOURCES)
 	cargo build --release $(BUILD_OPTS)
 
 format: $(SOURCES) $(EXAMPLES) $(TESTS)
-	@for f in $(SOURCES) $(EXAMPLES); \
+	@for f in $?; \
 		do echo $$f && rustfmt $$f; \
 	done
 
