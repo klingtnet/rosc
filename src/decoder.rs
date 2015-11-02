@@ -55,45 +55,29 @@ fn decode_message(msg: &[u8]) -> ot::OscResult<ot::OscPacket> {
 fn decode_bundle(msg: &[u8]) -> ot::OscResult<ot::OscPacket> {
     let mut cursor: io::Cursor<&[u8]> = io::Cursor::new(msg);
 
-    match read_osc_string(&mut cursor).map(|s| s == "bundle") {
-        Ok(b) => {
-            if b {
-                match read_time_tag(&mut cursor) {
-                    Ok(tt) => {
-                        let mut bundle: Vec<ot::OscPacket> = Vec::new();
-                        match cursor.read_u32::<BigEndian>()
-                                    .map_err(|e| oe::OscError::ByteOrderError(e)) {
-                            Ok(size) => {
-                                let mut buf: Vec<u8> = Vec::new();
-                                match cursor.take(size as u64).read_to_end(&mut buf) {
-                                    Ok(cnt) => {
-                                        if cnt == (size as usize) {
-                                            match decode(&mut buf) {
-                                                Ok(p) => bundle.push(p),
-                                                Err(e) => return Err(e),
-                                            }
-                                        } else {
-                                            return Err(oe::OscError::BadBundle);
-                                        }
-                                    }
-                                    Err(e) => return Err(oe::OscError::ReadError(e)),
-                                }
-                            }
-                            Err(e) => return Err(e),
-                        }
-                        Ok(ot::OscPacket::Bundle(ot::OscBundle {
-                            timetag: tt,
-                            content: bundle,
-                        }))
-                    }
-                    Err(e) => Err(e),
-                }
-            } else {
-                Err(oe::OscError::BadBundle)
-            }
-        }
-        Err(e) => Err(e),
+    let b = try!(read_osc_string(&mut cursor));
+    if b != "bundle" {
+        return Err(oe::OscError::BadBundle);
     }
+
+    let time_tag = try!(read_time_tag(&mut cursor));
+    let mut bundle: Vec<ot::OscPacket> = Vec::new();
+    let size: usize = try!(cursor.read_u32::<BigEndian>()
+                   .map_err(oe::OscError::ByteOrderError)) as usize;
+    let mut buf: Vec<u8> = Vec::new();
+    let cnt: usize = try!(cursor.take(size as u64)
+                                .read_to_end(&mut buf)
+                                .map_err(oe::OscError::ReadError));
+    if cnt == size {
+        try!(decode(&mut buf).map(|p| bundle.push(p)));
+    } else {
+        return Err(oe::OscError::BadBundle);
+    }
+
+    Ok(ot::OscPacket::Bundle(ot::OscBundle {
+        timetag: time_tag,
+        content: bundle,
+    }))
 }
 
 fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> ot::OscResult<String> {
