@@ -70,10 +70,11 @@ fn test_decode_args() {
             assert_eq!(raw_addr, msg.addr);
             for arg in msg.args.unwrap() {
                 match arg {
-                    types::OscType::OscInt(x) => assert_eq!(i, x),
-                    types::OscType::OscLong(x) => assert_eq!(l, x),
-                    types::OscType::OscFloat(x) => assert_eq!(f, x),
-                    types::OscType::OscDouble(x) => assert_eq!(d, x),
+                    types::OscType::Int(x) => assert_eq!(i, x),
+                    types::OscType::Long(x) => assert_eq!(l, x),
+                    types::OscType::Float(x) => assert_eq!(f, x),
+                    types::OscType::Double(x) => assert_eq!(d, x),
+                    types::OscType::String(x) => assert_eq!(s, x),
                     _ => panic!(),
                 }
             }
