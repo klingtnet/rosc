@@ -3,7 +3,7 @@ extern crate rosc;
 use rosc::{types, errors, decoder, utils};
 
 #[test]
-fn test_decode() {
+fn test_decode_no_args() {
     let raw_addr = "/some/valid/address/4";
     let addr = pad(raw_addr.as_bytes());
     // args
