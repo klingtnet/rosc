@@ -16,7 +16,7 @@ pub fn decode(msg: &[u8]) -> ot::OscResult<ot::OscPacket> {
         '#' => {
             decode_bundle(msg)
         }
-        _ => Err(oe::OscError::BadOscPacket("Unknown message format.".to_string())),
+        _ => Err(oe::OscError::BadPacket("Unknown message format.".to_string())),
     }
 }
 
@@ -73,7 +73,7 @@ fn decode_bundle(msg: &[u8]) -> ot::OscResult<ot::OscPacket> {
                                                 Err(e) => return Err(e),
                                             }
                                         } else {
-                                            return Err(oe::OscError::BadOscBundle);
+                                            return Err(oe::OscError::BadBundle);
                                         }
                                     }
                                     Err(e) => return Err(oe::OscError::ReadError(e)),
@@ -89,7 +89,7 @@ fn decode_bundle(msg: &[u8]) -> ot::OscResult<ot::OscPacket> {
                     Err(e) => Err(e),
                 }
             } else {
-                Err(oe::OscError::BadOscBundle)
+                Err(oe::OscError::BadBundle)
             }
         }
         Err(e) => Err(e),
@@ -132,26 +132,26 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> ot::OscResult<ot::
     match tag {
         'f' => {
             cursor.read_f32::<BigEndian>()
-                  .map(|f| ot::OscType::OscFloat(f))
+                  .map(|f| ot::OscType::Float(f))
                   .map_err(|e| oe::OscError::ByteOrderError(e))
         }
         'd' => {
             cursor.read_f64::<BigEndian>()
-                  .map(|d| ot::OscType::OscDouble(d))
+                  .map(|d| ot::OscType::Double(d))
                   .map_err(|e| oe::OscError::ByteOrderError(e))
         }
         'i' => {
             cursor.read_i32::<BigEndian>()
-                  .map(|i| ot::OscType::OscInt(i))
+                  .map(|i| ot::OscType::Int(i))
                   .map_err(|e| oe::OscError::ByteOrderError(e))
         }
         'h' => {
             cursor.read_i64::<BigEndian>()
-                  .map(|l| ot::OscType::OscLong(l))
+                  .map(|l| ot::OscType::Long(l))
                   .map_err(|e| oe::OscError::ByteOrderError(e))
         }
         's' => {
-            read_osc_string(cursor).map(|s| ot::OscType::OscString(s))
+            read_osc_string(cursor).map(|s| ot::OscType::String(s))
         }
         't' => {
             // http://opensoundcontrol.org/node/3/#timetags
@@ -162,15 +162,15 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> ot::OscResult<ot::
                 Ok(size) => {
                     let mut buf: Vec<u8> = Vec::with_capacity(size as usize);
                     match cursor.take(size as u64).read(&mut buf) {
-                        Ok(blob_size) => Ok(ot::OscType::OscBlob(buf)),
+                        Ok(blob_size) => Ok(ot::OscType::Blob(buf)),
                         Err(e) => Err(oe::OscError::ReadError(e)),
                     }
                 }
                 // TODO: use correct error type
-                Err(e) => return Err(oe::OscError::BadOscBundle),
+                Err(e) => return Err(oe::OscError::BadBundle),
             }
         }
-        _ => Err(oe::OscError::BadOscArg(format!("Type tag \"{}\" is not implemented!", tag))),
+        _ => Err(oe::OscError::BadArg(format!("Type tag \"{}\" is not implemented!", tag))),
     }
 }
 
@@ -178,7 +178,7 @@ fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> ot::OscResult<ot::OscType> {
     match cursor.read_u32::<BigEndian>() {
         Ok(date) => {
             match cursor.read_u32::<BigEndian>() {
-                Ok(frac) => Ok(ot::OscType::OscTime(date, frac)),
+                Ok(frac) => Ok(ot::OscType::Time(date, frac)),
                 Err(e) => Err(oe::OscError::ByteOrderError(e)),
             }
         }

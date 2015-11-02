@@ -5,23 +5,23 @@ use errors;
 
 #[derive(Debug)]
 pub enum OscType {
-    OscInt(i32),
-    OscFloat(f32),
-    OscString(String),
-    OscBlob(Vec<u8>),
-    OscTime(u32, u32),
+    Int(i32),
+    Float(f32),
+    String(String),
+    Blob(Vec<u8>),
+    Time(u32, u32),
     // nonstandard argument types
     // ignore them if not implemented
-    OscLong(i64),
-    OscDouble(f64),
-    OscChar(u8),
-    OscColor(u32), // byte-order: RGBA
-    OscMidi(OscMidiType),
-    OscTrue,
-    OscFalse,
-    OscNil,
-    OscInf,
-    OscArray(Vec<OscType>),
+    Long(i64),
+    Double(f64),
+    Char(u8),
+    Color(u32), // byte-order: RGBA
+    Midi(OscMidiType),
+    True,
+    False,
+    Nil,
+    Inf,
+    Array(Vec<OscType>),
 }
 
 
