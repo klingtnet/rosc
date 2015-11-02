@@ -128,17 +128,16 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> OscResult<OscType>
             read_time_tag(cursor)
         }
         'b' => {
-            match cursor.read_u32::<BigEndian>() {
-                Ok(size) => {
-                    let mut buf: Vec<u8> = Vec::with_capacity(size as usize);
-                    match cursor.take(size as u64).read(&mut buf) {
-                        Ok(blob_size) => Ok(OscType::Blob(buf)),
-                        Err(e) => Err(OscError::ReadError(e)),
-                    }
-                }
-                // TODO: use correct error type
-                Err(e) => return Err(OscError::BadBundle),
-            }
+            let size: usize =
+                try!(cursor.read_u32::<BigEndian>()
+                           .map_err(OscError::ByteOrderError)) as usize;
+            let mut byte_buf: Vec<u8> = Vec::with_capacity(size);
+
+            try!(cursor.take(size as u64)
+                       .read(&mut byte_buf)
+                       .map(|_| Ok(OscType::Blob(byte_buf)))
+                       .map_err(OscError::ReadError))
+
         }
         _ => Err(OscError::BadArg(format!("Type tag \"{}\" is not implemented!", tag))),
     }
