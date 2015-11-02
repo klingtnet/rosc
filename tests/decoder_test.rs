@@ -10,20 +10,19 @@ fn test_decode_no_args() {
     // message to build: /some/valid/address/4 ,
     let raw_addr = "/some/valid/address/4";
     let addr = pad(raw_addr.as_bytes());
-    // args
     let type_tags = pad(b",");
     let merged: Vec<u8> = addr.into_iter()
-        .chain(type_tags.into_iter())
-        .collect();
+                              .chain(type_tags.into_iter())
+                              .collect();
     let osc_packet: Result<types::OscPacket, errors::OscError> = decoder::decode(&merged);
     assert!(osc_packet.is_ok());
     match osc_packet {
         Ok(types::OscPacket::Message(msg)) => {
-                assert_eq!(raw_addr, msg.addr);
-                assert!(msg.args.is_none());
-        },
-        Ok(_) => panic!("OscMessage was expected!"),
-        Err(e) => panic!(e)
+            assert_eq!(raw_addr, msg.addr);
+            assert!(msg.args.is_none());
+        }
+        Ok(_) => panic!("Expected an OscMessage!"),
+        Err(e) => panic!(e),
     }
 }
 
@@ -45,24 +44,25 @@ fn test_decode_args() {
     assert_eq!(BigEndian::read_f64(&d_bytes), d);
 
     let i = 12345678i32;
-    let i_bytes: [u8; 4] = unsafe {mem::transmute(i.to_be())};
+    let i_bytes: [u8; 4] = unsafe { mem::transmute(i.to_be()) };
 
     let l = -1234567891011i64;
-    let h_bytes: [u8; 8] = unsafe {mem::transmute(l.to_be())};
+    let h_bytes: [u8; 8] = unsafe { mem::transmute(l.to_be()) };
 
     let type_tags = pad(b",fdih");
 
     let args: Vec<u8> = f_bytes.iter()
-        .chain(d_bytes.iter())
-        .chain(i_bytes.iter())
-        .chain(h_bytes.iter())
-        .map(|x| *x)
-        .collect::<Vec<u8>>();
+                               .chain(d_bytes.iter())
+                               .chain(i_bytes.iter())
+                               .chain(h_bytes.iter())
+                               .map(|x| *x)
+                               .collect::<Vec<u8>>();
 
     let merged: Vec<u8> = addr.into_iter()
-        .chain(type_tags.into_iter())
-        .chain(args)
-        .collect::<Vec<u8>>();
+                              .chain(type_tags.into_iter())
+                              .chain(args)
+                              .collect::<Vec<u8>>();
+
     let osc_packet: Result<types::OscPacket, errors::OscError> = decoder::decode(&merged);
     match osc_packet {
         Ok(types::OscPacket::Message(msg)) => {
