@@ -73,15 +73,16 @@ fn decode_bundle(msg: &[u8]) -> OscResult<OscPacket> {
 
 fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> OscResult<String> {
     let mut str_buf: Vec<u8> = Vec::new();
-    match cursor.read_until(0, &mut str_buf) {
-        Ok(_) => {
-            pad_cursor(cursor);
-            String::from_utf8(str_buf)
-                .map_err(|e| OscError::StringError(e))
-                .map(|s| s.trim_matches(0u8 as char).to_string())
-        }
-        Err(e) => Err(OscError::ReadError(e)),
-    }
+    try!(cursor.read_until(0, &mut str_buf)
+               .map_err(OscError::ReadError)); // ignore returned byte count
+    pad_cursor(cursor);
+    // convert to String and remove nul bytes
+    String::from_utf8(str_buf)
+        .map_err(|e| OscError::StringError(e))
+        .map(|s| {
+            s.trim_matches(0u8 as char)
+             .to_string()
+        })
 }
 
 fn read_osc_args(cursor: &mut io::Cursor<&[u8]>, raw_type_tags: String) -> OscResult<Vec<OscType>> {
