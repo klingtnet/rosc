@@ -64,29 +64,21 @@ fn test_decode_args() {
         .chain(args)
         .collect::<Vec<u8>>();
     let osc_packet: Result<types::OscPacket, errors::OscError> = decoder::decode(&merged);
-    assert!(osc_packet.is_ok());
     match osc_packet {
-        Ok(packet) => match packet {
-            types::OscPacket::Message(msg) => {
-                assert_eq!(raw_addr, msg.addr);
-                match msg.args {
-                    Some(args) => {
-                        for arg in args {
-                            match arg {
-                                types::OscType::OscInt(x) => assert_eq!(i,x),
-                                types::OscType::OscLong(x) => assert_eq!(l,x),
-                                types::OscType::OscFloat(x) => assert_eq!(f, x),
-                                types::OscType::OscDouble(x) => assert_eq!(d, x),
-                                _ => panic!()
-                            }
-                        }
-                    },
-                    None => panic!()
+        Ok(types::OscPacket::Message(msg)) => {
+            assert_eq!(raw_addr, msg.addr);
+            for arg in msg.args.unwrap() {
+                match arg {
+                    types::OscType::OscInt(x) => assert_eq!(i, x),
+                    types::OscType::OscLong(x) => assert_eq!(l, x),
+                    types::OscType::OscFloat(x) => assert_eq!(f, x),
+                    types::OscType::OscDouble(x) => assert_eq!(d, x),
+                    _ => panic!(),
                 }
-            },
-            _ => panic!()
-        },
-        Err(e) => panic!(e)
+            }
+        }
+        Ok(_) => panic!("Expected an OscMessage!"),
+        Err(e) => panic!(e),
     }
 }
 
