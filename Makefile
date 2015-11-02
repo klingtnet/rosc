@@ -13,6 +13,8 @@ build: $(SOURCES)
 release: test $(SOURCES)
 	cargo build --release $(BUILD_OPTS)
 
+fmt: format
+
 format: $(SOURCES) $(EXAMPLES) $(TESTS)
 	@for f in $?; \
 		do echo $$f && rustfmt $$f; \
