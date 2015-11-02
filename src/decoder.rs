@@ -54,7 +54,7 @@ fn decode_bundle(msg: &[u8]) -> OscResult<OscPacket> {
     let time_tag = try!(read_time_tag(&mut cursor));
     let mut bundle: Vec<OscPacket> = Vec::new();
     let size: usize = try!(cursor.read_u32::<BigEndian>()
-                   .map_err(OscError::ByteOrderError)) as usize;
+                                 .map_err(OscError::ByteOrderError)) as usize;
     let mut buf: Vec<u8> = Vec::new();
     let cnt: usize = try!(cursor.take(size as u64)
                                 .read_to_end(&mut buf)
@@ -84,9 +84,7 @@ fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> OscResult<String> {
     }
 }
 
-fn read_osc_args(cursor: &mut io::Cursor<&[u8]>,
-                 raw_type_tags: String)
-                 -> OscResult<Vec<OscType>> {
+fn read_osc_args(cursor: &mut io::Cursor<&[u8]>, raw_type_tags: String) -> OscResult<Vec<OscType>> {
     let type_tags: Vec<char> = raw_type_tags.chars()
                                             .skip(1)
                                             .map(|c| c as char)
