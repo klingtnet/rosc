@@ -102,23 +102,23 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> OscResult<OscType>
     match tag {
         'f' => {
             cursor.read_f32::<BigEndian>()
-                  .map(|f| OscType::Float(f))
-                  .map_err(|e| OscError::ByteOrderError(e))
+                  .map(OscType::Float)
+                  .map_err(OscError::ByteOrderError)
         }
         'd' => {
             cursor.read_f64::<BigEndian>()
-                  .map(|d| OscType::Double(d))
-                  .map_err(|e| OscError::ByteOrderError(e))
+                  .map(OscType::Double)
+                  .map_err(OscError::ByteOrderError)
         }
         'i' => {
             cursor.read_i32::<BigEndian>()
-                  .map(|i| OscType::Int(i))
-                  .map_err(|e| OscError::ByteOrderError(e))
+                  .map(OscType::Int)
+                  .map_err(OscError::ByteOrderError)
         }
         'h' => {
             cursor.read_i64::<BigEndian>()
-                  .map(|l| OscType::Long(l))
-                  .map_err(|e| OscError::ByteOrderError(e))
+                  .map(OscType::Long)
+                  .map_err(OscError::ByteOrderError)
         }
         's' => {
             read_osc_string(cursor).map(|s| OscType::String(s))
