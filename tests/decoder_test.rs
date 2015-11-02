@@ -17,13 +17,11 @@ fn test_decode_no_args() {
     let osc_packet: Result<types::OscPacket, errors::OscError> = decoder::decode(&merged);
     assert!(osc_packet.is_ok());
     match osc_packet {
-        Ok(packet) => match packet {
-            types::OscPacket::Message(msg) => {
+        Ok(types::OscPacket::Message(msg)) => {
                 assert_eq!(raw_addr, msg.addr);
                 assert!(msg.args.is_none());
-            },
-            _ => panic!()
         },
+        Ok(_) => panic!("OscMessage was expected!"),
         Err(e) => panic!(e)
     }
 }
