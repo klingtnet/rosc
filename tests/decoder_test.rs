@@ -51,19 +51,25 @@ fn test_decode_args() {
     let l = -1234567891011i64;
     let h_bytes: [u8; 8] = unsafe { mem::transmute(l.to_be()) };
 
+    let blob_size: [u8; 4] = unsafe { mem::transmute(6u32.to_be()) };
+    let blob: Vec<u8> = vec![1u8, 2u8, 3u8, 4u8, 5u8, 6u8];
+
     let s = "I am an osc test string.";
     assert!(s.is_ascii());
 
     // Osc strings are null terminated like in C!
     let s_bytes: Vec<u8> = to_osc_string(s.as_bytes());
 
-    let type_tags = to_osc_string(b",fdsih");
+    let type_tags = to_osc_string(b",fdsihb");
 
     let args: Vec<u8> = f_bytes.iter()
                                .chain(d_bytes.iter())
                                .chain(s_bytes.iter())
                                .chain(i_bytes.iter())
                                .chain(h_bytes.iter())
+                               .chain(blob_size.iter())
+                               .chain(blob.iter())
+                               .chain(vec![0u8, 0u8].iter())
                                .map(|x| *x)
                                .collect::<Vec<u8>>();
 
@@ -83,6 +89,7 @@ fn test_decode_args() {
                     types::OscType::Float(x) => assert_eq!(f, x),
                     types::OscType::Double(x) => assert_eq!(d, x),
                     types::OscType::String(x) => assert_eq!(s, x),
+                    types::OscType::Blob(x) => assert_eq!(blob, x),
                     _ => panic!(),
                 }
             }
