@@ -16,9 +16,9 @@ pub enum OscType {
     Double(f64),
     Char(u8),
     Color(u32), // byte-order: RGBA
-    Midi(OscMidiType),
     True,
     False,
+    Midi(OscMidiMessage),
     Nil,
     Inf,
     Array(Vec<OscType>),
@@ -26,11 +26,11 @@ pub enum OscType {
 
 
 #[derive(Debug)]
-pub struct OscMidiType {
-    port: u8,
-    status: u8,
-    data1: u8, // maybe use an enum for data?
-    data2: u8,
+pub struct OscMidiMessage {
+    pub port: u8,
+    pub status: u8,
+    pub data1: u8, // maybe use an enum for data?
+    pub data2: u8,
 }
 
 /// An *osc packet* can contain an *osc message* or a bundle of nested messages
