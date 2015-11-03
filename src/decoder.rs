@@ -1,4 +1,4 @@
-use types::{OscPacket, OscType, OscResult, OscMessage, OscBundle};
+use types::{OscPacket, OscType, OscResult, OscMessage, OscMidiMessage, OscBundle};
 use errors::OscError;
 use utils;
 
@@ -148,6 +148,9 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> OscResult<OscType>
                 None => Err(OscError::BadArg("Argument is not a char!".to_string())),
             }
         }
+        'm' => {
+            read_midi_message(cursor)
+        }
         _ => Err(OscError::BadArg(format!("Type tag \"{}\" is not implemented!", tag))),
     }
 }
@@ -162,6 +165,18 @@ fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> OscResult<OscType> {
         }
         Err(e) => Err(OscError::ByteOrderError(e)),
     }
+
+fn read_midi_message(cursor: &mut io::Cursor<&[u8]>) -> OscResult<OscType> {
+    let mut buf: Vec<u8> = Vec::with_capacity(4);
+    try!(cursor.take(4).read_to_end(&mut buf).map_err(OscError::ReadError));
+
+    Ok(OscType::Midi(OscMidiMessage {
+        port: buf[0],
+        status: buf[1],
+        data1: buf[2],
+        data2: buf[3],
+    }))
+
 }
 
 fn pad_cursor(cursor: &mut io::Cursor<&[u8]>) {
