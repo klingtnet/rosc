@@ -14,7 +14,7 @@ pub enum OscType {
     // ignore them if not implemented
     Long(i64),
     Double(f64),
-    Char(u8),
+    Char(char),
     Color(u32), // byte-order: RGBA
     True,
     False,
