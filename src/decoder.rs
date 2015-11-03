@@ -168,15 +168,13 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> OscResult<OscType>
 }
 
 fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> OscResult<OscType> {
-    match cursor.read_u32::<BigEndian>() {
-        Ok(date) => {
-            match cursor.read_u32::<BigEndian>() {
-                Ok(frac) => Ok(OscType::Time(date, frac)),
-                Err(e) => Err(OscError::ByteOrderError(e)),
-            }
-        }
-        Err(e) => Err(OscError::ByteOrderError(e)),
-    }
+    let date = try!(cursor.read_u32::<BigEndian>()
+                          .map_err(OscError::ByteOrderError));
+    let frac = try!(cursor.read_u32::<BigEndian>()
+                          .map_err(OscError::ByteOrderError));
+
+    Ok(OscType::Time(date, frac))
+}
 
 fn read_midi_message(cursor: &mut io::Cursor<&[u8]>) -> OscResult<OscType> {
     let mut buf: Vec<u8> = Vec::with_capacity(4);
