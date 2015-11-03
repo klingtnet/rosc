@@ -127,16 +127,7 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> OscResult<OscType>
             read_time_tag(cursor)
         }
         'b' => {
-            let size: usize =
-                try!(cursor.read_u32::<BigEndian>()
-                           .map_err(OscError::ByteOrderError)) as usize;
-            let mut byte_buf: Vec<u8> = Vec::with_capacity(size);
-            try!(cursor.take(size as u64)
-                       .read_to_end(&mut byte_buf)
-                       .map_err(OscError::ReadError));
-            pad_cursor(cursor);
-            Ok(OscType::Blob(byte_buf))
-
+            read_blob(cursor)
         }
         'T' => {
             Ok(OscType::Bool(true))
@@ -164,6 +155,20 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> OscResult<OscType>
         }
         _ => Err(OscError::BadArg(format!("Type tag \"{}\" is not implemented!", tag))),
     }
+}
+
+fn read_blob(cursor: &mut io::Cursor<&[u8]>) -> OscResult<OscType> {
+    let size: usize = try!(cursor.read_u32::<BigEndian>()
+                                 .map_err(OscError::ByteOrderError)) as usize;
+    let mut byte_buf: Vec<u8> = Vec::with_capacity(size);
+
+    try!(cursor.take(size as u64)
+               .read_to_end(&mut byte_buf)
+               .map_err(OscError::ReadError));
+
+    pad_cursor(cursor);
+
+    Ok(OscType::Blob(byte_buf))
 }
 
 fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> OscResult<OscType> {
