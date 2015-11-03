@@ -60,16 +60,16 @@ fn test_decode_args() {
     // Osc strings are null terminated like in C!
     let s_bytes: Vec<u8> = to_osc_string(s.as_bytes());
 
-    let type_tags = to_osc_string(b",fdsihb");
+    let type_tags = to_osc_string(b",fdsibh");
 
     let args: Vec<u8> = f_bytes.iter()
                                .chain(d_bytes.iter())
                                .chain(s_bytes.iter())
                                .chain(i_bytes.iter())
-                               .chain(h_bytes.iter())
                                .chain(blob_size.iter())
                                .chain(blob.iter())
                                .chain(vec![0u8, 0u8].iter())
+                               .chain(h_bytes.iter())
                                .map(|x| *x)
                                .collect::<Vec<u8>>();
 
