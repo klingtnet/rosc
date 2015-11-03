@@ -60,7 +60,7 @@ fn test_decode_args() {
     // Osc strings are null terminated like in C!
     let s_bytes: Vec<u8> = to_osc_string(s.as_bytes());
 
-    let type_tags = to_osc_string(b",fdsibh");
+    let type_tags = to_osc_string(b",fdsTFibhNI");
 
     let args: Vec<u8> = f_bytes.iter()
                                .chain(d_bytes.iter())
@@ -90,6 +90,10 @@ fn test_decode_args() {
                     types::OscType::Double(x) => assert_eq!(d, x),
                     types::OscType::String(x) => assert_eq!(s, x),
                     types::OscType::Blob(x) => assert_eq!(blob, x),
+                    // cant assign bool args to type_tag, so there is no real test
+                    types::OscType::Bool(x) => assert_eq!(x, x),
+                    types::OscType::Inf => (),
+                    types::OscType::Nil => (),
                     _ => panic!(),
                 }
             }
