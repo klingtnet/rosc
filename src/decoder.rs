@@ -2,7 +2,7 @@ use types::{OscPacket, OscType, OscResult, OscMessage, OscBundle};
 use errors::OscError;
 use utils;
 
-use std::io;
+use std::{io, char};
 use std::io::{Read, BufRead};
 
 use byteorder::{BigEndian, ReadBytesExt};
@@ -138,6 +138,15 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> OscResult<OscType>
             pad_cursor(cursor);
             Ok(OscType::Blob(byte_buf))
 
+        }
+        'c' => {
+            let opt_char = try!(cursor.read_u32::<BigEndian>()
+                                      .map(char::from_u32)
+                                      .map_err(OscError::ByteOrderError));
+            match opt_char {
+                Some(c) => Ok(OscType::Char(c)),
+                None => Err(OscError::BadArg("Argument is not a char!".to_string())),
+            }
         }
         _ => Err(OscError::BadArg(format!("Type tag \"{}\" is not implemented!", tag))),
     }
