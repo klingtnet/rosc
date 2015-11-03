@@ -16,9 +16,8 @@ pub enum OscType {
     Double(f64),
     Char(char),
     Color(u32), // byte-order: RGBA
-    True,
-    False,
     Midi(OscMidiMessage),
+    Bool(bool),
     Nil,
     Inf,
     Array(Vec<OscType>),
