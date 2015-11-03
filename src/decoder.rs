@@ -139,6 +139,18 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> OscResult<OscType>
             Ok(OscType::Blob(byte_buf))
 
         }
+        'T' => {
+            Ok(OscType::Bool(true))
+        }
+        'F' => {
+            Ok(OscType::Bool(false))
+        }
+        'N' => {
+            Ok(OscType::Nil)
+        }
+        'I' => {
+            Ok(OscType::Inf)
+        }
         'c' => {
             let opt_char = try!(cursor.read_u32::<BigEndian>()
                                       .map(char::from_u32)
