@@ -78,10 +78,8 @@ fn test_decode_args() {
                               .chain(args)
                               .collect::<Vec<u8>>();
 
-    let osc_packet: Result<types::OscPacket, errors::OscError> = decoder::decode(&merged);
-    match osc_packet {
-        Ok(types::OscPacket::Message(msg)) => {
-            assert_eq!(raw_addr, msg.addr);
+    match decoder::decode(&merged).unwrap() {
+        types::OscPacket::Message(msg) => {
             for arg in msg.args.unwrap() {
                 match arg {
                     types::OscType::Int(x) => assert_eq!(i, x),
@@ -96,10 +94,10 @@ fn test_decode_args() {
                     types::OscType::Nil => (),
                     _ => panic!(),
                 }
+
             }
         }
-        Ok(_) => panic!("Expected an OscMessage!"),
-        Err(e) => panic!(e),
+        _ => panic!("Expected an OSC message!"),
     }
 }
 
