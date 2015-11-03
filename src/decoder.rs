@@ -124,7 +124,6 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> OscResult<OscType>
             read_osc_string(cursor).map(|s| OscType::String(s))
         }
         't' => {
-            // http://opensoundcontrol.org/node/3/#timetags
             read_time_tag(cursor)
         }
         'b' => {
