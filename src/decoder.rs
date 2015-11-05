@@ -142,18 +142,22 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> OscResult<OscType>
             Ok(OscType::Inf)
         }
         'c' => {
-            let opt_char = try!(cursor.read_u32::<BigEndian>()
-                                      .map(char::from_u32)
-                                      .map_err(OscError::ByteOrderError));
-            match opt_char {
-                Some(c) => Ok(OscType::Char(c)),
-                None => Err(OscError::BadArg("Argument is not a char!".to_string())),
-            }
+            read_char(cursor)
         }
         'm' => {
             read_midi_message(cursor)
         }
         _ => Err(OscError::BadArg(format!("Type tag \"{}\" is not implemented!", tag))),
+    }
+}
+
+fn read_char(cursor: &mut io::Cursor<&[u8]>) -> OscResult<OscType> {
+    let opt_char = try!(cursor.read_u32::<BigEndian>()
+                              .map(char::from_u32)
+                              .map_err(OscError::ByteOrderError));
+    match opt_char {
+        Some(c) => Ok(OscType::Char(c)),
+        None => Err(OscError::BadArg("Argument is not a char!".to_string())),
     }
 }
 
