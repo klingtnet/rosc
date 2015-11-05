@@ -1,4 +1,4 @@
-use types::{OscPacket, OscType, OscResult, OscMessage, OscMidiMessage, OscBundle};
+use types::{OscPacket, OscType, Result, OscMessage, OscMidiMessage, OscBundle};
 use errors::OscError;
 use utils;
 
@@ -10,7 +10,7 @@ use byteorder::{BigEndian, ReadBytesExt};
 /// Common MTP size for ethernet
 pub const MTP: usize = 1536;
 
-pub fn decode(msg: &[u8]) -> OscResult<OscPacket> {
+pub fn decode(msg: &[u8]) -> Result<OscPacket> {
     match msg[0] as char {
         '/' => {
             decode_message(msg)
@@ -22,7 +22,7 @@ pub fn decode(msg: &[u8]) -> OscResult<OscPacket> {
     }
 }
 
-fn decode_message(msg: &[u8]) -> OscResult<OscPacket> {
+fn decode_message(msg: &[u8]) -> Result<OscPacket> {
     let mut cursor: io::Cursor<&[u8]> = io::Cursor::new(msg);
 
     let addr: String = try!(read_osc_string(&mut cursor));
@@ -43,7 +43,7 @@ fn decode_message(msg: &[u8]) -> OscResult<OscPacket> {
     }
 }
 
-fn decode_bundle(msg: &[u8]) -> OscResult<OscPacket> {
+fn decode_bundle(msg: &[u8]) -> Result<OscPacket> {
     let mut cursor: io::Cursor<&[u8]> = io::Cursor::new(msg);
 
     let b = try!(read_osc_string(&mut cursor));
@@ -71,7 +71,7 @@ fn decode_bundle(msg: &[u8]) -> OscResult<OscPacket> {
     }))
 }
 
-fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> OscResult<String> {
+fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> Result<String> {
     let mut str_buf: Vec<u8> = Vec::new();
     try!(cursor.read_until(0, &mut str_buf)
                .map_err(OscError::ReadError)); // ignore returned byte count
@@ -85,7 +85,7 @@ fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> OscResult<String> {
         })
 }
 
-fn read_osc_args(cursor: &mut io::Cursor<&[u8]>, raw_type_tags: String) -> OscResult<Vec<OscType>> {
+fn read_osc_args(cursor: &mut io::Cursor<&[u8]>, raw_type_tags: String) -> Result<Vec<OscType>> {
     let type_tags: Vec<char> = raw_type_tags.chars()
                                             .skip(1)
                                             .map(|c| c as char)
@@ -98,7 +98,7 @@ fn read_osc_args(cursor: &mut io::Cursor<&[u8]>, raw_type_tags: String) -> OscRe
     Ok(args)
 }
 
-fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> OscResult<OscType> {
+fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> Result<OscType> {
     match tag {
         'f' => {
             cursor.read_f32::<BigEndian>()
@@ -151,7 +151,7 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> OscResult<OscType>
     }
 }
 
-fn read_char(cursor: &mut io::Cursor<&[u8]>) -> OscResult<OscType> {
+fn read_char(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
     let opt_char = try!(cursor.read_u32::<BigEndian>()
                               .map(char::from_u32)
                               .map_err(OscError::ByteOrderError));
@@ -161,7 +161,7 @@ fn read_char(cursor: &mut io::Cursor<&[u8]>) -> OscResult<OscType> {
     }
 }
 
-fn read_blob(cursor: &mut io::Cursor<&[u8]>) -> OscResult<OscType> {
+fn read_blob(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
     let size: usize = try!(cursor.read_u32::<BigEndian>()
                                  .map_err(OscError::ByteOrderError)) as usize;
     let mut byte_buf: Vec<u8> = Vec::with_capacity(size);
@@ -175,7 +175,7 @@ fn read_blob(cursor: &mut io::Cursor<&[u8]>) -> OscResult<OscType> {
     Ok(OscType::Blob(byte_buf))
 }
 
-fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> OscResult<OscType> {
+fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
     let date = try!(cursor.read_u32::<BigEndian>()
                           .map_err(OscError::ByteOrderError));
     let frac = try!(cursor.read_u32::<BigEndian>()
@@ -184,7 +184,7 @@ fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> OscResult<OscType> {
     Ok(OscType::Time(date, frac))
 }
 
-fn read_midi_message(cursor: &mut io::Cursor<&[u8]>) -> OscResult<OscType> {
+fn read_midi_message(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
     let mut buf: Vec<u8> = Vec::with_capacity(4);
     try!(cursor.take(4).read_to_end(&mut buf).map_err(OscError::ReadError));
 

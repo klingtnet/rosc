@@ -1,4 +1,5 @@
 use errors;
+use std::result;
 
 // see OSC Type Tag String: http://opensoundcontrol.org/spec-1_0
 // padding: zero bytes (n*4)
@@ -54,4 +55,4 @@ pub struct OscBundle {
     pub content: Vec<OscPacket>,
 }
 
-pub type OscResult<T> = Result<T, errors::OscError>;
+pub type Result<T> = result::Result<T, errors::OscError>;
