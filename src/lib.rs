@@ -11,7 +11,3 @@ pub mod encoder;
 pub mod utils;
 /// Contains custom errors
 pub mod errors;
-
-#[test]
-fn it_works() {
-}
