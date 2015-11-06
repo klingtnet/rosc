@@ -3,7 +3,7 @@ use errors::OscError;
 use utils;
 
 use byteorder::{ByteOrder, BigEndian};
-use std::{iter, str};
+use std::iter;
 
 pub fn encode_packet(packet: OscPacket) -> Result<Vec<u8>> {
     match packet {
