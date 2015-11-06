@@ -12,4 +12,5 @@ pub enum OscError {
     BadString(String),
     BadArg(String),
     BadBundle,
+    Unimplemented,
 }
