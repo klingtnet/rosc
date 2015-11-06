@@ -3,7 +3,7 @@ use errors::OscError;
 use utils;
 
 use byteorder::{ByteOrder, BigEndian};
-use std::iter;
+use std::{iter, str};
 
 pub fn encode_packet(packet: OscPacket) -> Result<Vec<u8>> {
     match packet {
@@ -16,22 +16,28 @@ fn encode_message(msg: OscMessage) -> Result<Vec<u8>> {
     let mut msg_bytes: Vec<u8> = Vec::new();
 
     msg_bytes.extend(encode_string(msg.addr));
-    // save address
+    let mut type_tags: Vec<char> = vec![','];
+    let mut arg_bytes: Vec<u8> = Vec::new();
 
     if msg.args.is_some() {
         let args: Vec<OscType> = msg.args.unwrap();
-        let mut type_tags: Vec<char> = Vec::with_capacity(args.len());
         // Possible optimization: write this as iterator
         for arg in args {
             let (bytes, tag): (Option<Vec<u8>>, char) = try!(encode(arg));
 
             type_tags.push(tag);
             if bytes.is_some() {
-                msg_bytes.extend(bytes.unwrap());
+                arg_bytes.extend(bytes.unwrap());
             }
         }
     }
 
+    msg_bytes.extend(encode_string(type_tags.iter()
+                                            .cloned()
+                                            .collect()));
+    if arg_bytes.len() > 0 {
+        msg_bytes.extend(arg_bytes);
+    }
     Ok(msg_bytes)
 }
 
