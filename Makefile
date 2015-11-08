@@ -22,13 +22,13 @@ format: $(SOURCES) $(EXAMPLES) $(TESTS)
 
 examples: $(EXAMPLES)
 
-./examples/%.rs:
+./examples/%.rs: $(SOURCES)
 	cargo build --example $(basename $(notdir $@))
 
 run: build
 	cargo run
 
-test:
+test: $(TESTS) $(SOURCES)
 	cargo test
 
 clean:
