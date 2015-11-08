@@ -24,7 +24,6 @@ pub enum OscType {
     Array(Vec<OscType>),
 }
 
-
 #[derive(Debug)]
 pub struct OscMidiMessage {
     pub port: u8,
@@ -41,13 +40,11 @@ pub enum OscPacket {
     Bundle(OscBundle),
 }
 
-
 #[derive(Debug)]
 pub struct OscMessage {
     pub addr: String,
     pub args: Option<Vec<OscType>>,
 }
-
 
 #[derive(Debug)]
 pub struct OscBundle {
