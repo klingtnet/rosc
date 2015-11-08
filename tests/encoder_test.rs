@@ -11,7 +11,7 @@ fn test_encode_message() {
         args: None,
     };
 
-    let enc_msg = encoder::encode_packet(OscPacket::Message(msg)).unwrap();
+    let enc_msg = encoder::encode_packet(&OscPacket::Message(msg).unwrap();
     match decoder::decode(&enc_msg).unwrap() {
         OscPacket::Message(dec_msg) => assert_eq!("/some/addr", dec_msg.addr),
         _ => panic!("Expected OSC message!")
