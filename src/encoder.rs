@@ -12,7 +12,7 @@ pub fn encode_packet(packet: &OscPacket) -> Result<Vec<u8>> {
     }
 }
 
-fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
+pub fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
     let mut msg_bytes: Vec<u8> = Vec::new();
 
     msg_bytes.extend(encode_string(&msg.addr));
