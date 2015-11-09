@@ -48,27 +48,27 @@ fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
 fn encode(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
     match arg {
         &OscType::Int(ref x) => {
-            let mut bytes = Vec::with_capacity(4);
+            let mut bytes = vec![0u8; 4];
             BigEndian::write_i32(&mut bytes, *x);
             Ok((Some(bytes), 'i'))
         }
         &OscType::Long(ref x) => {
-            let mut bytes = Vec::with_capacity(8);
+            let mut bytes = vec![0u8; 8];
             BigEndian::write_i64(&mut bytes, *x);
             Ok((Some(bytes), 'h'))
         }
         &OscType::Float(ref x) => {
-            let mut bytes = Vec::with_capacity(4);
+            let mut bytes = vec![0u8; 4];
             BigEndian::write_f32(&mut bytes, *x);
             Ok((Some(bytes), 'f'))
         }
         &OscType::Double(ref x) => {
-            let mut bytes = Vec::with_capacity(8);
+            let mut bytes = vec![0u8; 8];
             BigEndian::write_f64(&mut bytes, *x);
             Ok((Some(bytes), 'd'))
         }
         &OscType::Char(ref x) => {
-            let mut bytes = Vec::with_capacity(4);
+            let mut bytes = vec![0u8; 4];
             BigEndian::write_u32(&mut bytes, *x as u32);
             Ok((Some(bytes), 'c'))
         }
@@ -121,8 +121,8 @@ fn pad_bytes(bytes: &mut Vec<u8>) {
 }
 
 fn encode_time_tag(sec: u32, frac: u32) -> Vec<u8> {
-    let mut bytes = Vec::with_capacity(8);
     BigEndian::write_u32(&mut bytes[..3], sec);
+    let mut bytes = vec![0u8; 8];
     BigEndian::write_u32(&mut bytes[4..], frac);
     bytes
 }
