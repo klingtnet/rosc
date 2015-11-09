@@ -76,8 +76,14 @@ fn encode(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
             Ok((Some(encode_string(&x)), 's'))
         }
         &OscType::Blob(ref x) => {
-            let mut bytes = x.clone();
-            pad_bytes(&mut bytes);
+            // let mut bytes = x.clone();
+            let padded_blob_length: usize = utils::pad(x.len() as u64) as usize;
+            let mut bytes = vec![0u8; 4 + padded_blob_length];
+            // write length
+            BigEndian::write_i32(&mut bytes[..4], x.len() as i32);
+            for (i, v) in x.iter().enumerate() {
+                bytes[i + 4] = *v;
+            }
             Ok((Some(bytes), 'b'))
         }
         &OscType::Time(ref x, ref y) => {
