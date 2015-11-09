@@ -91,7 +91,8 @@ fn test_decode_args() {
                     types::OscType::Double(x) => assert_eq!(d, x),
                     types::OscType::String(x) => assert_eq!(s, x),
                     types::OscType::Blob(x) => assert_eq!(blob, x),
-                    // cant assign bool args to type_tag, so there is no real test wether the value is
+                    // cant assign bool args to type_tag
+                    // , so there is no real test wether the value is
                     // correct or not
                     types::OscType::Bool(_) => (),
                     types::OscType::Inf => (),

@@ -5,8 +5,8 @@ use rosc::errors::OscError;
 use rosc::types::{Result, OscMessage, OscPacket};
 
 #[test]
-fn test_encode_message() {
-    let msg = OscMessage{
+fn test_encode_message_wo_args() {
+    let msg = OscMessage {
         addr: "/some/addr".to_string(),
         args: None,
     };
