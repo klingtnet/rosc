@@ -121,8 +121,8 @@ fn pad_bytes(bytes: &mut Vec<u8>) {
 }
 
 fn encode_time_tag(sec: u32, frac: u32) -> Vec<u8> {
-    BigEndian::write_u32(&mut bytes[..3], sec);
     let mut bytes = vec![0u8; 8];
+    BigEndian::write_u32(&mut bytes[..4], sec);
     BigEndian::write_u32(&mut bytes[4..], frac);
     bytes
 }
