@@ -1,7 +1,7 @@
 extern crate rosc;
 
 use rosc::{encoder, decoder};
-use rosc::types::{OscMessage, OscMidiMessage, OscPacket, OscType};
+use rosc::types::{OscMessage, OscMidiMessage, OscColor, OscPacket, OscType};
 
 #[test]
 fn test_encode_message_wo_args() {
@@ -33,6 +33,12 @@ fn test_encode_message_with_args() {
         status: 14,
         data1: 120,
         data2: 53,
+    };
+    let color_arg = OscColor {
+        red: 255u8,
+        green: 192u8,
+        blue: 42u8,
+        alpha: 13u8,
     };
     let args = vec![OscType::Int(int_arg),
                     OscType::Float(float_arg),
@@ -83,6 +89,12 @@ fn test_encode_message_with_args() {
             OscType::String(x) => assert_eq!(string_arg, x),
             OscType::Blob(x) => assert_eq!(blob_arg, x),
             OscType::Time(x, y) => assert_eq!(time_arg, (x, y)),
+            OscType::Color(x) => {
+                assert_eq!(color_arg.red, x.red);
+                assert_eq!(color_arg.green, x.green);
+                assert_eq!(color_arg.blue, x.blue);
+                assert_eq!(color_arg.alpha, x.alpha);
+            }
             OscType::Char(x) => assert_eq!(char_arg, x),
             OscType::Bool(_) => (),
             OscType::Inf => (),
