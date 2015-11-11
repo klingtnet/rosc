@@ -18,7 +18,7 @@ pub fn decode(msg: &[u8]) -> Result<OscPacket> {
         '#' => {
             decode_bundle(msg)
         }
-        _ => Err(OscError::BadPacket("Unknown message format.".to_string())),
+        _ => Err(OscError::BadPacket("Unknown message format.")),
     }
 }
 
