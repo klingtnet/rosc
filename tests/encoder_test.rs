@@ -1,7 +1,7 @@
 extern crate rosc;
 
 use rosc::{encoder, decoder};
-use rosc::types::{OscMessage, OscMidiMessage, OscColor, OscPacket, OscType};
+use rosc::types::{OscMessage, OscMidiMessage, OscColor, OscPacket, OscType, OscBundle};
 
 #[test]
 fn test_encode_message_wo_args() {
@@ -112,4 +112,93 @@ fn test_encode_message_with_args() {
             _ => panic!("Unexpected OSC argument!"),
         }
     }
+}
+
+#[test]
+fn test_encode_bundle() {
+    let msg0 = OscMessage {
+        addr: "/view/1".to_string(),
+        args: None,
+    };
+
+    let msg1 = OscMessage {
+        addr: "/mixer/channel/1/amp".to_string(),
+        args: Some(vec![OscType::Float(0.9)]),
+    };
+
+    let msg2 = OscMessage {
+        addr: "/osc/1/freq".to_string(),
+        args: Some(vec![OscType::Int(440)]),
+    };
+
+    let msg3 = OscMessage {
+        addr: "/osc/1/phase".to_string(),
+        args: Some(vec![OscType::Float(-0.4)]),
+    };
+
+    let bundle1 = OscBundle {
+        timetag: OscType::Time(5678, 8765),
+        content: vec![OscPacket::Message(msg2), OscPacket::Message(msg3)],
+    };
+
+    let root_bundle = OscBundle {
+        timetag: OscType::Time(1234, 4321),
+        content: vec![OscPacket::Message(msg0),
+                      OscPacket::Message(msg1),
+                      OscPacket::Bundle(bundle1)],
+    };
+
+    let enc_bundle = encoder::encode(&OscPacket::Bundle(root_bundle)).unwrap();
+    assert_eq!(enc_bundle.len() % 4, 0);
+
+    let dec_bundle = match decoder::decode(&enc_bundle).unwrap() {
+        OscPacket::Bundle(b) => b,
+        _ => panic!("Expected OscBundle!"),
+    };
+
+    assert_eq!(3, dec_bundle.content.len());
+
+    match dec_bundle.content[0] {
+        OscPacket::Message(ref msg0) => {
+            assert_eq!("/view/1", msg0.addr);
+            assert!(msg0.args.is_none());
+        }
+        _ => panic!("Expected Message"),
+    }
+
+    match dec_bundle.content[1] {
+        OscPacket::Message(ref msg1) => {
+            assert_eq!("/mixer/channel/1/amp", msg1.addr);
+            assert!(msg1.args.is_some());
+        }
+        _ => panic!("Expected Message"),
+    }
+
+    match dec_bundle.content[2] {
+        OscPacket::Bundle(ref bndl) => {
+            assert_eq!(2, bndl.content.len());
+            match &bndl.content[0] {
+                &OscPacket::Message(ref msg) => {
+                    assert_eq!("/osc/1/freq", msg.addr);
+                    assert!(msg.args.is_some());
+                }
+                _ => panic!("Expected Message"),
+            }
+
+            match &bndl.content[1] {
+                &OscPacket::Message(ref msg) => {
+                    assert_eq!("/osc/1/phase", msg.addr);
+                    assert!(msg.args.is_some());
+                }
+                _ => panic!("Expected Message"),
+            }
+        }
+        _ => panic!("Expected Bundle!"),
+    }
+
+    // let b: &OscBundle = match dec_bundle.content[1] {
+    //     OscPacket::Bundle(ref b) => b,
+    //     _ => panic!("Expected Bundle"),
+    // };
+
 }
