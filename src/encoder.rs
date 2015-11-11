@@ -56,6 +56,12 @@ pub fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
         }
     }
 
+    if bundle.content.len() == 0 {
+        // TODO: A bundle of length zero, should this really be supported?
+        bundle_bytes.extend([0u8; 4].iter().cloned());
+        return Ok(bundle_bytes);
+    }
+
     for packet in &bundle.content {
         match packet {
             &OscPacket::Message(ref m) =>{
