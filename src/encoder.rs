@@ -1,4 +1,4 @@
-use types::{Result, OscType, OscPacket, OscBundle, OscMessage, OscColor};
+use types::{Result, OscType, OscPacket, OscBundle, OscMessage};
 use errors::OscError;
 use utils;
 
