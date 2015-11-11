@@ -11,6 +11,8 @@ fn test_encode_message_wo_args() {
     };
 
     let enc_msg = encoder::encode_message(&msg).unwrap();
+    assert_eq!(enc_msg.len() % 4, 0);
+
     match decoder::decode(&enc_msg).unwrap() {
         OscPacket::Message(dec_msg) => assert_eq!(msg.addr, dec_msg.addr),
         _ => panic!("Expected OSC message!"),
@@ -66,6 +68,8 @@ fn test_encode_message_with_args() {
     };
 
     let enc_msg = encoder::encode_message(&msg).unwrap();
+    assert_eq!(enc_msg.len() % 4, 0);
+
     let dec_msg: OscMessage = match decoder::decode(&enc_msg).unwrap() {
         OscPacket::Message(m) => m,
         _ => panic!("Expected OscMessage!"),
