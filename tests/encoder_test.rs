@@ -195,10 +195,4 @@ fn test_encode_bundle() {
         }
         _ => panic!("Expected Bundle!"),
     }
-
-    // let b: &OscBundle = match dec_bundle.content[1] {
-    //     OscPacket::Bundle(ref b) => b,
-    //     _ => panic!("Expected Bundle"),
-    // };
-
 }
