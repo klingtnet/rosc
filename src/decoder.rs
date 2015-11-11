@@ -50,8 +50,8 @@ fn decode_message(msg: &[u8]) -> Result<OscPacket> {
 fn decode_bundle(msg: &[u8]) -> Result<OscPacket> {
     let mut cursor: io::Cursor<&[u8]> = io::Cursor::new(msg);
 
-    let b = try!(read_osc_string(&mut cursor));
-    if b != "bundle" {
+    let bundle_tag = try!(read_osc_string(&mut cursor));
+    if bundle_tag != "#bundle" {
         return Err(OscError::BadBundle(format!("Wrong bundle specifier: {}", bundle_tag)));
     }
 
