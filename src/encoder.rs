@@ -41,11 +41,11 @@ pub fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
     Ok(msg_bytes)
 }
 
-fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
     let mut buf: Vec<u8> = Vec::new();
     buf.extend(encode_string(&"#bundle".to_string())
                    .iter()
                    .cloned());
+pub fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
 
     match try!(encode_arg(&bundle.timetag)) {
         (Some(x), _) => {
