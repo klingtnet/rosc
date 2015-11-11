@@ -52,7 +52,7 @@ fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
             buf.extend(x.iter().cloned());
         },
         (None, _) => {
-            return Err(OscError::BadBundle("Missing time tag!"));
+            return Err(OscError::BadBundle("Missing time tag!".to_string()));
         }
     }
 

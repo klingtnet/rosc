@@ -11,6 +11,6 @@ pub enum OscError {
     BadMessage(&'static str),
     BadString(&'static str),
     BadArg(String),
-    BadBundle(&'static str),
+    BadBundle(String),
     Unimplemented,
 }
