@@ -41,16 +41,16 @@ pub fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
     Ok(msg_bytes)
 }
 
-    let mut buf: Vec<u8> = Vec::new();
-    buf.extend(encode_string(&"#bundle".to_string())
-                   .iter()
-                   .cloned());
 pub fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
+    let mut bundle_bytes: Vec<u8> = Vec::new();
+    bundle_bytes.extend(encode_string(&"#bundle".to_string())
+                            .iter()
+                            .cloned());
 
     match try!(encode_arg(&bundle.timetag)) {
         (Some(x), _) => {
-            buf.extend(x.iter().cloned());
-        },
+            bundle_bytes.extend(x.iter().cloned());
+        }
         (None, _) => {
             return Err(OscError::BadBundle("Missing time tag!".to_string()));
         }
@@ -62,18 +62,18 @@ pub fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
                 let msg = try!(encode_message(m));
                 let mut msg_size = vec![0u8; 4];
                 BigEndian::write_u32(&mut msg_size, msg.len() as u32);
-                buf.extend(msg_size.iter().chain(msg.iter()).cloned());
+                bundle_bytes.extend(msg_size.iter().chain(msg.iter()).cloned());
             }
             &OscPacket::Bundle(ref b) => {
                 let bdl = try!(encode_bundle(b));
                 let mut bdl_size = vec![0u8; 4];
                 BigEndian::write_u32(&mut bdl_size, bdl.len() as u32);
-                buf.extend(bdl_size.iter().chain(bdl.iter()).cloned());
+                bundle_bytes.extend(bdl_size.iter().chain(bdl.iter()).cloned());
             }
         }
     }
 
-    Err(OscError::Unimplemented)
+    Ok(bundle_bytes)
 }
 
 fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
