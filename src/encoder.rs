@@ -1,4 +1,4 @@
-use types::{Result, OscType, OscPacket, OscBundle, OscMessage};
+use types::{Result, OscType, OscPacket, OscBundle, OscMessage, OscColor};
 use errors::OscError;
 use utils;
 
@@ -91,6 +91,9 @@ fn encode(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
         }
         &OscType::Midi(ref x) => {
             Ok((Some(vec![x.port, x.status, x.data1, x.data2]), 'm'))
+        }
+        &OscType::Color(ref x) => {
+            Ok((Some(vec![x.red, x.green, x.blue, x.alpha]), 'r'))
         }
         &OscType::Bool(ref x) => {
             if *x {

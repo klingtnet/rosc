@@ -1,4 +1,4 @@
-use types::{OscPacket, OscType, Result, OscMessage, OscMidiMessage, OscBundle};
+use types::{OscPacket, OscType, Result, OscMessage, OscMidiMessage, OscColor, OscBundle};
 use errors::OscError;
 use utils;
 
@@ -129,6 +129,9 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> Result<OscType> {
         'b' => {
             read_blob(cursor)
         }
+        'r' => {
+            read_osc_color(cursor)
+        }
         'T' => {
             Ok(OscType::Bool(true))
         }
@@ -195,6 +198,18 @@ fn read_midi_message(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
         data2: buf[3],
     }))
 
+}
+
+fn read_osc_color(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
+    let mut buf: Vec<u8> = Vec::with_capacity(4);
+    try!(cursor.take(4).read_to_end(&mut buf).map_err(OscError::ReadError));
+
+    Ok(OscType::Color(OscColor {
+        red: buf[0],
+        green: buf[1],
+        blue: buf[2],
+        alpha: buf[3],
+    }))
 }
 
 fn pad_cursor(cursor: &mut io::Cursor<&[u8]>) {

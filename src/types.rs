@@ -16,7 +16,7 @@ pub enum OscType {
     Long(i64),
     Double(f64),
     Char(char),
-    Color(u32), // byte-order: RGBA
+    Color(OscColor),
     Midi(OscMidiMessage),
     Bool(bool),
     Nil,
@@ -50,6 +50,14 @@ pub struct OscMessage {
 pub struct OscBundle {
     pub timetag: OscType,
     pub content: Vec<OscPacket>,
+}
+
+#[derive(Debug)]
+pub struct OscColor {
+    pub red: u8,
+    pub green: u8,
+    pub blue: u8,
+    pub alpha: u8,
 }
 
 pub type Result<T> = result::Result<T, errors::OscError>;
