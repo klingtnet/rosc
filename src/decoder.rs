@@ -55,7 +55,7 @@ fn decode_bundle(msg: &[u8]) -> Result<OscPacket> {
     let mut bundle: Vec<OscPacket> = Vec::new();
     let size: usize = try!(cursor.read_u32::<BigEndian>()
                                  .map_err(OscError::ByteOrderError)) as usize;
-    let mut buf: Vec<u8> = Vec::new();
+    let mut buf: Vec<u8> = Vec::with_capacity(size);
     let cnt: usize = try!(cursor.take(size as u64)
                                 .read_to_end(&mut buf)
                                 .map_err(OscError::ReadError));
