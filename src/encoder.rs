@@ -5,7 +5,7 @@ use utils;
 use byteorder::{ByteOrder, BigEndian};
 use std::iter;
 
-pub fn encode_packet(packet: &OscPacket) -> Result<Vec<u8>> {
+pub fn encode(packet: &OscPacket) -> Result<Vec<u8>> {
     match *packet {
         OscPacket::Message(ref msg) => encode_message(msg),
         OscPacket::Bundle(ref bundle) => encode_bundle(bundle),
@@ -23,7 +23,7 @@ pub fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
         let args = msg.args.as_ref().unwrap();
         // Possible optimization: write this as iterator
         for arg in args {
-            let (bytes, tag): (Option<Vec<u8>>, char) = try!(encode(arg));
+            let (bytes, tag): (Option<Vec<u8>>, char) = try!(encode_arg(arg));
 
             type_tags.push(tag);
             if bytes.is_some() {
@@ -47,7 +47,7 @@ fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
                    .iter()
                    .cloned());
 
-    match try!(encode(&bundle.timetag)) {
+    match try!(encode_arg(&bundle.timetag)) {
         (Some(x), _) => {
             buf.extend(x.iter().cloned());
         },
@@ -76,7 +76,7 @@ fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
     Err(OscError::Unimplemented)
 }
 
-fn encode(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
+fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
     match arg {
         &OscType::Int(ref x) => {
             let mut bytes = vec![0u8; 4];
