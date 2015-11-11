@@ -21,7 +21,6 @@ pub fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
 
     if msg.args.is_some() {
         let args = msg.args.as_ref().unwrap();
-        // Possible optimization: write this as iterator
         for arg in args {
             let (bytes, tag): (Option<Vec<u8>>, char) = try!(encode_arg(arg));
 
@@ -64,7 +63,7 @@ pub fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
 
     for packet in &bundle.content {
         match packet {
-            &OscPacket::Message(ref m) =>{
+            &OscPacket::Message(ref m) => {
                 let msg = try!(encode_message(m));
                 let mut msg_size = vec![0u8; 4];
                 BigEndian::write_u32(&mut msg_size, msg.len() as u32);

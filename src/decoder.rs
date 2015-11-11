@@ -56,6 +56,7 @@ fn decode_bundle(msg: &[u8]) -> Result<OscPacket> {
     }
 
     let time_tag = try!(read_time_tag(&mut cursor));
+
     let mut bundle: Vec<OscPacket> = Vec::new();
 
     let mut elem_size = try!(read_bundle_element_size(&mut cursor));
@@ -117,6 +118,7 @@ fn read_osc_args(cursor: &mut io::Cursor<&[u8]>, raw_type_tags: String) -> Resul
                                             .skip(1)
                                             .map(|c| c as char)
                                             .collect();
+
     let mut args: Vec<OscType> = Vec::with_capacity(type_tags.len());
     for tag in type_tags {
         let arg: OscType = try!(read_osc_arg(cursor, tag));
