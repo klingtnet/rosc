@@ -48,7 +48,7 @@ fn decode_bundle(msg: &[u8]) -> Result<OscPacket> {
 
     let b = try!(read_osc_string(&mut cursor));
     if b != "bundle" {
-        return Err(OscError::BadBundle);
+        return Err(OscError::BadBundle("Wrong bundle specifier!"));
     }
 
     let time_tag = try!(read_time_tag(&mut cursor));
@@ -62,7 +62,7 @@ fn decode_bundle(msg: &[u8]) -> Result<OscPacket> {
     if cnt == size {
         try!(decode(&mut buf).map(|p| bundle.push(p)));
     } else {
-        return Err(OscError::BadBundle);
+        return Err(OscError::BadBundle("Bundle shorter than expected!"));
     }
 
     Ok(OscPacket::Bundle(OscBundle {
