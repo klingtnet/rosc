@@ -57,22 +57,45 @@ fn decode_bundle(msg: &[u8]) -> Result<OscPacket> {
 
     let time_tag = try!(read_time_tag(&mut cursor));
     let mut bundle: Vec<OscPacket> = Vec::new();
-    let size: usize = try!(cursor.read_u32::<BigEndian>()
-                                 .map_err(OscError::ByteOrderError)) as usize;
-    let mut buf: Vec<u8> = Vec::with_capacity(size);
-    let cnt: usize = try!(cursor.take(size as u64)
-                                .read_to_end(&mut buf)
-                                .map_err(OscError::ReadError));
-    if cnt == size {
-        try!(decode(&mut buf).map(|p| bundle.push(p)));
-    } else {
-        return Err(OscError::BadBundle("Bundle shorter than expected!".to_string()));
+
+    let mut elem_size = try!(read_bundle_element_size(&mut cursor));
+
+    while msg.len() >= (cursor.position() as usize) + elem_size {
+        let packet = try!(read_bundle_element(&mut cursor, elem_size));
+        bundle.push(packet);
+
+        if msg.len() == cursor.position() as usize {
+            break;
+        }
+
+        elem_size = try!(read_bundle_element_size(&mut cursor));
     }
 
     Ok(OscPacket::Bundle(OscBundle {
         timetag: time_tag,
         content: bundle,
     }))
+}
+
+fn read_bundle_element_size(cursor: &mut io::Cursor<&[u8]>) -> Result<usize> {
+    cursor.read_u32::<BigEndian>()
+          .map(|size| size as usize)
+          .map_err(OscError::ByteOrderError)
+}
+
+fn read_bundle_element(cursor: &mut io::Cursor<&[u8]>, elem_size: usize) -> Result<OscPacket> {
+    let mut buf: Vec<u8> = Vec::with_capacity(elem_size);
+
+    let mut handle = cursor.take(elem_size as u64);
+
+    let cnt = try!(handle.read_to_end(&mut buf)
+                         .map_err(OscError::ReadError));
+
+    if cnt == elem_size {
+        decode(&mut buf)
+    } else {
+        return Err(OscError::BadBundle("Bundle shorter than expected!".to_string()));
+    }
 }
 
 fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> Result<String> {
