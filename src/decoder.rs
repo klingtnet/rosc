@@ -11,6 +11,10 @@ use byteorder::{BigEndian, ReadBytesExt};
 pub const MTP: usize = 1536;
 
 pub fn decode(msg: &[u8]) -> Result<OscPacket> {
+    if msg.len() == 0 {
+        return Err(OscError::BadPacket("Empty packet."));
+    }
+
     match msg[0] as char {
         '/' => {
             decode_message(msg)
