@@ -20,10 +20,10 @@ format: $(SOURCES) $(EXAMPLES) $(TESTS)
 		do echo $$f && rustfmt $$f; \
 	done
 
-examples: $(EXAMPLES)
-
-./examples/%.rs: $(SOURCES)
-	cargo build --example $(basename $(notdir $@))
+examples: $(SOURCES) $(EXAMPLES)
+	@for f in $(EXAMPLES); \
+		cargo build --example $(basename $(notdir $$f))
+	done
 
 run: build
 	cargo run
