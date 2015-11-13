@@ -1,7 +1,7 @@
 extern crate rosc;
 
 use std::{net, env, process};
-use rosc::types::{OscPacket};
+use rosc::types::OscPacket;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
