@@ -10,9 +10,8 @@ pub enum OscType {
     Float(f32),
     String(String),
     Blob(Vec<u8>),
+    // use struct for time tag to avoid destructuring
     Time(u32, u32),
-    // nonstandard argument types
-    // ignore them if not implemented
     Long(i64),
     Double(f64),
     Char(char),
