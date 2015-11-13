@@ -12,7 +12,7 @@ pub fn encode(packet: &OscPacket) -> Result<Vec<u8>> {
     }
 }
 
-pub fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
+fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
     let mut msg_bytes: Vec<u8> = Vec::new();
 
     msg_bytes.extend(encode_string(&msg.addr));
@@ -40,7 +40,7 @@ pub fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
     Ok(msg_bytes)
 }
 
-pub fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
+fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
     let mut bundle_bytes: Vec<u8> = Vec::new();
     bundle_bytes.extend(encode_string(&"#bundle".to_string())
                             .iter()
