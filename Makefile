@@ -21,8 +21,8 @@ format: $(SOURCES) $(EXAMPLES) $(TESTS)
 	done
 
 examples: $(SOURCES) $(EXAMPLES)
-	@for f in $(EXAMPLES); \
-		cargo build --example $(basename $(notdir $$f))
+	@for f in $(basename $(notdir $(EXAMPLES))); do\
+		cargo build --example $$f; \
 	done
 
 run: build
