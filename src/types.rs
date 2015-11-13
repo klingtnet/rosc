@@ -20,7 +20,6 @@ pub enum OscType {
     Bool(bool),
     Nil,
     Inf,
-    Array(Vec<OscType>),
 }
 
 #[derive(Debug)]

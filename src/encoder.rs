@@ -144,7 +144,6 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
         &OscType::Inf => {
             Ok((None, 'I'))
         }
-        _ => Err(OscError::Unimplemented),
     }
 }
 
