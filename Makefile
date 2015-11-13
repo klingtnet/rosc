@@ -16,8 +16,8 @@ release: test $(SOURCES)
 fmt: format
 
 format: $(SOURCES) $(EXAMPLES) $(TESTS)
-	@for f in $?; \
-		do echo $$f && rustfmt $$f; \
+	@for f in $?; do\
+		echo $$f && rustfmt $$f; \
 	done
 
 examples: $(SOURCES) $(EXAMPLES)
