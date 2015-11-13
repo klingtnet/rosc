@@ -1,6 +1,7 @@
 extern crate rosc;
 
 use std::{net, env, process};
+use rosc::types::{OscPacket};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -9,34 +10,40 @@ fn main() {
         process::exit(1);
     }
 
-    match rosc::utils::parse_ip_and_port(&args[1]) {
-        Ok((ip, port)) => {
-            let sock = match net::UdpSocket::bind((ip, port)) {
-                Ok(sock_ok) => sock_ok,
-                Err(e) => {
-                    println!("Could not bind socket: {}", e);
-                    process::exit(1);
-                }
-            };
-            println!("Listening to {}:{}", ip, port);
+    let (ip, port) = rosc::utils::parse_ip_and_port(&args[1]).unwrap();
+    let sock = net::UdpSocket::bind((ip, port)).unwrap();
+    println!("Listening to {}:{}", ip, port);
 
-            let mut buf: [u8; rosc::decoder::MTP] = [0u8; rosc::decoder::MTP];
+    let mut buf = [0u8; rosc::decoder::MTP];
 
-            loop {
-                match sock.recv_from(&mut buf) {
-                    Ok((size, addr)) => {
-                        println!("addr: {}, size: {}", addr, size);
-                        rosc::decoder::decode(&mut buf);
-                    }
-                    Err(e) => {
-                        println!("Error receiving from socket: {}", e);
-                        break;
-                    }
-                }
+    loop {
+        match sock.recv_from(&mut buf) {
+            Ok((size, addr)) => {
+                println!("Received packet with size {} from: {}", size, addr);
+                let packet = rosc::decoder::decode(&mut buf).unwrap();
+                handle_packet(packet);
             }
-
-            drop(sock);
+            Err(e) => {
+                println!("Error receiving from socket: {}", e);
+                break;
+            }
         }
-        Err(e) => println!("{}", e),
+    }
+
+    drop(sock);
+}
+
+fn handle_packet(packet: OscPacket) {
+    match packet {
+        OscPacket::Message(msg) => {
+            println!("OSC address: {}", msg.addr);
+            match msg.args {
+                Some(args) => {
+                    println!("OSC arguments: {:?}", args);
+                }
+                None => println!("No arguments in message."),
+            }
+        }
+        _ => (),
     }
 }
