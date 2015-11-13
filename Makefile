@@ -5,7 +5,7 @@ TESTS:=$(wildcard ./tests/*.rs)
 EXAMPLES:=$(wildcard ./examples/*.rs)
 BUILD_OPTS:=--jobs $(shell nproc)
 
-all: build
+all: test build examples doc
 
 build: $(SOURCES)
 	cargo build $(BUILD_OPTS)
