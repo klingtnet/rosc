@@ -1,21 +1,24 @@
 extern crate rosc;
 
-use std::{env, process, thread, f32};
+use std::{env, thread, f32};
 use std::net::{UdpSocket, SocketAddrV4};
 use std::str::FromStr;
 use std::time::Duration;
 use rosc::types::{OscPacket, OscMessage, OscType};
 use rosc::encoder;
 
+fn get_addr_from_arg(arg: &str) -> SocketAddrV4 {
+    SocketAddrV4::from_str(arg).unwrap()
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
+    let usage = format!("Usage: {} HOST_IP:HOST_PORT CLIENT_IP:CLIENT_PORT", &args[0]);
     if args.len() < 3 {
-        println!("Usage ./sender HOST_IP:HOST_PORT CLIENT_IP:CLIENT_PORT");
-        process::exit(1);
+        panic!(usage);
     }
-
-    let host_addr = SocketAddrV4::from_str(&args[1]).unwrap();
-    let to_addr = SocketAddrV4::from_str(&args[2]).unwrap();
+    let host_addr = get_addr_from_arg(&args[1]);
+    let to_addr = get_addr_from_arg(&args[2]);
     let sock = UdpSocket::bind(host_addr).unwrap();
 
     // switch view

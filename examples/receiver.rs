@@ -7,12 +7,11 @@ use rosc::types::OscPacket;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    if args.len() < 2 {
-        println!("Usage ./receive IP:PORT");
-        process::exit(1);
-    }
-
-    let addr = SocketAddrV4::from_str(&args[1]).unwrap();
+    let usage = format!("Usage {} IP:PORT", &args[0]);
+    let addr = match SocketAddrV4::from_str(&args[1]) {
+        Ok(addr) => addr,
+        Err(_) => panic!(usage),
+    };
     let sock = UdpSocket::bind(addr).unwrap();
     println!("Listening to {}", addr);
 
