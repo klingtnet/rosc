@@ -1,6 +1,7 @@
 extern crate rosc;
 
 use std::{net, env, process, thread, f32};
+use std::time::Duration;
 use rosc::types::{OscPacket, OscMessage, OscType};
 use rosc::encoder;
 
@@ -43,7 +44,7 @@ fn main() {
                       }))
                           .unwrap();
         sock.send_to(&msg_buf, net::SocketAddrV4::new(to_ip, to_port)).unwrap();
-        thread::sleep_ms(20);
+        thread::sleep(Duration::from_millis(20));
     }
 
     drop(sock);
