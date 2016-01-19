@@ -48,6 +48,4 @@ fn main() {
         sock.send_to(&msg_buf, to_addr).unwrap();
         thread::sleep(Duration::from_millis(20));
     }
-
-    drop(sock);
 }

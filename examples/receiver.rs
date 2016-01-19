@@ -31,8 +31,6 @@ fn main() {
             }
         }
     }
-
-    drop(sock);
 }
 
 fn handle_packet(packet: OscPacket) {
