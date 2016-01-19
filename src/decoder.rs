@@ -116,7 +116,6 @@ fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> Result<String> {
 fn read_osc_args(cursor: &mut io::Cursor<&[u8]>, raw_type_tags: String) -> Result<Vec<OscType>> {
     let type_tags: Vec<char> = raw_type_tags.chars()
                                             .skip(1)
-                                            .map(|c| c as char)
                                             .collect();
 
     let mut args: Vec<OscType> = Vec::with_capacity(type_tags.len());
