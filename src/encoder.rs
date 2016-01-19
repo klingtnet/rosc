@@ -29,8 +29,7 @@ fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
         }
     }
 
-    msg_bytes.extend(encode_string(&type_tags.iter()
-                                             .cloned()
+    msg_bytes.extend(encode_string(&type_tags.into_iter()
                                              .collect::<String>()));
     if arg_bytes.len() > 0 {
         msg_bytes.extend(arg_bytes);
@@ -40,13 +39,11 @@ fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
 
 fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
     let mut bundle_bytes: Vec<u8> = Vec::new();
-    bundle_bytes.extend(encode_string(&"#bundle".to_string())
-                            .iter()
-                            .cloned());
+    bundle_bytes.extend(encode_string(&"#bundle".to_string()).into_iter());
 
     match try!(encode_arg(&bundle.timetag)) {
         (Some(x), _) => {
-            bundle_bytes.extend(x.iter().cloned());
+            bundle_bytes.extend(x.into_iter());
         }
         (None, _) => {
             return Err(OscError::BadBundle("Missing time tag!".to_string()));
@@ -55,7 +52,7 @@ fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
 
     if bundle.content.len() == 0 {
         // TODO: A bundle of length zero, should this really be supported?
-        bundle_bytes.extend([0u8; 4].iter().cloned());
+        bundle_bytes.extend([0u8; 4].into_iter());
         return Ok(bundle_bytes);
     }
 
@@ -65,13 +62,13 @@ fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
                 let msg = try!(encode_message(m));
                 let mut msg_size = vec![0u8; 4];
                 BigEndian::write_u32(&mut msg_size, msg.len() as u32);
-                bundle_bytes.extend(msg_size.iter().chain(msg.iter()).cloned());
+                bundle_bytes.extend(msg_size.into_iter().chain(msg.into_iter()));
             }
             OscPacket::Bundle(ref b) => {
                 let bdl = try!(encode_bundle(b));
                 let mut bdl_size = vec![0u8; 4];
                 BigEndian::write_u32(&mut bdl_size, bdl.len() as u32);
-                bundle_bytes.extend(bdl_size.iter().chain(bdl.iter()).cloned());
+                bundle_bytes.extend(bdl_size.into_iter().chain(bdl.into_iter()));
             }
         }
     }
