@@ -14,7 +14,7 @@ pub fn encode(packet: &OscPacket) -> Result<Vec<u8>> {
 fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
     let mut msg_bytes: Vec<u8> = Vec::new();
 
-    msg_bytes.extend(encode_string(&msg.addr));
+    msg_bytes.extend(encode_string(msg.addr.clone()));
     let mut type_tags: Vec<char> = vec![','];
     let mut arg_bytes: Vec<u8> = Vec::new();
 
@@ -29,7 +29,7 @@ fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
         }
     }
 
-    msg_bytes.extend(encode_string(&type_tags.into_iter()
+    msg_bytes.extend(encode_string(type_tags.into_iter()
                                              .collect::<String>()));
     if arg_bytes.len() > 0 {
         msg_bytes.extend(arg_bytes);
@@ -39,7 +39,7 @@ fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
 
 fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
     let mut bundle_bytes: Vec<u8> = Vec::new();
-    bundle_bytes.extend(encode_string(&"#bundle".to_string()).into_iter());
+    bundle_bytes.extend(encode_string("#bundle".to_string()).into_iter());
 
     match try!(encode_arg(&bundle.timetag)) {
         (Some(x), _) => {
@@ -104,7 +104,7 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
             Ok((Some(bytes), 'c'))
         }
         OscType::String(ref x) => {
-            Ok((Some(encode_string(&x)), 's'))
+            Ok((Some(encode_string(x.clone())), 's'))
         }
         OscType::Blob(ref x) => {
             let padded_blob_length: usize = utils::pad(x.len() as u64) as usize;
@@ -141,8 +141,8 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
     }
 }
 
-fn encode_string(s: &String) -> Vec<u8> {
-    let mut bytes: Vec<u8> = s.as_bytes().into();
+fn encode_string<S: Into<String>>(s: S) -> Vec<u8> {
+    let mut bytes: Vec<u8> = s.into().as_bytes().into();
     bytes.push(0u8);
     pad_bytes(&mut bytes);
     bytes
