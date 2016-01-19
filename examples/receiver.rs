@@ -1,6 +1,6 @@
 extern crate rosc;
 
-use std::{env, process};
+use std::env;
 use std::net::{UdpSocket, SocketAddrV4};
 use std::str::FromStr;
 use rosc::types::OscPacket;
