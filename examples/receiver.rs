@@ -1,6 +1,8 @@
 extern crate rosc;
 
-use std::{net, env, process};
+use std::{env, process};
+use std::net::{UdpSocket, SocketAddrV4};
+use std::str::FromStr;
 use rosc::types::OscPacket;
 
 fn main() {
@@ -10,9 +12,9 @@ fn main() {
         process::exit(1);
     }
 
-    let (ip, port) = rosc::utils::parse_ip_and_port(&args[1]).unwrap();
-    let sock = net::UdpSocket::bind((ip, port)).unwrap();
-    println!("Listening to {}:{}", ip, port);
+    let addr = SocketAddrV4::from_str(&args[1]).unwrap();
+    let sock = UdpSocket::bind(addr).unwrap();
+    println!("Listening to {}", addr);
 
     let mut buf = [0u8; rosc::decoder::MTP];
 
