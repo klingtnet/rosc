@@ -3,7 +3,6 @@ use errors::OscError;
 use utils;
 
 use byteorder::{ByteOrder, BigEndian};
-use std::iter;
 
 pub fn encode(packet: &OscPacket) -> Result<Vec<u8>> {
     match *packet {
@@ -148,11 +147,8 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
 }
 
 fn encode_string(s: &String) -> Vec<u8> {
-    let mut bytes: Vec<u8> = s.as_bytes()
-                              .iter()
-                              .cloned()
-                              .chain(iter::once(0u8))
-                              .collect();
+    let mut bytes: Vec<u8> = s.as_bytes().into();
+    bytes.push(0u8);
     pad_bytes(&mut bytes);
     bytes
 }
