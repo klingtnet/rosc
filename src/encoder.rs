@@ -18,8 +18,7 @@ fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
     let mut type_tags: Vec<char> = vec![','];
     let mut arg_bytes: Vec<u8> = Vec::new();
 
-    if msg.args.is_some() {
-        let args = msg.args.as_ref().unwrap();
+    if let Some(ref args) = msg.args {
         for arg in args {
             let (bytes, tag): (Option<Vec<u8>>, char) = try!(encode_arg(arg));
 
