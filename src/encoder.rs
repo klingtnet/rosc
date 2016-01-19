@@ -107,7 +107,6 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
             Ok((Some(encode_string(&x)), 's'))
         }
         OscType::Blob(ref x) => {
-            // let mut bytes = x.clone();
             let padded_blob_length: usize = utils::pad(x.len() as u64) as usize;
             let mut bytes = vec![0u8; 4 + padded_blob_length];
             // write length
