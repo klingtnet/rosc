@@ -30,7 +30,7 @@ fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
     }
 
     msg_bytes.extend(encode_string(type_tags.into_iter()
-                                             .collect::<String>()));
+                                            .collect::<String>()));
     if arg_bytes.len() > 0 {
         msg_bytes.extend(arg_bytes);
     }
@@ -103,9 +103,7 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
             BigEndian::write_u32(&mut bytes, *x as u32);
             Ok((Some(bytes), 'c'))
         }
-        OscType::String(ref x) => {
-            Ok((Some(encode_string(x.clone())), 's'))
-        }
+        OscType::String(ref x) => Ok((Some(encode_string(x.clone())), 's')),
         OscType::Blob(ref x) => {
             let padded_blob_length: usize = utils::pad(x.len() as u64) as usize;
             let mut bytes = vec![0u8; 4 + padded_blob_length];
@@ -116,15 +114,9 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
             }
             Ok((Some(bytes), 'b'))
         }
-        OscType::Time(ref x, ref y) => {
-            Ok((Some(encode_time_tag(*x, *y)), 't'))
-        }
-        OscType::Midi(ref x) => {
-            Ok((Some(vec![x.port, x.status, x.data1, x.data2]), 'm'))
-        }
-        OscType::Color(ref x) => {
-            Ok((Some(vec![x.red, x.green, x.blue, x.alpha]), 'r'))
-        }
+        OscType::Time(ref x, ref y) => Ok((Some(encode_time_tag(*x, *y)), 't')),
+        OscType::Midi(ref x) => Ok((Some(vec![x.port, x.status, x.data1, x.data2]), 'm')),
+        OscType::Color(ref x) => Ok((Some(vec![x.red, x.green, x.blue, x.alpha]), 'r')),
         OscType::Bool(ref x) => {
             if *x {
                 Ok((None, 'T'))
@@ -132,12 +124,8 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
                 Ok((None, 'F'))
             }
         }
-        OscType::Nil => {
-            Ok((None, 'N'))
-        }
-        OscType::Inf => {
-            Ok((None, 'I'))
-        }
+        OscType::Nil => Ok((None, 'N')),
+        OscType::Inf => Ok((None, 'I')),
     }
 }
 

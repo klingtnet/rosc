@@ -16,12 +16,8 @@ pub fn decode(msg: &[u8]) -> Result<OscPacket> {
     }
 
     match msg[0] as char {
-        '/' => {
-            decode_message(msg)
-        }
-        '#' => {
-            decode_bundle(msg)
-        }
+        '/' => decode_message(msg),
+        '#' => decode_bundle(msg),
         _ => Err(OscError::BadPacket("Unknown message format.")),
     }
 }
@@ -148,36 +144,16 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> Result<OscType> {
                   .map(OscType::Long)
                   .map_err(OscError::ByteOrderError)
         }
-        's' => {
-            read_osc_string(cursor).map(|s| OscType::String(s))
-        }
-        't' => {
-            read_time_tag(cursor)
-        }
-        'b' => {
-            read_blob(cursor)
-        }
-        'r' => {
-            read_osc_color(cursor)
-        }
-        'T' => {
-            Ok(OscType::Bool(true))
-        }
-        'F' => {
-            Ok(OscType::Bool(false))
-        }
-        'N' => {
-            Ok(OscType::Nil)
-        }
-        'I' => {
-            Ok(OscType::Inf)
-        }
-        'c' => {
-            read_char(cursor)
-        }
-        'm' => {
-            read_midi_message(cursor)
-        }
+        's' => read_osc_string(cursor).map(|s| OscType::String(s)),
+        't' => read_time_tag(cursor),
+        'b' => read_blob(cursor),
+        'r' => read_osc_color(cursor),
+        'T' => Ok(OscType::Bool(true)),
+        'F' => Ok(OscType::Bool(false)),
+        'N' => Ok(OscType::Nil),
+        'I' => Ok(OscType::Inf),
+        'c' => read_char(cursor),
+        'm' => read_midi_message(cursor),
         _ => Err(OscError::BadArg(format!("Type tag \"{}\" is not implemented!", tag))),
     }
 }
