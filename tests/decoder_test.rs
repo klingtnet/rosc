@@ -114,7 +114,6 @@ fn to_osc_string(data: &[u8]) -> Vec<u8> {
                              .cloned()
                              .chain(iter::once(0u8))
                              .collect();
-    // v;
     let pad_len: usize = utils::pad(v.len() as u64) as usize;
     while v.len() < pad_len {
         v.push(0u8);
