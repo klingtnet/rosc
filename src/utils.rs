@@ -1,4 +1,4 @@
-/// Returns the 4-byte padded position
+/// Returns the position padded to 4 bytes.
 ///
 /// # Example
 ///

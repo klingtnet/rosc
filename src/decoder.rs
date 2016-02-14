@@ -10,6 +10,9 @@ use byteorder::{BigEndian, ReadBytesExt};
 /// Common MTP size for ethernet
 pub const MTP: usize = 1536;
 
+/// Takes an byte slice as argument and returns an
+/// OSC packet on success or an `OscError` if the slice
+/// does not contain a valid OSC message.
 pub fn decode(msg: &[u8]) -> Result<OscPacket> {
     if msg.len() == 0 {
         return Err(OscError::BadPacket("Empty packet."));

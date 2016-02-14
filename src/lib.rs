@@ -4,13 +4,13 @@
 extern crate byteorder;
 
 /// OSC data types, see [OSC 1.0
-/// specification](http://opensoundcontrol.org/spec-1_0) for details
+/// specification](http://opensoundcontrol.org/spec-1_0) for details.
 pub mod types;
-/// Provides a decoding method for OSC packets
+/// Provides a decoding method for OSC packets.
 pub mod decoder;
-/// TODO
+/// Encodes an `OscPacket` to a byte vector.
 pub mod encoder;
-/// Utilities, g.e. IP address parsing
+/// Misc. utilities.
 pub mod utils;
-/// Contains custom errors
+/// Crate specific error types.
 pub mod errors;

@@ -4,6 +4,22 @@ use utils;
 
 use byteorder::{ByteOrder, BigEndian};
 
+/// Takes a refernece to an OSC packet and returns
+/// a byte vector on success. If the packet was invalid
+/// an `OscError` is returned.
+///
+/// # Example
+///
+/// ```
+/// use rosc::OscPacket;
+///
+/// let packet = OscPacket::Message(OscMessage{
+///         addr: "/greet/me".to_string(),
+///         args: Some(vec![OscType::String("hi!")])
+///     }
+/// )
+/// assert!(encode(packet).is_ok())
+/// ```
 pub fn encode(packet: &OscPacket) -> Result<Vec<u8>> {
     match *packet {
         OscPacket::Message(ref msg) => encode_message(msg),

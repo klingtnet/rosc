@@ -1,9 +1,8 @@
 use errors;
 use std::result;
 
-// see OSC Type Tag String: http://opensoundcontrol.org/spec-1_0
-// padding: zero bytes (n*4)
-
+/// see OSC Type Tag String: http://opensoundcontrol.org/spec-1_0
+/// padding: zero bytes (n*4)
 #[derive(Debug, PartialEq)]
 pub enum OscType {
     Int(i32),
@@ -22,6 +21,8 @@ pub enum OscType {
     Inf,
 }
 
+/// Represents the parts of a Midi message. Mainly used for
+/// tunneling midi over a network using the OSC protocol.
 #[derive(Debug, PartialEq)]
 pub struct OscMidiMessage {
     pub port: u8,
@@ -38,18 +39,28 @@ pub enum OscPacket {
     Bundle(OscBundle),
 }
 
+/// An OSC message consists of an address and
+/// zero or more arguments. The address should
+/// specify an element of your Instrument (or whatever
+/// you want to control with OSC) and the arguments
+/// are used to set properties of the element to the
+/// respective values.
 #[derive(Debug, PartialEq)]
 pub struct OscMessage {
     pub addr: String,
     pub args: Option<Vec<OscType>>,
 }
 
+/// An OSC bundle contains zero or more OSC packets
+/// and a time tag. The contained packets *should* be
+/// applied at the given time tag.
 #[derive(Debug, PartialEq)]
 pub struct OscBundle {
     pub timetag: OscType,
     pub content: Vec<OscPacket>,
 }
 
+/// An RGBA color.
 #[derive(Debug, PartialEq)]
 pub struct OscColor {
     pub red: u8,
