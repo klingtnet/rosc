@@ -1,12 +1,3 @@
 # rosc
 
-*rosc* is an OSC 1.0 compatible rust library.
-
-## Build
-
-- `make` or `cargo build`
-- with optimizations: `make release`
-
-### Examples
-
-`cargo build --example examplefile` where `examplefile` is the name of a rust source file from the `examples/` folder withouth the `.rs` extension (TODO: make target)
+**rosc** is an implementation of the [OSC 1.0](http://opensoundcontrol.org/spec-1_0) protocol in pure Rust.
