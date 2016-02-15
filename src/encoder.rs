@@ -4,7 +4,7 @@ use utils;
 
 use byteorder::{ByteOrder, BigEndian};
 
-/// Takes a refernece to an OSC packet and returns
+/// Takes a reference to an OSC packet and returns
 /// a byte vector on success. If the packet was invalid
 /// an `OscError` is returned.
 ///
