@@ -10,7 +10,7 @@ use byteorder::{ByteOrder, BigEndian};
 /// # Example
 ///
 /// ```
-/// use rosc::types::{OscPacket,OscMessage,OscType};
+/// use rosc::{OscPacket,OscMessage,OscType};
 /// use rosc::encoder;
 ///
 /// let packet = OscPacket::Message(OscMessage{

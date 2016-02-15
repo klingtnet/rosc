@@ -1,7 +1,7 @@
 extern crate rosc;
 
 use rosc::{encoder, decoder};
-use rosc::types::{OscMessage, OscMidiMessage, OscColor, OscPacket, OscType, OscBundle};
+use rosc::{OscMessage, OscMidiMessage, OscColor, OscPacket, OscType, OscBundle};
 
 #[test]
 fn test_encode_message_wo_args() {

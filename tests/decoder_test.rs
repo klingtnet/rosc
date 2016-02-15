@@ -5,7 +5,8 @@ use byteorder::{ByteOrder, BigEndian};
 use std::mem;
 use std::ascii::AsciiExt;
 
-use rosc::{types, errors, decoder, encoder};
+use rosc::{decoder, encoder};
+
 
 #[test]
 fn test_decode_no_args() {
@@ -16,10 +17,10 @@ fn test_decode_no_args() {
     let merged: Vec<u8> = addr.into_iter()
                               .chain(type_tags.into_iter())
                               .collect();
-    let osc_packet: Result<types::OscPacket, errors::OscError> = decoder::decode(&merged);
+    let osc_packet: Result<rosc::OscPacket, rosc::OscError> = decoder::decode(&merged);
     assert!(osc_packet.is_ok());
     match osc_packet {
-        Ok(types::OscPacket::Message(msg)) => {
+        Ok(rosc::OscPacket::Message(msg)) => {
             assert_eq!(raw_addr, msg.addr);
             assert!(msg.args.is_none());
         }
@@ -81,23 +82,23 @@ fn test_decode_args() {
                               .collect::<Vec<u8>>();
 
     match decoder::decode(&merged).unwrap() {
-        types::OscPacket::Message(msg) => {
+        rosc::OscPacket::Message(msg) => {
             for arg in msg.args.unwrap() {
                 match arg {
-                    types::OscType::Int(x) => assert_eq!(i, x),
-                    types::OscType::Long(x) => assert_eq!(l, x),
-                    types::OscType::Float(x) => assert_eq!(f, x),
-                    types::OscType::Double(x) => assert_eq!(d, x),
-                    types::OscType::String(x) => assert_eq!(s, x),
-                    types::OscType::Blob(x) => assert_eq!(blob, x),
+                    rosc::OscType::Int(x) => assert_eq!(i, x),
+                    rosc::OscType::Long(x) => assert_eq!(l, x),
+                    rosc::OscType::Float(x) => assert_eq!(f, x),
+                    rosc::OscType::Double(x) => assert_eq!(d, x),
+                    rosc::OscType::String(x) => assert_eq!(s, x),
+                    rosc::OscType::Blob(x) => assert_eq!(blob, x),
                     // cant assign bool args to type_tag
                     // , so there is no real test wether the value is
                     // correct or not
-                    types::OscType::Bool(_) => (),
-                    types::OscType::Inf => (),
-                    types::OscType::Nil => (),
+                    rosc::OscType::Bool(_) => (),
+                    rosc::OscType::Inf => (),
+                    rosc::OscType::Nil => (),
                     // test time-tags, midi-messages and chars
-                    types::OscType::Char(x) => assert_eq!(c, x),
+                    rosc::OscType::Char(x) => assert_eq!(c, x),
                     _ => panic!(),
                 }
 

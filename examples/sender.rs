@@ -4,7 +4,7 @@ use std::{env, thread, f32};
 use std::net::{UdpSocket, SocketAddrV4};
 use std::str::FromStr;
 use std::time::Duration;
-use rosc::types::{OscPacket, OscMessage, OscType};
+use rosc::{OscPacket, OscMessage, OscType};
 use rosc::encoder;
 
 fn get_addr_from_arg(arg: &str) -> SocketAddrV4 {
