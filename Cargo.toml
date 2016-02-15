@@ -13,4 +13,3 @@ readme = "README.md"
 
 [dependencies]
 byteorder = "0.3.13"
-# none
