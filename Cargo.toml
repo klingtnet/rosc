@@ -5,7 +5,6 @@ authors = ["Andreas Linz <klingt.net@gmail.com>"]
 description = "An OSC library for Rust"
 keywords = ["audio", "osc"]
 documentation = "https://docs.klingt.net/rustdoc/rosc"
-# homepage = "https://klingt.net"
 repository = "https://git.klingt.net/alinz/rosc"
 license-file = "LICENSE"
 readme = "README.md"
