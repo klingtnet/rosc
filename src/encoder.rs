@@ -1,6 +1,5 @@
 use types::{Result, OscType, OscPacket, OscBundle, OscMessage};
 use errors::OscError;
-use utils;
 
 use byteorder::{ByteOrder, BigEndian};
 
@@ -11,14 +10,15 @@ use byteorder::{ByteOrder, BigEndian};
 /// # Example
 ///
 /// ```
-/// use rosc::OscPacket;
+/// use rosc::types::{OscPacket,OscMessage,OscType};
+/// use rosc::encoder;
 ///
 /// let packet = OscPacket::Message(OscMessage{
 ///         addr: "/greet/me".to_string(),
-///         args: Some(vec![OscType::String("hi!")])
+///         args: Some(vec![OscType::String("hi!".to_string())])
 ///     }
-/// )
-/// assert!(encode(packet).is_ok())
+/// );
+/// assert!(encoder::encode(&packet).is_ok())
 /// ```
 pub fn encode(packet: &OscPacket) -> Result<Vec<u8>> {
     match *packet {
@@ -121,7 +121,7 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
         }
         OscType::String(ref x) => Ok((Some(encode_string(x.clone())), 's')),
         OscType::Blob(ref x) => {
-            let padded_blob_length: usize = utils::pad(x.len() as u64) as usize;
+            let padded_blob_length: usize = pad(x.len() as u64) as usize;
             let mut bytes = vec![0u8; 4 + padded_blob_length];
             // write length
             BigEndian::write_i32(&mut bytes[..4], x.len() as i32);
@@ -145,7 +145,10 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
     }
 }
 
-fn encode_string<S: Into<String>>(s: S) -> Vec<u8> {
+/// Null terminates the byte representation of string `s` and
+/// adds null bytes until the length of the result is a
+/// multiple of 4.
+pub fn encode_string<S: Into<String>>(s: S) -> Vec<u8> {
     let mut bytes: Vec<u8> = s.into().as_bytes().into();
     bytes.push(0u8);
     pad_bytes(&mut bytes);
@@ -153,15 +156,41 @@ fn encode_string<S: Into<String>>(s: S) -> Vec<u8> {
 }
 
 fn pad_bytes(bytes: &mut Vec<u8>) {
-    let padded_lengh = utils::pad(bytes.len() as u64);
+    let padded_lengh = pad(bytes.len() as u64);
     while bytes.len() < padded_lengh as usize {
         bytes.push(0u8)
     }
 }
+
+/// Returns the position padded to 4 bytes.
+///
+/// # Example
+///
+/// ```
+/// use rosc::encoder;
+///
+/// let pos: u64 = 10;
+/// assert_eq!(12u64, encoder::pad(pos))
+/// ```
+pub fn pad(pos: u64) -> u64 {
+    match pos % 4 {
+        0 => pos,
+        d => pos + (4 - d),
+    }
+}
+
 
 fn encode_time_tag(sec: u32, frac: u32) -> Vec<u8> {
     let mut bytes = vec![0u8; 8];
     BigEndian::write_u32(&mut bytes[..4], sec);
     BigEndian::write_u32(&mut bytes[4..], frac);
     bytes
+}
+
+#[test]
+fn test_pad() {
+    assert_eq!(4, pad(4));
+    assert_eq!(8, pad(5));
+    assert_eq!(8, pad(6));
+    assert_eq!(8, pad(7));
 }

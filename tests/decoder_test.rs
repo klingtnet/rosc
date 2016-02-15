@@ -2,17 +2,17 @@ extern crate rosc;
 extern crate byteorder;
 
 use byteorder::{ByteOrder, BigEndian};
-use std::{mem, iter};
+use std::mem;
 use std::ascii::AsciiExt;
 
-use rosc::{types, errors, decoder, utils};
+use rosc::{types, errors, decoder, encoder};
 
 #[test]
 fn test_decode_no_args() {
     // message to build: /some/valid/address/4 ,
     let raw_addr = "/some/valid/address/4";
-    let addr = to_osc_string(raw_addr.as_bytes());
-    let type_tags = to_osc_string(b",");
+    let addr = encoder::encode_string(raw_addr);
+    let type_tags = encoder::encode_string(",");
     let merged: Vec<u8> = addr.into_iter()
                               .chain(type_tags.into_iter())
                               .collect();
@@ -32,8 +32,7 @@ fn test_decode_no_args() {
 fn test_decode_args() {
     // /another/valid/address/123 ,fdih 3.1415 3.14159265359 12345678i32
     // -1234567891011
-    let raw_addr = "/another/valid/address/123";
-    let addr = to_osc_string(raw_addr.as_bytes());
+    let addr = encoder::encode_string("/another/valid/address/123");
     // args
     let f = 3.1415f32;
     let mut f_bytes: [u8; 4] = [0u8; 4];
@@ -57,12 +56,12 @@ fn test_decode_args() {
     let s = "I am an osc test string.";
     assert!(s.is_ascii());
     // Osc strings are null terminated like in C!
-    let s_bytes: Vec<u8> = to_osc_string(s.as_bytes());
+    let s_bytes: Vec<u8> = encoder::encode_string(s);
 
     let c = '$';
     let c_bytes: [u8; 4] = unsafe { mem::transmute((c as u32).to_be()) };
 
-    let type_tags = to_osc_string(b",fdsTFibhNIc");
+    let type_tags = encoder::encode_string(",fdsTFibhNIc");
 
     let args: Vec<u8> = f_bytes.iter()
                                .chain(d_bytes.iter())
@@ -106,17 +105,4 @@ fn test_decode_args() {
         }
         _ => panic!("Expected an OSC message!"),
     }
-}
-
-/// Nul terminates the data and pads with zero bytes to a length that is a multiple of 4.
-fn to_osc_string(data: &[u8]) -> Vec<u8> {
-    let mut v: Vec<u8> = data.iter()
-                             .cloned()
-                             .chain(iter::once(0u8))
-                             .collect();
-    let pad_len: usize = utils::pad(v.len() as u64) as usize;
-    while v.len() < pad_len {
-        v.push(0u8);
-    }
-    v
 }

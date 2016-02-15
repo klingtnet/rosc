@@ -1,6 +1,6 @@
 use types::{OscPacket, OscType, Result, OscMessage, OscMidiMessage, OscColor, OscBundle};
 use errors::OscError;
-use utils;
+use encoder;
 
 use std::{io, char};
 use std::io::{Read, BufRead};
@@ -221,5 +221,5 @@ fn read_osc_color(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
 
 fn pad_cursor(cursor: &mut io::Cursor<&[u8]>) {
     let pos = cursor.position();
-    cursor.set_position(utils::pad(pos));
+    cursor.set_position(encoder::pad(pos));
 }

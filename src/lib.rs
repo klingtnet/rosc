@@ -10,7 +10,5 @@ pub mod types;
 pub mod decoder;
 /// Encodes an `OscPacket` to a byte vector.
 pub mod encoder;
-/// Misc. utilities.
-pub mod utils;
 /// Crate specific error types.
 pub mod errors;
