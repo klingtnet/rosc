@@ -7,8 +7,8 @@ keywords = ["audio", "osc"]
 # documentation = "..."
 # homepage = "https://klingt.net"
 # repository = "..."
-# license = "MIT"
-# license-file = "LICENSE"
+license = "GPLv3"
+license-file = "LICENSE"
 readme = "README.md"
 
 [dependencies]
