@@ -6,7 +6,7 @@ description = "An OSC library for Rust"
 keywords = ["audio", "osc"]
 documentation = "https://docs.klingt.net/rustdoc/rosc"
 repository = "https://git.klingt.net/alinz/rosc"
-license = "GPL"
+license = "GPL-3.0"
 readme = "README.md"
 
 [dependencies]
