@@ -8,6 +8,10 @@ use rosc::OscPacket;
 fn main() {
     let args: Vec<String> = env::args().collect();
     let usage = format!("Usage {} IP:PORT", &args[0]);
+    if args.len() < 2 {
+        println!("{}", usage);
+        ::std::process::exit(1)
+    }
     let addr = match SocketAddrV4::from_str(&args[1]) {
         Ok(addr) => addr,
         Err(_) => panic!(usage),
