@@ -19,7 +19,7 @@ fn main() {
     let sock = UdpSocket::bind(addr).unwrap();
     println!("Listening to {}", addr);
 
-    let mut buf = [0u8; rosc::decoder::MTP];
+    let mut buf = [0u8; rosc::decoder::MTU];
 
     loop {
         match sock.recv_from(&mut buf) {

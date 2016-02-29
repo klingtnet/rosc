@@ -7,8 +7,8 @@ use std::io::{Read, BufRead};
 
 use byteorder::{BigEndian, ReadBytesExt};
 
-/// Common MTP size for ethernet
-pub const MTP: usize = 1536;
+/// Common MTU size for ethernet
+pub const MTU: usize = 1536;
 
 /// Takes an byte slice as argument and returns an
 /// OSC packet on success or an `OscError` if the slice
