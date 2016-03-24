@@ -1,12 +1,12 @@
 [package]
 name = "rosc"
-version = "0.1.1-2"
+version = "0.1.2"
 authors = ["Andreas Linz <klingt.net@gmail.com>"]
 description = "An OSC library for Rust"
 keywords = ["audio", "osc"]
 documentation = "https://docs.klingt.net/rustdoc/rosc"
 repository = "https://git.klingt.net/alinz/rosc"
-license = "GPL-3.0"
+license = "MIT/Apache-2.0"
 readme = "README.md"
 
 [dependencies]
