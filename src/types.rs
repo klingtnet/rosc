@@ -3,7 +3,7 @@ use std::result;
 
 /// see OSC Type Tag String: http://opensoundcontrol.org/spec-1_0
 /// padding: zero bytes (n*4)
-#[derive(Debug, PartialEq)]
+#[derive(Clone,Debug, PartialEq)]
 pub enum OscType {
     Int(i32),
     Float(f32),
@@ -23,7 +23,7 @@ pub enum OscType {
 
 /// Represents the parts of a Midi message. Mainly used for
 /// tunneling midi over a network using the OSC protocol.
-#[derive(Debug, PartialEq)]
+#[derive(Clone,Debug, PartialEq)]
 pub struct OscMidiMessage {
     pub port: u8,
     pub status: u8,
@@ -33,7 +33,7 @@ pub struct OscMidiMessage {
 
 /// An *osc packet* can contain an *osc message* or a bundle of nested messages
 /// which is called *osc bundle*.
-#[derive(Debug, PartialEq)]
+#[derive(Clone,Debug, PartialEq)]
 pub enum OscPacket {
     Message(OscMessage),
     Bundle(OscBundle),
@@ -45,7 +45,7 @@ pub enum OscPacket {
 /// you want to control with OSC) and the arguments
 /// are used to set properties of the element to the
 /// respective values.
-#[derive(Debug, PartialEq)]
+#[derive(Clone,Debug, PartialEq)]
 pub struct OscMessage {
     pub addr: String,
     pub args: Option<Vec<OscType>>,
@@ -54,14 +54,14 @@ pub struct OscMessage {
 /// An OSC bundle contains zero or more OSC packets
 /// and a time tag. The contained packets *should* be
 /// applied at the given time tag.
-#[derive(Debug, PartialEq)]
+#[derive(Clone,Debug, PartialEq)]
 pub struct OscBundle {
     pub timetag: OscType,
     pub content: Vec<OscPacket>,
 }
 
 /// An RGBA color.
-#[derive(Debug, PartialEq)]
+#[derive(Clone,Debug, PartialEq)]
 pub struct OscColor {
     pub red: u8,
     pub green: u8,
