@@ -47,6 +47,8 @@ fn handle_packet(packet: OscPacket) {
                 None => println!("No arguments in message."),
             }
         }
-        _ => (),
+        OscPacket::Bundle(bundle) => {
+            println!("OSC Bundle: {:?}", bundle);
+        },
     }
 }
