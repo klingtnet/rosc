@@ -47,7 +47,7 @@ fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
 
     msg_bytes.extend(encode_string(type_tags.into_iter()
                                             .collect::<String>()));
-    if arg_bytes.len() > 0 {
+    if !arg_bytes.is_empty() {
         msg_bytes.extend(arg_bytes);
     }
     Ok(msg_bytes)
@@ -66,7 +66,7 @@ fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
         }
     }
 
-    if bundle.content.len() == 0 {
+    if bundle.content.is_empty() {
         // TODO: A bundle of length zero, should this really be supported?
         bundle_bytes.extend([0u8; 4].into_iter());
         return Ok(bundle_bytes);
