@@ -10,4 +10,5 @@ license = "MIT/Apache-2.0"
 readme = "README.md"
 
 [dependencies]
-byteorder = "0.3.13"
+byteorder = "^0.3"
+clippy = "^0"
