@@ -92,7 +92,7 @@ fn read_bundle_element(cursor: &mut io::Cursor<&[u8]>, elem_size: usize) -> Resu
                          .map_err(OscError::ReadError));
 
     if cnt == elem_size {
-        decode(&mut buf)
+        decode(&buf)
     } else {
         Err(OscError::BadBundle("Bundle shorter than expected!".to_string()))
     }
