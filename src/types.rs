@@ -1,7 +1,7 @@
 use errors;
 use std::result;
 
-/// see OSC Type Tag String: http://opensoundcontrol.org/spec-1_0
+/// see OSC Type Tag String: [OSC Spec. 1.0](http://opensoundcontrol.org/spec-1_0)
 /// padding: zero bytes (n*4)
 #[derive(Clone,Debug, PartialEq)]
 pub enum OscType {
