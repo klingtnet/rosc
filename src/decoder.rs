@@ -105,7 +105,7 @@ fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> Result<String> {
     pad_cursor(cursor);
     // convert to String and remove nul bytes
     String::from_utf8(str_buf)
-        .map_err(|e| OscError::StringError(e))
+        .map_err(OscError::StringError)
         .map(|s| {
             s.trim_matches(0u8 as char)
              .to_string()
@@ -147,7 +147,7 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> Result<OscType> {
                   .map(OscType::Long)
                   .map_err(OscError::ByteOrderError)
         }
-        's' => read_osc_string(cursor).map(|s| OscType::String(s)),
+        's' => read_osc_string(cursor).map(OscType::String),
         't' => read_time_tag(cursor),
         'b' => read_blob(cursor),
         'r' => read_osc_color(cursor),
