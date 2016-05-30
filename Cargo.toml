@@ -13,5 +13,5 @@ readme = "README.md"
 lints = ["clippy"]
 
 [dependencies]
-byteorder = "^0.3"
+byteorder = "0.5"
 clippy = {version="^0", optional=true}
