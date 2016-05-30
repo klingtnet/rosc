@@ -80,7 +80,7 @@ fn decode_bundle(msg: &[u8]) -> Result<OscPacket> {
 fn read_bundle_element_size(cursor: &mut io::Cursor<&[u8]>) -> Result<usize> {
     cursor.read_u32::<BigEndian>()
           .map(|size| size as usize)
-          .map_err(OscError::ByteOrderError)
+          .map_err(OscError::ReadError)
 }
 
 fn read_bundle_element(cursor: &mut io::Cursor<&[u8]>, elem_size: usize) -> Result<OscPacket> {
@@ -130,22 +130,22 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> Result<OscType> {
         'f' => {
             cursor.read_f32::<BigEndian>()
                   .map(OscType::Float)
-                  .map_err(OscError::ByteOrderError)
+                  .map_err(OscError::ReadError)
         }
         'd' => {
             cursor.read_f64::<BigEndian>()
                   .map(OscType::Double)
-                  .map_err(OscError::ByteOrderError)
+                  .map_err(OscError::ReadError)
         }
         'i' => {
             cursor.read_i32::<BigEndian>()
                   .map(OscType::Int)
-                  .map_err(OscError::ByteOrderError)
+                  .map_err(OscError::ReadError)
         }
         'h' => {
             cursor.read_i64::<BigEndian>()
                   .map(OscType::Long)
-                  .map_err(OscError::ByteOrderError)
+                  .map_err(OscError::ReadError)
         }
         's' => read_osc_string(cursor).map(OscType::String),
         't' => read_time_tag(cursor),
@@ -164,7 +164,7 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> Result<OscType> {
 fn read_char(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
     let opt_char = try!(cursor.read_u32::<BigEndian>()
                               .map(char::from_u32)
-                              .map_err(OscError::ByteOrderError));
+                              .map_err(OscError::ReadError));
     match opt_char {
         Some(c) => Ok(OscType::Char(c)),
         None => Err(OscError::BadArg("Argument is not a char!".to_string())),
@@ -173,7 +173,7 @@ fn read_char(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
 
 fn read_blob(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
     let size: usize = try!(cursor.read_u32::<BigEndian>()
-                                 .map_err(OscError::ByteOrderError)) as usize;
+                                 .map_err(OscError::ReadError)) as usize;
     let mut byte_buf: Vec<u8> = Vec::with_capacity(size);
 
     try!(cursor.take(size as u64)
@@ -187,9 +187,9 @@ fn read_blob(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
 
 fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
     let date = try!(cursor.read_u32::<BigEndian>()
-                          .map_err(OscError::ByteOrderError));
+                          .map_err(OscError::ReadError));
     let frac = try!(cursor.read_u32::<BigEndian>()
-                          .map_err(OscError::ByteOrderError));
+                          .map_err(OscError::ReadError));
 
     Ok(OscType::Time(date, frac))
 }
