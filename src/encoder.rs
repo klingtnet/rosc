@@ -46,7 +46,7 @@ fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
     }
 
     msg_bytes.extend(encode_string(type_tags.into_iter()
-                                            .collect::<String>()));
+        .collect::<String>()));
     if !arg_bytes.is_empty() {
         msg_bytes.extend(arg_bytes);
     }
