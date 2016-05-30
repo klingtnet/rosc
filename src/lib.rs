@@ -3,8 +3,7 @@
 
 extern crate byteorder;
 
-/// OSC data types, see [OSC 1.0
-/// specification](http://opensoundcontrol.org/spec-1_0) for details.
+/// OSC data types, see [OSC 1.0 specification](http://opensoundcontrol.org/spec-1_0) for details.
 mod types;
 /// Crate specific error types.
 mod errors;
