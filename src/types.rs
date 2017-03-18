@@ -20,7 +20,38 @@ pub enum OscType {
     Nil,
     Inf,
 }
-
+macro_rules! value_impl {
+    ($(($name:ident, $variant:ident, $ty:ty)),*) => {
+        $(
+        impl OscType {
+            #[allow(dead_code)]
+            pub fn $name(self) -> Option<$ty> {
+                match self {
+                    OscType::$variant(v) => Some(v),
+                    _ => None
+                }
+            }
+        }
+        impl From<$ty> for OscType {
+            fn from(v: $ty) -> Self {
+                OscType::$variant(v)
+            }
+        }
+        )*
+    }
+}
+value_impl! {
+    (int, Int, i32),
+    (float, Float, f32),
+    (string, String, String),
+    (blob, Blob, Vec<u8>),
+    (long, Long, i64),
+    (double, Double, f64),
+    (char, Char, char),
+    (color, Color, OscColor),
+    (midi, Midi, OscMidiMessage),
+    (bool, Bool, bool)
+}
 /// Represents the parts of a Midi message. Mainly used for
 /// tunneling midi over a network using the OSC protocol.
 #[derive(Clone,Debug, PartialEq)]
