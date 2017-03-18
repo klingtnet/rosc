@@ -70,3 +70,20 @@ pub struct OscColor {
 }
 
 pub type Result<T> = result::Result<T, errors::OscError>;
+
+impl From<String> for OscMessage {
+    fn from(s: String) -> OscMessage {
+        OscMessage {
+            addr: s,
+            args: None
+        }
+    }
+}
+impl<'a> From<&'a str> for OscMessage {
+    fn from(s: &str) -> OscMessage {
+        OscMessage {
+            addr: s.to_string(),
+            args: None
+        }
+    }
+}
