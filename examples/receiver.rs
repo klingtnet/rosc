@@ -49,6 +49,6 @@ fn handle_packet(packet: OscPacket) {
         }
         OscPacket::Bundle(bundle) => {
             println!("OSC Bundle: {:?}", bundle);
-        },
+        }
     }
 }

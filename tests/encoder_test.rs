@@ -43,17 +43,19 @@ fn test_encode_message_with_args() {
                         OscType::Nil,
                         OscType::Inf,
                         OscMidiMessage {
-                            port: 4,
-                            status: 41,
-                            data1: 42,
-                            data2: 129,
-                        }.into(),
+                                port: 4,
+                                status: 41,
+                                data1: 42,
+                                data2: 129,
+                            }
+                            .into(),
                         OscColor {
-                            red: 255,
-                            green: 192,
-                            blue: 42,
-                            alpha: 13,
-                        }.into()]),
+                                red: 255,
+                                green: 192,
+                                blue: 42,
+                                alpha: 13,
+                            }
+                            .into()]),
     });
 
     let enc_msg = encoder::encode(&msg_packet).unwrap();

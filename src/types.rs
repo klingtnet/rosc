@@ -66,6 +66,7 @@ impl OscType {
         }
     }
 }
+
 /// Represents the parts of a Midi message. Mainly used for
 /// tunneling midi over a network using the OSC protocol.
 #[derive(Clone,Debug, PartialEq)]
@@ -120,7 +121,7 @@ impl From<String> for OscMessage {
     fn from(s: String) -> OscMessage {
         OscMessage {
             addr: s,
-            args: None
+            args: None,
         }
     }
 }
@@ -128,7 +129,7 @@ impl<'a> From<&'a str> for OscMessage {
     fn from(s: &str) -> OscMessage {
         OscMessage {
             addr: s.to_string(),
-            args: None
+            args: None,
         }
     }
 }
