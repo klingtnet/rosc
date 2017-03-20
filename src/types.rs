@@ -52,6 +52,20 @@ value_impl! {
     (midi, Midi, OscMidiMessage),
     (bool, Bool, bool)
 }
+impl From<(u32, u32)> for OscType {
+    fn from(time: (u32, u32)) -> Self {
+        OscType::Time(time.0, time.1)
+    }
+}
+impl OscType {
+    #[allow(dead_code)]
+    pub fn time(self) -> Option<(u32, u32)> {
+        match self {
+            OscType::Time(sec, frac) => Some((sec, frac)),
+            _ => None,
+        }
+    }
+}
 /// Represents the parts of a Midi message. Mainly used for
 /// tunneling midi over a network using the OSC protocol.
 #[derive(Clone,Debug, PartialEq)]
