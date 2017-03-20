@@ -1,5 +1,6 @@
 use errors;
 use std::result;
+use std::time;
 
 /// see OSC Type Tag String: [OSC Spec. 1.0](http://opensoundcontrol.org/spec-1_0)
 /// padding: zero bytes (n*4)
@@ -56,12 +57,27 @@ impl From<(u32, u32)> for OscType {
     fn from(time: (u32, u32)) -> Self {
         OscType::Time(time.0, time.1)
     }
+
+}
+impl From<time::Duration> for OscType {
+    fn from(duration: time::Duration) -> Self {
+        let sec = duration.as_secs() as u32;
+        OscType::Time(sec, duration.subsec_nanos())
+    }
+
 }
 impl OscType {
     #[allow(dead_code)]
     pub fn time(self) -> Option<(u32, u32)> {
         match self {
             OscType::Time(sec, frac) => Some((sec, frac)),
+            _ => None,
+        }
+    }
+
+    pub fn duration(self) -> Option<time::Duration> {
+        match self {
+            OscType::Time(sec, frac) => Some(time::Duration::new(sec as u64, frac)),
             _ => None,
         }
     }
