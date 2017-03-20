@@ -20,7 +20,52 @@ pub enum OscType {
     Nil,
     Inf,
 }
-
+macro_rules! value_impl {
+    ($(($name:ident, $variant:ident, $ty:ty)),*) => {
+        $(
+        impl OscType {
+            #[allow(dead_code)]
+            pub fn $name(self) -> Option<$ty> {
+                match self {
+                    OscType::$variant(v) => Some(v),
+                    _ => None
+                }
+            }
+        }
+        impl From<$ty> for OscType {
+            fn from(v: $ty) -> Self {
+                OscType::$variant(v)
+            }
+        }
+        )*
+    }
+}
+value_impl! {
+    (int, Int, i32),
+    (float, Float, f32),
+    (string, String, String),
+    (blob, Blob, Vec<u8>),
+    (long, Long, i64),
+    (double, Double, f64),
+    (char, Char, char),
+    (color, Color, OscColor),
+    (midi, Midi, OscMidiMessage),
+    (bool, Bool, bool)
+}
+impl From<(u32, u32)> for OscType {
+    fn from(time: (u32, u32)) -> Self {
+        OscType::Time(time.0, time.1)
+    }
+}
+impl OscType {
+    #[allow(dead_code)]
+    pub fn time(self) -> Option<(u32, u32)> {
+        match self {
+            OscType::Time(sec, frac) => Some((sec, frac)),
+            _ => None,
+        }
+    }
+}
 /// Represents the parts of a Midi message. Mainly used for
 /// tunneling midi over a network using the OSC protocol.
 #[derive(Clone,Debug, PartialEq)]
@@ -70,3 +115,20 @@ pub struct OscColor {
 }
 
 pub type Result<T> = result::Result<T, errors::OscError>;
+
+impl From<String> for OscMessage {
+    fn from(s: String) -> OscMessage {
+        OscMessage {
+            addr: s,
+            args: None
+        }
+    }
+}
+impl<'a> From<&'a str> for OscMessage {
+    fn from(s: &str) -> OscMessage {
+        OscMessage {
+            addr: s.to_string(),
+            args: None
+        }
+    }
+}
