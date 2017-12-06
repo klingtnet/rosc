@@ -36,7 +36,7 @@ fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
 
     if let Some(ref args) = msg.args {
         for arg in args {
-            let (bytes, tag): (Option<Vec<u8>>, char) = try!(encode_arg(arg));
+            let (bytes, tag): (Option<Vec<u8>>, char) = encode_arg(arg)?;
 
             type_tags.push(tag);
             if bytes.is_some() {
@@ -57,7 +57,7 @@ fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
     let mut bundle_bytes: Vec<u8> = Vec::new();
     bundle_bytes.extend(encode_string("#bundle".to_string()).into_iter());
 
-    match try!(encode_arg(&bundle.timetag)) {
+    match encode_arg(&bundle.timetag)? {
         (Some(x), _) => {
             bundle_bytes.extend(x.into_iter());
         }
@@ -75,13 +75,13 @@ fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
     for packet in &bundle.content {
         match *packet {
             OscPacket::Message(ref m) => {
-                let msg = try!(encode_message(m));
+                let msg = encode_message(m)?;
                 let mut msg_size = vec![0u8; 4];
                 BigEndian::write_u32(&mut msg_size, msg.len() as u32);
                 bundle_bytes.extend(msg_size.into_iter().chain(msg.into_iter()));
             }
             OscPacket::Bundle(ref b) => {
-                let bdl = try!(encode_bundle(b));
+                let bdl = encode_bundle(b)?;
                 let mut bdl_size = vec![0u8; 4];
                 BigEndian::write_u32(&mut bdl_size, bdl.len() as u32);
                 bundle_bytes.extend(bdl_size.into_iter().chain(bdl.into_iter()));
