@@ -1,11 +1,10 @@
-extern crate rosc;
 extern crate byteorder;
+extern crate rosc;
 
-use byteorder::{ByteOrder, BigEndian};
+use byteorder::{BigEndian, ByteOrder};
 use std::mem;
 
 use rosc::{decoder, encoder};
-
 
 #[test]
 fn test_decode_no_args() {
@@ -13,9 +12,7 @@ fn test_decode_no_args() {
     let raw_addr = "/some/valid/address/4";
     let addr = encoder::encode_string(raw_addr);
     let type_tags = encoder::encode_string(",");
-    let merged: Vec<u8> = addr.into_iter()
-                              .chain(type_tags.into_iter())
-                              .collect();
+    let merged: Vec<u8> = addr.into_iter().chain(type_tags.into_iter()).collect();
     let osc_packet: Result<rosc::OscPacket, rosc::OscError> = decoder::decode(&merged);
     assert!(osc_packet.is_ok());
     match osc_packet {
@@ -63,22 +60,23 @@ fn test_decode_args() {
 
     let type_tags = encoder::encode_string(",fdsTFibhNIc");
 
-    let args: Vec<u8> = f_bytes.iter()
-                               .chain(d_bytes.iter())
-                               .chain(s_bytes.iter())
-                               .chain(i_bytes.iter())
-                               .chain(blob_size.iter())
-                               .chain(blob.iter())
-                               .chain(vec![0u8, 0u8].iter())
-                               .chain(h_bytes.iter())
-                               .chain(c_bytes.iter())
-                               .map(|x| *x)
-                               .collect::<Vec<u8>>();
+    let args: Vec<u8> = f_bytes
+        .iter()
+        .chain(d_bytes.iter())
+        .chain(s_bytes.iter())
+        .chain(i_bytes.iter())
+        .chain(blob_size.iter())
+        .chain(blob.iter())
+        .chain(vec![0u8, 0u8].iter())
+        .chain(h_bytes.iter())
+        .chain(c_bytes.iter())
+        .map(|x| *x)
+        .collect::<Vec<u8>>();
 
     let merged: Vec<u8> = addr.into_iter()
-                              .chain(type_tags.into_iter())
-                              .chain(args)
-                              .collect::<Vec<u8>>();
+        .chain(type_tags.into_iter())
+        .chain(args)
+        .collect::<Vec<u8>>();
 
     match decoder::decode(&merged).unwrap() {
         rosc::OscPacket::Message(msg) => {
@@ -100,7 +98,6 @@ fn test_decode_args() {
                     rosc::OscType::Char(x) => assert_eq!(c, x),
                     _ => panic!(),
                 }
-
             }
         }
         _ => panic!("Expected an OSC message!"),

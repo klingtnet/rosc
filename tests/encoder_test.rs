@@ -30,30 +30,32 @@ fn test_encode_message_wo_args() {
 fn test_encode_message_with_args() {
     let msg_packet = OscPacket::Message(OscMessage {
         addr: "/another/address/1".to_string(),
-        args: Some(vec![4i32.into(),
-                        42i64.into(),
-                        3.1415926f32.into(),
-                        3.14159265359f64.into(),
-                        "This is a string.".to_string().into(),
-                        vec![1u8, 2u8, 3u8].into(),
-                        (123, 456).into(),
-                        'c'.into(),
-                        false.into(),
-                        true.into(),
-                        OscType::Nil,
-                        OscType::Inf,
-                        OscMidiMessage {
-                            port: 4,
-                            status: 41,
-                            data1: 42,
-                            data2: 129,
-                        }.into(),
-                        OscColor {
-                            red: 255,
-                            green: 192,
-                            blue: 42,
-                            alpha: 13,
-                        }.into()]),
+        args: Some(vec![
+            4i32.into(),
+            42i64.into(),
+            3.1415926f32.into(),
+            3.14159265359f64.into(),
+            "This is a string.".to_string().into(),
+            vec![1u8, 2u8, 3u8].into(),
+            (123, 456).into(),
+            'c'.into(),
+            false.into(),
+            true.into(),
+            OscType::Nil,
+            OscType::Inf,
+            OscMidiMessage {
+                port: 4,
+                status: 41,
+                data1: 42,
+                data2: 129,
+            }.into(),
+            OscColor {
+                red: 255,
+                green: 192,
+                blue: 42,
+                alpha: 13,
+            }.into(),
+        ]),
     });
 
     let enc_msg = encoder::encode(&msg_packet).unwrap();
@@ -101,9 +103,11 @@ fn test_encode_bundle() {
 
     let root_bundle = OscPacket::Bundle(OscBundle {
         timetag: (1234, 4321).into(),
-        content: vec![OscPacket::Message(msg0),
-                      OscPacket::Message(msg1),
-                      OscPacket::Bundle(bundle1)],
+        content: vec![
+            OscPacket::Message(msg0),
+            OscPacket::Message(msg1),
+            OscPacket::Bundle(bundle1),
+        ],
     });
 
     let enc_bundle = encoder::encode(&root_bundle).unwrap();

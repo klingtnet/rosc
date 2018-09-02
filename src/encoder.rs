@@ -45,8 +45,7 @@ fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
         }
     }
 
-    msg_bytes.extend(encode_string(type_tags.into_iter()
-        .collect::<String>()));
+    msg_bytes.extend(encode_string(type_tags.into_iter().collect::<String>()));
     if !arg_bytes.is_empty() {
         msg_bytes.extend(arg_bytes);
     }
@@ -133,13 +132,7 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, char)> {
         OscType::Time(ref x, ref y) => Ok((Some(encode_time_tag(*x, *y)), 't')),
         OscType::Midi(ref x) => Ok((Some(vec![x.port, x.status, x.data1, x.data2]), 'm')),
         OscType::Color(ref x) => Ok((Some(vec![x.red, x.green, x.blue, x.alpha]), 'r')),
-        OscType::Bool(ref x) => {
-            if *x {
-                Ok((None, 'T'))
-            } else {
-                Ok((None, 'F'))
-            }
-        }
+        OscType::Bool(ref x) => if *x { Ok((None, 'T')) } else { Ok((None, 'F')) },
         OscType::Nil => Ok((None, 'N')),
         OscType::Inf => Ok((None, 'I')),
     }
