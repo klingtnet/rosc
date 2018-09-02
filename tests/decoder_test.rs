@@ -3,7 +3,6 @@ extern crate byteorder;
 
 use byteorder::{ByteOrder, BigEndian};
 use std::mem;
-use std::ascii::AsciiExt;
 
 use rosc::{decoder, encoder};
 
