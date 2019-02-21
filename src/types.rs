@@ -66,6 +66,11 @@ impl OscType {
         }
     }
 }
+impl<'a> From<&'a str> for OscType {
+    fn from(string: &'a str) -> Self {
+        OscType::String(string.to_string())
+    }
+}
 /// Represents the parts of a Midi message. Mainly used for
 /// tunneling midi over a network using the OSC protocol.
 #[derive(Clone, Debug, PartialEq)]
