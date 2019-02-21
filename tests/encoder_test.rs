@@ -36,6 +36,7 @@ fn test_encode_message_with_args() {
             3.1415926f32.into(),
             3.14159265359f64.into(),
             "This is a string.".to_string().into(),
+            "This is a string too.".into(),
             vec![1u8, 2u8, 3u8].into(),
             (123, 456).into(),
             'c'.into(),
