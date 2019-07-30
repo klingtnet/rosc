@@ -17,6 +17,7 @@ pub enum OscType {
     Color(OscColor),
     Midi(OscMidiMessage),
     Bool(bool),
+    Array(Vec<OscType>),
     Nil,
     Inf,
 }
@@ -45,6 +46,7 @@ value_impl! {
     (float, Float, f32),
     (string, String, String),
     (blob, Blob, Vec<u8>),
+    (array, Array, Vec<OscType>),
     (long, Long, i64),
     (double, Double, f64),
     (char, Char, char),
