@@ -96,29 +96,29 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, String)> {
         OscType::Int(ref x) => {
             let mut bytes = vec![0u8; 4];
             BigEndian::write_i32(&mut bytes, *x);
-            Ok((Some(bytes), 'i'.to_string()))
+            Ok((Some(bytes), "i".into()))
         }
         OscType::Long(ref x) => {
             let mut bytes = vec![0u8; 8];
             BigEndian::write_i64(&mut bytes, *x);
-            Ok((Some(bytes), 'h'.to_string()))
+            Ok((Some(bytes), "h".into()))
         }
         OscType::Float(ref x) => {
             let mut bytes = vec![0u8; 4];
             BigEndian::write_f32(&mut bytes, *x);
-            Ok((Some(bytes), 'f'.to_string()))
+            Ok((Some(bytes), "f".into()))
         }
         OscType::Double(ref x) => {
             let mut bytes = vec![0u8; 8];
             BigEndian::write_f64(&mut bytes, *x);
-            Ok((Some(bytes), 'd'.to_string()))
+            Ok((Some(bytes), "d".into()))
         }
         OscType::Char(ref x) => {
             let mut bytes = vec![0u8; 4];
             BigEndian::write_u32(&mut bytes, *x as u32);
-            Ok((Some(bytes), 'c'.to_string()))
+            Ok((Some(bytes), "c".into()))
         }
-        OscType::String(ref x) => Ok((Some(encode_string(x.clone())), 's'.to_string())),
+        OscType::String(ref x) => Ok((Some(encode_string(x.clone())), "s".into())),
         OscType::Blob(ref x) => {
             let padded_blob_length: usize = pad(x.len() as u64) as usize;
             let mut bytes = vec![0u8; 4 + padded_blob_length];
@@ -127,40 +127,38 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, String)> {
             for (i, v) in x.iter().enumerate() {
                 bytes[i + 4] = *v;
             }
-            Ok((Some(bytes), 'b'.to_string()))
+            Ok((Some(bytes), "b".into()))
         }
-        OscType::Array(ref x) => {
-            let mut bytes = vec![0u8; x.len()];
-            let mut type_tags = String::from("[");
-            for v in x.iter() {
-                match encode_arg(v).unwrap() {
-                    (Some(other_bytes), other_type_tags) => {
-                        bytes.extend(other_bytes);
-                        type_tags.extend(other_type_tags.chars());
-                    }
-                    (None, other_type_tags) => {
-                        type_tags.extend(other_type_tags.chars());
-                    }
-                }
-            }
-            type_tags = type_tags + "]";
-            Ok((Some(bytes), type_tags))
-        }
-        OscType::Time(ref x, ref y) => Ok((Some(encode_time_tag(*x, *y)), 't'.to_string())),
-        OscType::Midi(ref x) => Ok((
-            Some(vec![x.port, x.status, x.data1, x.data2]),
-            'm'.to_string(),
-        )),
-        OscType::Color(ref x) => Ok((Some(vec![x.red, x.green, x.blue, x.alpha]), 'r'.to_string())),
+        OscType::Time(ref x, ref y) => Ok((Some(encode_time_tag(*x, *y)), "t".into())),
+        OscType::Midi(ref x) => Ok((Some(vec![x.port, x.status, x.data1, x.data2]), "m'".into())),
+        OscType::Color(ref x) => Ok((Some(vec![x.red, x.green, x.blue, x.alpha]), "r".into())),
         OscType::Bool(ref x) => {
             if *x {
-                Ok((None, 'T'.to_string()))
+                Ok((None, "T".into()))
             } else {
-                Ok((None, 'F'.to_string()))
+                Ok((None, "F".into()))
             }
         }
-        OscType::Nil => Ok((None, 'N'.to_string())),
-        OscType::Inf => Ok((None, 'I'.to_string())),
+        OscType::Nil => Ok((None, "N".into())),
+        OscType::Inf => Ok((None, "I".into())),
+        OscType::Array(ref x) => {
+            let mut bytes = vec![0u8; 0];
+            let mut type_tags = String::from("[");
+            for v in x.iter() {
+                match encode_arg(v) {
+                    Ok((Some(other_bytes), other_type_tags)) => {
+                        bytes.extend(other_bytes);
+                        type_tags.push_str(&other_type_tags);
+                    }
+                    Ok((None, other_type_tags)) => {
+                        type_tags.push_str(&other_type_tags);
+                    }
+                    Err(err) => return Err(err),
+                }
+            }
+            type_tags.push_str("]");
+            Ok((Some(bytes), type_tags))
+        }
     }
 }
 
