@@ -119,9 +119,26 @@ fn read_osc_args(cursor: &mut io::Cursor<&[u8]>, raw_type_tags: String) -> Resul
     let type_tags: Vec<char> = raw_type_tags.chars().skip(1).collect();
 
     let mut args: Vec<OscType> = Vec::with_capacity(type_tags.len());
+    let mut stack: Vec<Vec<OscType>> = Vec::new();
     for tag in type_tags {
-        let arg: OscType = read_osc_arg(cursor, tag)?;
-        args.push(arg);
+        if tag == '[' {
+            // array start: save current frame and start a new frame
+            // for the array's content
+            stack.push(args);
+            args = Vec::new();
+        } else if tag == ']' {
+            // found the end of the current array:
+            // create array object from current frame and step one level up
+            let array = OscType::Array(args);
+            match stack.pop() {
+                Some(stashed) => args = stashed,
+                None => return Err(OscError::BadMessage("Encountered ] outside array")),
+            }
+            args.push(array);
+        } else {
+            let arg: OscType = read_osc_arg(cursor, tag)?;
+            args.push(arg);
+        }
     }
     Ok(args)
 }
