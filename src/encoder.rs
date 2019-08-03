@@ -144,7 +144,7 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, String)> {
         OscType::Array(ref x) => {
             let mut bytes = vec![0u8; 0];
             let mut type_tags = String::from("[");
-            for v in x.iter() {
+            for v in x.content.iter() {
                 match encode_arg(v) {
                     Ok((Some(other_bytes), other_type_tags)) => {
                         bytes.extend(other_bytes);

@@ -1,7 +1,7 @@
 extern crate rosc;
 
-use rosc::{encoder, decoder};
-use rosc::{OscMessage, OscMidiMessage, OscColor, OscPacket, OscType, OscBundle};
+use rosc::{decoder, encoder};
+use rosc::{OscArray, OscBundle, OscColor, OscMessage, OscMidiMessage, OscPacket, OscType};
 
 #[test]
 fn test_encode_message_wo_args() {
@@ -55,6 +55,16 @@ fn test_encode_message_with_args() {
                 green: 192,
                 blue: 42,
                 alpha: 13,
+            }
+            .into(),
+            OscArray {
+                content: vec![
+                    42i32.into(),
+                OscArray{
+                    content: vec![1.23.into(), 3.21.into()]
+                }.into(),
+                "Yay".into()
+                ]
             }.into(),
         ]),
     });

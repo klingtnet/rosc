@@ -1,6 +1,6 @@
-use types::{OscPacket, OscType, Result, OscMessage, OscMidiMessage, OscColor, OscBundle};
-use errors::OscError;
 use encoder;
+use errors::OscError;
+use types::{OscArray, OscBundle, OscColor, OscMessage, OscMidiMessage, OscPacket, OscType, Result};
 
 use std::{io, char};
 use std::io::{Read, BufRead};
@@ -129,7 +129,7 @@ fn read_osc_args(cursor: &mut io::Cursor<&[u8]>, raw_type_tags: String) -> Resul
         } else if tag == ']' {
             // found the end of the current array:
             // create array object from current frame and step one level up
-            let array = OscType::Array(args);
+            let array = OscType::Array(OscArray { content: args });
             match stack.pop() {
                 Some(stashed) => args = stashed,
                 None => return Err(OscError::BadMessage("Encountered ] outside array")),
