@@ -130,7 +130,7 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, String)> {
             Ok((Some(bytes), "b".into()))
         }
         OscType::Time(ref x, ref y) => Ok((Some(encode_time_tag(*x, *y)), "t".into())),
-        OscType::Midi(ref x) => Ok((Some(vec![x.port, x.status, x.data1, x.data2]), "m'".into())),
+        OscType::Midi(ref x) => Ok((Some(vec![x.port, x.status, x.data1, x.data2]), "m".into())),
         OscType::Color(ref x) => Ok((Some(vec![x.red, x.green, x.blue, x.alpha]), "r".into())),
         OscType::Bool(ref x) => {
             if *x {
