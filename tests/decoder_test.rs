@@ -4,7 +4,7 @@ extern crate rosc;
 use byteorder::{BigEndian, ByteOrder};
 use std::mem;
 
-use rosc::{decoder, encoder};
+use rosc::{decoder, encoder, OscType};
 
 #[test]
 fn test_decode_no_args() {
@@ -58,7 +58,9 @@ fn test_decode_args() {
     let c = '$';
     let c_bytes: [u8; 4] = unsafe { mem::transmute((c as u32).to_be()) };
 
-    let type_tags = encoder::encode_string(",fdsTFibhNIc");
+    let a = vec![OscType::Int(i), OscType::Float(f), OscType::Int(i)];
+
+    let type_tags = encoder::encode_string(",fdsTFibhNIc[ifi]");
 
     let args: Vec<u8> = f_bytes
         .iter()
@@ -70,6 +72,10 @@ fn test_decode_args() {
         .chain(vec![0u8, 0u8].iter())
         .chain(h_bytes.iter())
         .chain(c_bytes.iter())
+        // array content
+        .chain(i_bytes.iter())
+        .chain(f_bytes.iter())
+        .chain(i_bytes.iter())
         .map(|x| *x)
         .collect::<Vec<u8>>();
 
@@ -96,6 +102,7 @@ fn test_decode_args() {
                     rosc::OscType::Nil => (),
                     // test time-tags, midi-messages and chars
                     rosc::OscType::Char(x) => assert_eq!(c, x),
+                    rosc::OscType::Array(x) => assert_eq!(a, x.content),
                     _ => panic!(),
                 }
             }
