@@ -1,11 +1,11 @@
 extern crate rosc;
 
-use std::{env, thread, f32};
-use std::net::{UdpSocket, SocketAddrV4};
+use rosc::encoder;
+use rosc::{OscMessage, OscPacket, OscType};
+use std::net::{SocketAddrV4, UdpSocket};
 use std::str::FromStr;
 use std::time::Duration;
-use rosc::{OscPacket, OscMessage, OscType};
-use rosc::encoder;
+use std::{env, f32, thread};
 
 fn get_addr_from_arg(arg: &str) -> SocketAddrV4 {
     SocketAddrV4::from_str(arg).unwrap()
@@ -28,7 +28,8 @@ fn main() {
     let msg_buf = encoder::encode(&OscPacket::Message(OscMessage {
         addr: "/3".to_string(),
         args: None,
-    })).unwrap();
+    }))
+    .unwrap();
 
     sock.send_to(&msg_buf, to_addr).unwrap();
 
@@ -41,13 +42,15 @@ fn main() {
         let mut msg_buf = encoder::encode(&OscPacket::Message(OscMessage {
             addr: "/3/xy1".to_string(),
             args: Some(vec![OscType::Float(x), OscType::Float(y)]),
-        })).unwrap();
+        }))
+        .unwrap();
 
         sock.send_to(&msg_buf, to_addr).unwrap();
         msg_buf = encoder::encode(&OscPacket::Message(OscMessage {
             addr: "/3/xy2".to_string(),
             args: Some(vec![OscType::Float(y), OscType::Float(x)]),
-        })).unwrap();
+        }))
+        .unwrap();
         sock.send_to(&msg_buf, to_addr).unwrap();
         thread::sleep(Duration::from_millis(20));
     }

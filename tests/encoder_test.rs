@@ -49,7 +49,8 @@ fn test_encode_message_with_args() {
                 status: 41,
                 data1: 42,
                 data2: 129,
-            }.into(),
+            }
+            .into(),
             OscColor {
                 red: 255,
                 green: 192,
@@ -60,12 +61,14 @@ fn test_encode_message_with_args() {
             OscArray {
                 content: vec![
                     42i32.into(),
-                OscArray{
-                    content: vec![1.23.into(), 3.21.into()]
-                }.into(),
-                "Yay".into()
-                ]
-            }.into(),
+                    OscArray {
+                        content: vec![1.23.into(), 3.21.into()],
+                    }
+                    .into(),
+                    "Yay".into(),
+                ],
+            }
+            .into(),
         ]),
     });
 

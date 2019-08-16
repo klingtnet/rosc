@@ -79,7 +79,8 @@ fn test_decode_args() {
         .map(|x| *x)
         .collect::<Vec<u8>>();
 
-    let merged: Vec<u8> = addr.into_iter()
+    let merged: Vec<u8> = addr
+        .into_iter()
         .chain(type_tags.into_iter())
         .chain(args)
         .collect::<Vec<u8>>();

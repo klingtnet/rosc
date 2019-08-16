@@ -1,9 +1,9 @@
 extern crate rosc;
 
-use std::env;
-use std::net::{UdpSocket, SocketAddrV4};
-use std::str::FromStr;
 use rosc::OscPacket;
+use std::env;
+use std::net::{SocketAddrV4, UdpSocket};
+use std::str::FromStr;
 
 fn main() {
     let args: Vec<String> = env::args().collect();

@@ -1,9 +1,11 @@
 use encoder;
 use errors::OscError;
-use types::{OscArray, OscBundle, OscColor, OscMessage, OscMidiMessage, OscPacket, OscType, Result};
+use types::{
+    OscArray, OscBundle, OscColor, OscMessage, OscMidiMessage, OscPacket, OscType, Result,
+};
 
-use std::{io, char};
-use std::io::{Read, BufRead};
+use std::io::{BufRead, Read};
+use std::{char, io};
 
 use byteorder::{BigEndian, ReadBytesExt};
 
@@ -51,9 +53,10 @@ fn decode_bundle(msg: &[u8]) -> Result<OscPacket> {
 
     let bundle_tag = read_osc_string(&mut cursor)?;
     if bundle_tag != "#bundle" {
-        return Err(OscError::BadBundle(
-            format!("Wrong bundle specifier: {}", bundle_tag),
-        ));
+        return Err(OscError::BadBundle(format!(
+            "Wrong bundle specifier: {}",
+            bundle_tag
+        )));
     }
 
     let time_tag = read_time_tag(&mut cursor)?;
@@ -105,9 +108,9 @@ fn read_bundle_element(cursor: &mut io::Cursor<&[u8]>, elem_size: usize) -> Resu
 fn read_osc_string(cursor: &mut io::Cursor<&[u8]>) -> Result<String> {
     let mut str_buf: Vec<u8> = Vec::new();
     // ignore returned byte count
-    cursor.read_until(0, &mut str_buf).map_err(
-        OscError::ReadError,
-    )?;
+    cursor
+        .read_until(0, &mut str_buf)
+        .map_err(OscError::ReadError)?;
     pad_cursor(cursor);
     // convert to String and remove nul bytes
     String::from_utf8(str_buf)
@@ -145,27 +148,22 @@ fn read_osc_args(cursor: &mut io::Cursor<&[u8]>, raw_type_tags: String) -> Resul
 
 fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> Result<OscType> {
     match tag {
-        'f' => {
-            cursor.read_f32::<BigEndian>().map(OscType::Float).map_err(
-                OscError::ReadError,
-            )
-        }
-        'd' => {
-            cursor
-                .read_f64::<BigEndian>()
-                .map(OscType::Double)
-                .map_err(OscError::ReadError)
-        }
-        'i' => {
-            cursor.read_i32::<BigEndian>().map(OscType::Int).map_err(
-                OscError::ReadError,
-            )
-        }
-        'h' => {
-            cursor.read_i64::<BigEndian>().map(OscType::Long).map_err(
-                OscError::ReadError,
-            )
-        }
+        'f' => cursor
+            .read_f32::<BigEndian>()
+            .map(OscType::Float)
+            .map_err(OscError::ReadError),
+        'd' => cursor
+            .read_f64::<BigEndian>()
+            .map(OscType::Double)
+            .map_err(OscError::ReadError),
+        'i' => cursor
+            .read_i32::<BigEndian>()
+            .map(OscType::Int)
+            .map_err(OscError::ReadError),
+        'h' => cursor
+            .read_i64::<BigEndian>()
+            .map(OscType::Long)
+            .map_err(OscError::ReadError),
         's' => read_osc_string(cursor).map(OscType::String),
         't' => read_time_tag(cursor),
         'b' => read_blob(cursor),
@@ -176,16 +174,18 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> Result<OscType> {
         'I' => Ok(OscType::Inf),
         'c' => read_char(cursor),
         'm' => read_midi_message(cursor),
-        _ => Err(OscError::BadArg(
-            format!("Type tag \"{}\" is not implemented!", tag),
-        )),
+        _ => Err(OscError::BadArg(format!(
+            "Type tag \"{}\" is not implemented!",
+            tag
+        ))),
     }
 }
 
 fn read_char(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
-    let opt_char = cursor.read_u32::<BigEndian>().map(char::from_u32).map_err(
-        OscError::ReadError,
-    )?;
+    let opt_char = cursor
+        .read_u32::<BigEndian>()
+        .map(char::from_u32)
+        .map_err(OscError::ReadError)?;
     match opt_char {
         Some(c) => Ok(OscType::Char(c)),
         None => Err(OscError::BadArg("Argument is not a char!".to_string())),
@@ -193,7 +193,9 @@ fn read_char(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
 }
 
 fn read_blob(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
-    let size: usize = cursor.read_u32::<BigEndian>().map_err(OscError::ReadError)? as usize;
+    let size: usize = cursor
+        .read_u32::<BigEndian>()
+        .map_err(OscError::ReadError)? as usize;
     let mut byte_buf: Vec<u8> = Vec::with_capacity(size);
 
     cursor
@@ -207,17 +209,22 @@ fn read_blob(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
 }
 
 fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
-    let date = cursor.read_u32::<BigEndian>().map_err(OscError::ReadError)?;
-    let frac = cursor.read_u32::<BigEndian>().map_err(OscError::ReadError)?;
+    let date = cursor
+        .read_u32::<BigEndian>()
+        .map_err(OscError::ReadError)?;
+    let frac = cursor
+        .read_u32::<BigEndian>()
+        .map_err(OscError::ReadError)?;
 
     Ok(OscType::Time(date, frac))
 }
 
 fn read_midi_message(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
     let mut buf: Vec<u8> = Vec::with_capacity(4);
-    cursor.take(4).read_to_end(&mut buf).map_err(
-        OscError::ReadError,
-    )?;
+    cursor
+        .take(4)
+        .read_to_end(&mut buf)
+        .map_err(OscError::ReadError)?;
 
     Ok(OscType::Midi(OscMidiMessage {
         port: buf[0],
@@ -225,14 +232,14 @@ fn read_midi_message(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
         data1: buf[2],
         data2: buf[3],
     }))
-
 }
 
 fn read_osc_color(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
     let mut buf: Vec<u8> = Vec::with_capacity(4);
-    cursor.take(4).read_to_end(&mut buf).map_err(
-        OscError::ReadError,
-    )?;
+    cursor
+        .take(4)
+        .read_to_end(&mut buf)
+        .map_err(OscError::ReadError)?;
 
     Ok(OscType::Color(OscColor {
         red: buf[0],
