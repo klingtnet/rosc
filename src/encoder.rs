@@ -67,7 +67,7 @@ fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
 
     if bundle.content.is_empty() {
         // TODO: A bundle of length zero, should this really be supported?
-        bundle_bytes.extend([0u8; 4].into_iter());
+        bundle_bytes.extend([0u8; 4].iter());
         return Ok(bundle_bytes);
     }
 
