@@ -16,7 +16,7 @@ pub const MTU: usize = 1536;
 /// OSC packet on success or an `OscError` if the slice
 /// does not contain a valid OSC message.
 pub fn decode(msg: &[u8]) -> Result<OscPacket> {
-    if msg.len() == 0 {
+    if msg.is_empty() {
         return Err(OscError::BadPacket("Empty packet."));
     }
 
@@ -37,12 +37,12 @@ fn decode_message(msg: &[u8]) -> Result<OscPacket> {
         let args: Vec<OscType> = read_osc_args(&mut cursor, type_tags)?;
 
         Ok(OscPacket::Message(OscMessage {
-            addr: addr,
+            addr,
             args: Some(args),
         }))
     } else {
         Ok(OscPacket::Message(OscMessage {
-            addr: addr,
+            addr,
             args: None,
         }))
     }
