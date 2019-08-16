@@ -17,6 +17,7 @@ pub enum OscType {
     Color(OscColor),
     Midi(OscMidiMessage),
     Bool(bool),
+    Array(OscArray),
     Nil,
     Inf,
 }
@@ -45,6 +46,7 @@ value_impl! {
     (float, Float, f32),
     (string, String, String),
     (blob, Blob, Vec<u8>),
+    (array, Array, OscArray),
     (long, Long, i64),
     (double, Double, f64),
     (char, Char, char),
@@ -117,6 +119,12 @@ pub struct OscColor {
     pub green: u8,
     pub blue: u8,
     pub alpha: u8,
+}
+
+/// An OscArray color.
+#[derive(Clone, Debug, PartialEq)]
+pub struct OscArray {
+    pub content: Vec<OscType>,
 }
 
 pub type Result<T> = result::Result<T, errors::OscError>;
