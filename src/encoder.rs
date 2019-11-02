@@ -39,8 +39,8 @@ fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
             let (bytes, tags): (Option<Vec<u8>>, String) = encode_arg(arg)?;
 
             type_tags.extend(tags.chars());
-            if bytes.is_some() {
-                arg_bytes.extend(bytes.unwrap());
+            if let Some(data) = bytes {
+                arg_bytes.extend(data);
             }
         }
     }
