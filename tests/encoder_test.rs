@@ -7,7 +7,7 @@ use rosc::{OscArray, OscBundle, OscColor, OscMessage, OscMidiMessage, OscPacket,
 fn test_encode_message_wo_args() {
     let msg_packet = OscPacket::Message(OscMessage {
         addr: "/some/addr".to_string(),
-        args: None,
+        args: vec![],
     });
 
     let enc_msg = encoder::encode(&msg_packet).unwrap();
@@ -30,7 +30,7 @@ fn test_encode_message_wo_args() {
 fn test_encode_message_with_args() {
     let msg_packet = OscPacket::Message(OscMessage {
         addr: "/another/address/1".to_string(),
-        args: Some(vec![
+        args: vec![
             4i32.into(),
             42i64.into(),
             3.1415926f32.into(),
@@ -69,7 +69,7 @@ fn test_encode_message_with_args() {
                 ],
             }
             .into(),
-        ]),
+        ],
     });
 
     let enc_msg = encoder::encode(&msg_packet).unwrap();
@@ -92,22 +92,22 @@ fn test_encode_message_with_args() {
 fn test_encode_bundle() {
     let msg0 = OscMessage {
         addr: "/view/1".to_string(),
-        args: None,
+        args: vec![],
     };
 
     let msg1 = OscMessage {
         addr: "/mixer/channel/1/amp".to_string(),
-        args: Some(vec![0.9f32.into()]),
+        args: vec![0.9f32.into()],
     };
 
     let msg2 = OscMessage {
         addr: "/osc/1/freq".to_string(),
-        args: Some(vec![440i32.into()]),
+        args: vec![440i32.into()],
     };
 
     let msg3 = OscMessage {
         addr: "/osc/1/phase".to_string(),
-        args: Some(vec![(-0.4f32).into()]),
+        args: vec![(-0.4f32).into()],
     };
 
     let bundle1 = OscBundle {
