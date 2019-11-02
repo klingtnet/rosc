@@ -41,10 +41,7 @@ fn decode_message(msg: &[u8]) -> Result<OscPacket> {
             args: Some(args),
         }))
     } else {
-        Ok(OscPacket::Message(OscMessage {
-            addr,
-            args: None,
-        }))
+        Ok(OscPacket::Message(OscMessage { addr, args: None }))
     }
 }
 
