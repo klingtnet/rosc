@@ -27,7 +27,7 @@ fn main() {
     // switch view
     let msg_buf = encoder::encode(&OscPacket::Message(OscMessage {
         addr: "/3".to_string(),
-        args: None,
+        args: vec![],
     }))
     .unwrap();
 
@@ -41,14 +41,14 @@ fn main() {
         let y = 0.5 + (step_size * (i % steps) as f32).cos() / 2.0;
         let mut msg_buf = encoder::encode(&OscPacket::Message(OscMessage {
             addr: "/3/xy1".to_string(),
-            args: Some(vec![OscType::Float(x), OscType::Float(y)]),
+            args: vec![OscType::Float(x), OscType::Float(y)],
         }))
         .unwrap();
 
         sock.send_to(&msg_buf, to_addr).unwrap();
         msg_buf = encoder::encode(&OscPacket::Message(OscMessage {
             addr: "/3/xy2".to_string(),
-            args: Some(vec![OscType::Float(y), OscType::Float(x)]),
+            args: vec![OscType::Float(y), OscType::Float(x)],
         }))
         .unwrap();
         sock.send_to(&msg_buf, to_addr).unwrap();

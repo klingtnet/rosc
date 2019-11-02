@@ -35,13 +35,9 @@ fn decode_message(msg: &[u8]) -> Result<OscPacket> {
 
     if type_tags.len() > 1 {
         let args: Vec<OscType> = read_osc_args(&mut cursor, type_tags)?;
-
-        Ok(OscPacket::Message(OscMessage {
-            addr,
-            args: Some(args),
-        }))
+        Ok(OscPacket::Message(OscMessage { addr, args }))
     } else {
-        Ok(OscPacket::Message(OscMessage { addr, args: None }))
+        Ok(OscPacket::Message(OscMessage { addr, args: vec![] }))
     }
 }
 

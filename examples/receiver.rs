@@ -40,12 +40,7 @@ fn handle_packet(packet: OscPacket) {
     match packet {
         OscPacket::Message(msg) => {
             println!("OSC address: {}", msg.addr);
-            match msg.args {
-                Some(args) => {
-                    println!("OSC arguments: {:?}", args);
-                }
-                None => println!("No arguments in message."),
-            }
+            println!("OSC arguments: {:?}", msg.args);
         }
         OscPacket::Bundle(bundle) => {
             println!("OSC Bundle: {:?}", bundle);

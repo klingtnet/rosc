@@ -15,7 +15,7 @@ use byteorder::{BigEndian, ByteOrder};
 ///
 /// let packet = OscPacket::Message(OscMessage{
 ///         addr: "/greet/me".to_string(),
-///         args: Some(vec![OscType::String("hi!".to_string())])
+///         args: vec![OscType::String("hi!".to_string())]
 ///     }
 /// );
 /// assert!(encoder::encode(&packet).is_ok())
@@ -34,14 +34,12 @@ fn encode_message(msg: &OscMessage) -> Result<Vec<u8>> {
     let mut type_tags: Vec<char> = vec![','];
     let mut arg_bytes: Vec<u8> = Vec::new();
 
-    if let Some(ref args) = msg.args {
-        for arg in args {
-            let (bytes, tags): (Option<Vec<u8>>, String) = encode_arg(arg)?;
+    for arg in &msg.args {
+        let (bytes, tags): (Option<Vec<u8>>, String) = encode_arg(arg)?;
 
-            type_tags.extend(tags.chars());
-            if let Some(data) = bytes {
-                arg_bytes.extend(data);
-            }
+        type_tags.extend(tags.chars());
+        if let Some(data) = bytes {
+            arg_bytes.extend(data);
         }
     }
 

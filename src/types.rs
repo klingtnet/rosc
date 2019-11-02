@@ -100,7 +100,7 @@ pub enum OscPacket {
 #[derive(Clone, Debug, PartialEq)]
 pub struct OscMessage {
     pub addr: String,
-    pub args: Option<Vec<OscType>>,
+    pub args: Vec<OscType>,
 }
 
 /// An OSC bundle contains zero or more OSC packets
@@ -133,7 +133,7 @@ impl From<String> for OscMessage {
     fn from(s: String) -> OscMessage {
         OscMessage {
             addr: s,
-            args: None,
+            args: vec![],
         }
     }
 }
@@ -141,7 +141,7 @@ impl<'a> From<&'a str> for OscMessage {
     fn from(s: &str) -> OscMessage {
         OscMessage {
             addr: s.to_string(),
-            args: None,
+            args: vec![],
         }
     }
 }

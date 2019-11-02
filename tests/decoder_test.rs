@@ -18,7 +18,7 @@ fn test_decode_no_args() {
     match osc_packet {
         Ok(rosc::OscPacket::Message(msg)) => {
             assert_eq!(raw_addr, msg.addr);
-            assert!(msg.args.is_none());
+            assert!(msg.args.is_empty());
         }
         Ok(_) => panic!("Expected an OscMessage!"),
         Err(e) => panic!(e),
@@ -87,7 +87,7 @@ fn test_decode_args() {
 
     match decoder::decode(&merged).unwrap() {
         rosc::OscPacket::Message(msg) => {
-            for arg in msg.args.unwrap() {
+            for arg in msg.args {
                 match arg {
                     rosc::OscType::Int(x) => assert_eq!(i, x),
                     rosc::OscType::Long(x) => assert_eq!(l, x),
