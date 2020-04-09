@@ -8,8 +8,8 @@ mod errors;
 /// OSC data types, see [OSC 1.0 specification](http://opensoundcontrol.org/spec-1_0) for details.
 mod types;
 
-pub use errors::*;
-pub use types::*;
+pub use crate::errors::*;
+pub use crate::types::*;
 
 /// Provides a decoding method for OSC packets.
 pub mod decoder;

@@ -1,6 +1,6 @@
-use encoder;
-use errors::OscError;
-use types::{
+use crate::encoder;
+use crate::errors::OscError;
+use crate::types::{
     OscArray, OscBundle, OscColor, OscMessage, OscMidiMessage, OscPacket, OscType, Result,
 };
 

@@ -1,4 +1,4 @@
-use errors;
+use crate::errors;
 use std::result;
 
 /// see OSC Type Tag String: [OSC Spec. 1.0](http://opensoundcontrol.org/spec-1_0)

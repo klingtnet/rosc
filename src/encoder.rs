@@ -1,5 +1,5 @@
-use errors::OscError;
-use types::{OscBundle, OscMessage, OscPacket, OscType, Result};
+use crate::errors::OscError;
+use crate::types::{OscBundle, OscMessage, OscPacket, OscType, Result};
 
 use byteorder::{BigEndian, ByteOrder};
 
