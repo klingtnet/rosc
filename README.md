@@ -18,7 +18,7 @@ rosc = "~0.3"
 
 ## Documentation
 
-The package documentation can be found [here](https://docs.klingt.net/rustdoc/rosc/)
+The package documentation can be found [here](https://docs.rs/rosc/)
 
 ## License
 
