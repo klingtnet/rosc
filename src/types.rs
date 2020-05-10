@@ -1,6 +1,10 @@
 use crate::errors;
 use std::result;
 
+/// A time tag in OSC message consists of two 32-bit integers where the first one denotes the number of seconds since 1900-01-01 and the second the fractions of a second.
+/// For details on its semantics see http://opensoundcontrol.org/node/3/#timetags
+pub type OscTime = (u32, u32);
+
 /// see OSC Type Tag String: [OSC Spec. 1.0](http://opensoundcontrol.org/spec-1_0)
 /// padding: zero bytes (n*4)
 #[derive(Clone, Debug, PartialEq)]
@@ -10,7 +14,7 @@ pub enum OscType {
     String(String),
     Blob(Vec<u8>),
     // use struct for time tag to avoid destructuring
-    Time(u32, u32),
+    Time(OscTime),
     Long(i64),
     Double(f64),
     Char(char),
@@ -56,14 +60,14 @@ value_impl! {
 }
 impl From<(u32, u32)> for OscType {
     fn from(time: (u32, u32)) -> Self {
-        OscType::Time(time.0, time.1)
+        OscType::Time((time.0, time.1))
     }
 }
 impl OscType {
     #[allow(dead_code)]
     pub fn time(self) -> Option<(u32, u32)> {
         match self {
-            OscType::Time(sec, frac) => Some((sec, frac)),
+            OscType::Time((sec, frac)) => Some((sec, frac)),
             _ => None,
         }
     }
@@ -108,7 +112,7 @@ pub struct OscMessage {
 /// applied at the given time tag.
 #[derive(Clone, Debug, PartialEq)]
 pub struct OscBundle {
-    pub timetag: OscType,
+    pub timetag: OscTime,
     pub content: Vec<OscPacket>,
 }
 

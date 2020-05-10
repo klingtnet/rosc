@@ -54,7 +54,7 @@ fn encode_bundle(bundle: &OscBundle) -> Result<Vec<u8>> {
     let mut bundle_bytes: Vec<u8> = Vec::new();
     bundle_bytes.extend(encode_string("#bundle".to_string()).into_iter());
 
-    match encode_arg(&bundle.timetag)? {
+    match encode_arg(&OscType::Time(bundle.timetag))? {
         (Some(x), _) => {
             bundle_bytes.extend(x.into_iter());
         }
@@ -127,7 +127,7 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, String)> {
             }
             Ok((Some(bytes), "b".into()))
         }
-        OscType::Time(ref x, ref y) => Ok((Some(encode_time_tag(*x, *y)), "t".into())),
+        OscType::Time((ref x, ref y)) => Ok((Some(encode_time_tag(*x, *y)), "t".into())),
         OscType::Midi(ref x) => Ok((Some(vec![x.port, x.status, x.data1, x.data2]), "m".into())),
         OscType::Color(ref x) => Ok((Some(vec![x.red, x.green, x.blue, x.alpha]), "r".into())),
         OscType::Bool(ref x) => {

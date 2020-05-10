@@ -158,7 +158,7 @@ fn read_osc_arg(cursor: &mut io::Cursor<&[u8]>, tag: char) -> Result<OscType> {
             .map(OscType::Long)
             .map_err(OscError::ReadError),
         's' => read_osc_string(cursor).map(OscType::String),
-        't' => read_time_tag(cursor),
+        't' => read_time_tag(cursor).map(OscType::Time),
         'b' => read_blob(cursor),
         'r' => read_osc_color(cursor),
         'T' => Ok(true.into()),
@@ -201,7 +201,7 @@ fn read_blob(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
     Ok(OscType::Blob(byte_buf))
 }
 
-fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
+fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> Result<(u32, u32)> {
     let date = cursor
         .read_u32::<BigEndian>()
         .map_err(OscError::ReadError)?;
@@ -209,7 +209,7 @@ fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
         .read_u32::<BigEndian>()
         .map_err(OscError::ReadError)?;
 
-    Ok(OscType::Time(date, frac))
+    Ok((date, frac))
 }
 
 fn read_midi_message(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
