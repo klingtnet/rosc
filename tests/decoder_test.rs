@@ -4,7 +4,7 @@ extern crate rosc;
 use byteorder::{BigEndian, ByteOrder};
 use std::mem;
 
-use rosc::{decoder, encoder, OscType};
+use rosc::{decoder, encoder, OscBundle, OscPacket, OscType};
 
 #[test]
 fn test_decode_no_args() {
@@ -21,6 +21,22 @@ fn test_decode_no_args() {
             assert!(msg.args.is_empty());
         }
         Ok(_) => panic!("Expected an OscMessage!"),
+        Err(e) => panic!(e),
+    }
+}
+
+#[test]
+fn test_decode_empty_bundle() {
+    let timetag = (4, 2);
+    let content = vec![];
+    let packet = encoder::encode(&OscPacket::Bundle(OscBundle { timetag, content })).unwrap();
+    let osc_packet: Result<rosc::OscPacket, rosc::OscError> = decoder::decode(&packet);
+    match osc_packet {
+        Ok(rosc::OscPacket::Bundle(bundle)) => {
+            assert_eq!(timetag, bundle.timetag);
+            assert!(bundle.content.is_empty());
+        }
+        Ok(_) => panic!("Expected an OscBundle!"),
         Err(e) => panic!(e),
     }
 }
