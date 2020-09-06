@@ -13,7 +13,7 @@ Add `rosc` to the dependencies section of your projects `Cargo.toml`:
 
 ```toml
 [dependencies]
-rosc = "~0.3"
+rosc = "~0.4"
 ```
 
 ## Documentation
