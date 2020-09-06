@@ -27,6 +27,30 @@ fn test_encode_message_wo_args() {
 }
 
 #[test]
+fn test_encode_empty_bundle() {
+    let bundle_packet = OscPacket::Bundle(OscBundle {
+        timetag: (4, 2),
+        content: vec![],
+    });
+
+    let enc_bundle = encoder::encode(&bundle_packet).unwrap();
+    assert_eq!(enc_bundle.len() % 4, 0);
+    assert_eq!(enc_bundle.len(), 16);
+
+    let dec_bundle = match decoder::decode(&enc_bundle).unwrap() {
+        OscPacket::Bundle(m) => m,
+        _ => panic!("Expected OscBundle!"),
+    };
+
+    let bundle = match bundle_packet {
+        OscPacket::Bundle(ref bundle) => bundle,
+        _ => panic!(),
+    };
+
+    assert_eq!(*bundle, dec_bundle)
+}
+
+#[test]
 fn test_encode_message_with_args() {
     let msg_packet = OscPacket::Message(OscMessage {
         addr: "/another/address/1".to_string(),

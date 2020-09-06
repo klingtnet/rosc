@@ -56,6 +56,14 @@ fn decode_bundle(msg: &[u8]) -> Result<OscPacket> {
 
     let mut bundle: Vec<OscPacket> = Vec::new();
 
+    // Empty bundle
+    if msg.len() == cursor.position() as usize {
+        return Ok(OscPacket::Bundle(OscBundle {
+            timetag: time_tag,
+            content: bundle,
+        }))
+    }
+
     let mut elem_size = read_bundle_element_size(&mut cursor)?;
 
     while msg.len() >= (cursor.position() as usize) + elem_size {
