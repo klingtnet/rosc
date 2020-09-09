@@ -67,7 +67,7 @@ fn decode_bundle(msg: &[u8]) -> Result<OscPacket> {
     let mut elem_size = read_bundle_element_size(&mut cursor)?;
 
     while msg.len() >= (cursor.position() as usize) + elem_size {
-        let packet = read_bundle_element(&mut cursor, elem_size)?;
+        let packet = read_bundle_element_content(&mut cursor, elem_size)?;
         bundle.push(packet);
 
         if msg.len() == cursor.position() as usize {
@@ -90,7 +90,7 @@ fn read_bundle_element_size(cursor: &mut io::Cursor<&[u8]>) -> Result<usize> {
         .map_err(OscError::ReadError)
 }
 
-fn read_bundle_element(cursor: &mut io::Cursor<&[u8]>, elem_size: usize) -> Result<OscPacket> {
+fn read_bundle_element_content(cursor: &mut io::Cursor<&[u8]>, elem_size: usize) -> Result<OscPacket> {
     let mut buf: Vec<u8> = Vec::with_capacity(elem_size);
 
     let mut handle = cursor.take(elem_size as u64);
