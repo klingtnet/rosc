@@ -1,5 +1,5 @@
 use crate::errors;
-use std::result;
+use std::{iter::FromIterator, result};
 
 /// A time tag in OSC message consists of two 32-bit integers where the first one denotes the number of seconds since 1900-01-01 and the second the fractions of a second.
 /// For details on its semantics see http://opensoundcontrol.org/node/3/#timetags
@@ -129,6 +129,14 @@ pub struct OscColor {
 #[derive(Clone, Debug, PartialEq)]
 pub struct OscArray {
     pub content: Vec<OscType>,
+}
+
+impl<T: Into<OscType>> FromIterator<T> for OscArray {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> OscArray {
+        OscArray {
+            content: iter.into_iter().map(T::into).collect(),
+        }
+    }
 }
 
 pub type Result<T> = result::Result<T, errors::OscError>;
