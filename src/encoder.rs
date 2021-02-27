@@ -152,7 +152,7 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, String)> {
                     Err(err) => return Err(err),
                 }
             }
-            type_tags.push_str("]");
+            type_tags.push(']');
             Ok((Some(bytes), type_tags))
         }
     }
