@@ -61,7 +61,7 @@ fn decode_bundle(msg: &[u8]) -> Result<OscPacket> {
         return Ok(OscPacket::Bundle(OscBundle {
             timetag: time_tag,
             content: bundle,
-        }))
+        }));
     }
 
     let mut elem_size = read_bundle_element_size(&mut cursor)?;
@@ -90,7 +90,10 @@ fn read_bundle_element_size(cursor: &mut io::Cursor<&[u8]>) -> Result<usize> {
         .map_err(OscError::ReadError)
 }
 
-fn read_bundle_element_content(cursor: &mut io::Cursor<&[u8]>, elem_size: usize) -> Result<OscPacket> {
+fn read_bundle_element_content(
+    cursor: &mut io::Cursor<&[u8]>,
+    elem_size: usize,
+) -> Result<OscPacket> {
     let mut buf: Vec<u8> = Vec::with_capacity(elem_size);
 
     let mut handle = cursor.take(elem_size as u64);
