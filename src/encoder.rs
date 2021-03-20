@@ -1,5 +1,5 @@
 use crate::errors::OscError;
-use crate::types::{OscBundle, OscMessage, OscPacket, OscType, Result};
+use crate::types::{OscBundle, OscMessage, OscPacket, OscTime, OscType, Result};
 
 use byteorder::{BigEndian, ByteOrder};
 
@@ -125,7 +125,7 @@ fn encode_arg(arg: &OscType) -> Result<(Option<Vec<u8>>, String)> {
             }
             Ok((Some(bytes), "b".into()))
         }
-        OscType::Time((ref x, ref y)) => Ok((Some(encode_time_tag(*x, *y)), "t".into())),
+        OscType::Time(time) => Ok((Some(encode_time_tag(time)), "t".into())),
         OscType::Midi(ref x) => Ok((Some(vec![x.port, x.status, x.data1, x.data2]), "m".into())),
         OscType::Color(ref x) => Ok((Some(vec![x.red, x.green, x.blue, x.alpha]), "r".into())),
         OscType::Bool(ref x) => {
@@ -192,10 +192,10 @@ pub fn pad(pos: u64) -> u64 {
     }
 }
 
-fn encode_time_tag(sec: u32, frac: u32) -> Vec<u8> {
+fn encode_time_tag(time: OscTime) -> Vec<u8> {
     let mut bytes = vec![0u8; 8];
-    BigEndian::write_u32(&mut bytes[..4], sec);
-    BigEndian::write_u32(&mut bytes[4..], frac);
+    BigEndian::write_u32(&mut bytes[..4], time.seconds);
+    BigEndian::write_u32(&mut bytes[4..], time.fractional);
     bytes
 }
 

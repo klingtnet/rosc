@@ -1,7 +1,7 @@
 use crate::encoder;
 use crate::errors::OscError;
 use crate::types::{
-    OscArray, OscBundle, OscColor, OscMessage, OscMidiMessage, OscPacket, OscType, Result,
+    OscArray, OscBundle, OscColor, OscMessage, OscMidiMessage, OscPacket, OscTime, OscType, Result,
 };
 
 use std::io::{BufRead, Read};
@@ -212,15 +212,18 @@ fn read_blob(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
     Ok(OscType::Blob(byte_buf))
 }
 
-fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> Result<(u32, u32)> {
-    let date = cursor
+fn read_time_tag(cursor: &mut io::Cursor<&[u8]>) -> Result<OscTime> {
+    let seconds = cursor
         .read_u32::<BigEndian>()
         .map_err(OscError::ReadError)?;
-    let frac = cursor
+    let fractional = cursor
         .read_u32::<BigEndian>()
         .map_err(OscError::ReadError)?;
 
-    Ok((date, frac))
+    Ok(OscTime {
+        seconds,
+        fractional,
+    })
 }
 
 fn read_midi_message(cursor: &mut io::Cursor<&[u8]>) -> Result<OscType> {
