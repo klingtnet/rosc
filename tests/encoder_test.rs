@@ -29,7 +29,7 @@ fn test_encode_message_wo_args() {
 #[test]
 fn test_encode_empty_bundle() {
     let bundle_packet = OscPacket::Bundle(OscBundle {
-        timetag: (4, 2),
+        timetag: (4, 2).into(),
         content: vec![],
     });
 

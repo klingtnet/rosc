@@ -4,7 +4,7 @@ extern crate rosc;
 use byteorder::{BigEndian, ByteOrder};
 use std::mem;
 
-use rosc::{decoder, encoder, OscBundle, OscPacket, OscType};
+use rosc::{decoder, encoder, OscBundle, OscPacket, OscTime, OscType};
 
 #[test]
 fn test_decode_no_args() {
@@ -27,7 +27,7 @@ fn test_decode_no_args() {
 
 #[test]
 fn test_decode_empty_bundle() {
-    let timetag = (4, 2);
+    let timetag = OscTime::from((4, 2));
     let content = vec![];
     let packet = encoder::encode(&OscPacket::Bundle(OscBundle { timetag, content })).unwrap();
     let osc_packet: Result<rosc::OscPacket, rosc::OscError> = decoder::decode(&packet);
