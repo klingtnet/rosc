@@ -1,6 +1,6 @@
 [package]
 name = "rosc"
-version = "0.5.1"
+version = "0.5.2-alpha.0"
 authors = ["Andreas Linz <klingt.net@gmail.com>"]
 description = "An OSC library for Rust"
 keywords = ["audio", "osc"]
