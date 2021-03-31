@@ -5,7 +5,7 @@
 [![Crates.io](https://img.shields.io/crates/v/rosc.svg)](https://crates.io/crates/rosc) [![rustdoc](https://img.shields.io/badge/rustdoc-hosted-blue.svg)](https://docs.rs/rosc)
 [![dependency status](https://deps.rs/repo/github/klingtnet/rosc/status.svg)](https://deps.rs/repo/github/klingtnet/rosc)
 
-**rosc** is an implementation of the [OSC 1.0](http://opensoundcontrol.org/) protocol in pure Rust.
+**rosc** is an implementation of the [OSC 1.0](https://web.archive.org/web/20030914224904/http://cnmat.berkeley.edu/OSC/OSC-spec.html) protocol in pure Rust.
 
 ## Usage
 
