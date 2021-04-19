@@ -15,10 +15,10 @@ use std::{
 ///
 /// ```
 /// use rosc::OscTime;
-/// use std::{convert::TryFrom, time::SystemTime};
+/// use std::{convert::TryFrom, time::UNIX_EPOCH};
 ///
 /// assert_eq!(
-///     OscTime::try_from(SystemTime::UNIX_EPOCH).unwrap(),
+///     OscTime::try_from(UNIX_EPOCH).unwrap(),
 ///     OscTime::from((2_208_988_800, 0))
 /// );
 /// ```
@@ -41,6 +41,11 @@ use std::{
 ///
 /// **These conversions are lossy**, but are tested to have a deviation within
 /// 5 nanoseconds when converted back and forth in either direction.
+///
+/// Although any time since the OSC epoch (`1900-01-01 00:00:00 UTC`) can be represented using the
+/// OSC timestamp format, this crate only allows conversions between times greater than or equal to
+/// the [`UNIX_EPOCH`](std::time::UNIX_EPOCH). This allows the math used in the conversions to work
+/// on 32-bit systems which cannot represent times that far back.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct OscTime {
     pub seconds: u32,
@@ -53,10 +58,6 @@ impl OscTime {
     const ONE_OVER_TWO_POW_32: f64 = 1.0 / OscTime::TWO_POW_32;
     const NANOS_PER_SECOND: f64 = 1.0e9;
     const SECONDS_PER_NANO: f64 = 1.0 / OscTime::NANOS_PER_SECOND;
-
-    fn epoch() -> SystemTime {
-        UNIX_EPOCH - Duration::from_secs(OscTime::UNIX_OFFSET)
-    }
 }
 
 impl TryFrom<SystemTime> for OscTime {
@@ -64,8 +65,9 @@ impl TryFrom<SystemTime> for OscTime {
 
     fn try_from(time: SystemTime) -> std::result::Result<OscTime, OscTimeError> {
         let duration_since_epoch = time
-            .duration_since(OscTime::epoch())
-            .map_err(|_| OscTimeError(OscTimeErrorKind::BeforeEpoch))?;
+            .duration_since(UNIX_EPOCH)
+            .map_err(|_| OscTimeError(OscTimeErrorKind::BeforeEpoch))?
+            + Duration::new(OscTime::UNIX_OFFSET, 0);
         let seconds = u32::try_from(duration_since_epoch.as_secs())
             .map_err(|_| OscTimeError(OscTimeErrorKind::Overflow))?;
         let nanos = duration_since_epoch.subsec_nanos() as f64;
@@ -82,7 +84,9 @@ impl From<OscTime> for SystemTime {
         let nanos =
             (time.fractional as f64) * OscTime::ONE_OVER_TWO_POW_32 * OscTime::NANOS_PER_SECOND;
         let duration_since_osc_epoch = Duration::new(time.seconds as u64, nanos as u32);
-        OscTime::epoch() + duration_since_osc_epoch
+        let duration_since_unix_epoch =
+            duration_since_osc_epoch - Duration::new(OscTime::UNIX_OFFSET, 0);
+        UNIX_EPOCH + duration_since_unix_epoch
     }
 }
 
@@ -116,7 +120,7 @@ impl Display for OscTimeError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.0 {
             OscTimeErrorKind::BeforeEpoch => {
-                write!(f, "time is before the OSC epoch and cannot be stored")
+                write!(f, "time is before the unix epoch and cannot be stored")
             }
             OscTimeErrorKind::Overflow => {
                 write!(f, "time overflows what OSC time can store")
@@ -289,12 +293,13 @@ impl<'a> From<&'a str> for OscMessage {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::time::UNIX_EPOCH;
 
     const TOLERANCE_NANOS: u64 = 5;
 
     #[test]
     fn system_times_can_be_converted_to_and_from_osc() {
-        let times = vec![UNIX_EPOCH, OscTime::epoch(), UNIX_EPOCH];
+        let times = vec![UNIX_EPOCH, SystemTime::now()];
         for time in times {
             for i in 0..1000 {
                 let time = time + Duration::from_nanos(1) * i;
@@ -306,9 +311,17 @@ mod tests {
     #[test]
     fn osc_times_can_be_converted_to_and_from_system_times() {
         let mut times = vec![];
-
         // Sweep across a few numbers to check for tolerance
-        for seconds in vec![0, 1, 2, 3, u32::MAX - 1, u32::MAX] {
+        for seconds in vec![
+            // We don't start at zero because times before the UNIX_EPOCH cannot be converted to
+            // OscTime.
+            OscTime::UNIX_OFFSET as u32,
+            OscTime::UNIX_OFFSET as u32 + 1,
+            OscTime::UNIX_OFFSET as u32 + 2,
+            OscTime::UNIX_OFFSET as u32 + 3,
+            u32::MAX - 1,
+            u32::MAX,
+        ] {
             let fractional_max = 100;
             for fractional in 0..fractional_max {
                 times.push((seconds, fractional));
@@ -325,8 +338,8 @@ mod tests {
     }
 
     #[test]
-    fn osc_time_cannot_represent_times_before_1900_01_01() {
-        assert!(OscTime::try_from(OscTime::epoch() - Duration::from_secs(1)).is_err())
+    fn osc_time_cannot_represent_times_before_1970_01_01() {
+        assert!(OscTime::try_from(UNIX_EPOCH - Duration::from_secs(1)).is_err())
     }
 
     fn assert_eq_system_times(a: SystemTime, b: SystemTime) {
