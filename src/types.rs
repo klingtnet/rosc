@@ -15,10 +15,17 @@ use std::{
 ///
 /// ```
 /// use rosc::OscTime;
-/// use std::{convert::TryFrom, time::UNIX_EPOCH};
+/// use std::{convert::TryFrom, time::UNIX_EPOCH, time::SystemTime};
 ///
+/// #[cfg(not(target_pointer_width="64"))]
 /// assert_eq!(
 ///     OscTime::try_from(UNIX_EPOCH).unwrap(),
+///     OscTime::from((2_208_988_800, 0))
+/// );
+///
+/// #[cfg(target_pointer_width="64")]
+/// assert_eq!(
+///     OscTime::try_from(SystemTime::UNIX_EPOCH).unwrap(),
 ///     OscTime::from((2_208_988_800, 0))
 /// );
 /// ```
@@ -42,6 +49,8 @@ use std::{
 /// **These conversions are lossy**, but are tested to have a deviation within
 /// 5 nanoseconds when converted back and forth in either direction.
 ///
+/// The following paragraph only applies to systems with less than 64-bit register width:
+///
 /// Although any time since the OSC epoch (`1900-01-01 00:00:00 UTC`) can be represented using the
 /// OSC timestamp format, this crate only allows conversions between times greater than or equal to
 /// the [`UNIX_EPOCH`](std::time::UNIX_EPOCH). This allows the math used in the conversions to work
@@ -58,11 +67,17 @@ impl OscTime {
     const ONE_OVER_TWO_POW_32: f64 = 1.0 / OscTime::TWO_POW_32;
     const NANOS_PER_SECOND: f64 = 1.0e9;
     const SECONDS_PER_NANO: f64 = 1.0 / OscTime::NANOS_PER_SECOND;
+
+    #[cfg(target_pointer_width = "64")]
+    fn epoch() -> SystemTime {
+        UNIX_EPOCH - Duration::from_secs(OscTime::UNIX_OFFSET)
+    }
 }
 
 impl TryFrom<SystemTime> for OscTime {
     type Error = OscTimeError;
 
+    #[cfg(not(target_pointer_width = "64"))]
     fn try_from(time: SystemTime) -> std::result::Result<OscTime, OscTimeError> {
         let duration_since_epoch = time
             .duration_since(UNIX_EPOCH)
@@ -77,9 +92,25 @@ impl TryFrom<SystemTime> for OscTime {
             fractional,
         })
     }
+
+    #[cfg(target_pointer_width = "64")]
+    fn try_from(time: SystemTime) -> std::result::Result<OscTime, OscTimeError> {
+        let duration_since_epoch = time
+            .duration_since(OscTime::epoch())
+            .map_err(|_| OscTimeError(OscTimeErrorKind::BeforeEpoch))?;
+        let seconds = u32::try_from(duration_since_epoch.as_secs())
+            .map_err(|_| OscTimeError(OscTimeErrorKind::Overflow))?;
+        let nanos = duration_since_epoch.subsec_nanos() as f64;
+        let fractional = (nanos * OscTime::SECONDS_PER_NANO * OscTime::TWO_POW_32).round() as u32;
+        Ok(OscTime {
+            seconds,
+            fractional,
+        })
+    }
 }
 
 impl From<OscTime> for SystemTime {
+    #[cfg(not(target_pointer_width = "64"))]
     fn from(time: OscTime) -> SystemTime {
         let nanos =
             (time.fractional as f64) * OscTime::ONE_OVER_TWO_POW_32 * OscTime::NANOS_PER_SECOND;
@@ -87,6 +118,14 @@ impl From<OscTime> for SystemTime {
         let duration_since_unix_epoch =
             duration_since_osc_epoch - Duration::new(OscTime::UNIX_OFFSET, 0);
         UNIX_EPOCH + duration_since_unix_epoch
+    }
+
+    #[cfg(target_pointer_width = "64")]
+    fn from(time: OscTime) -> SystemTime {
+        let nanos =
+            (time.fractional as f64) * OscTime::ONE_OVER_TWO_POW_32 * OscTime::NANOS_PER_SECOND;
+        let duration_since_osc_epoch = Duration::new(time.seconds as u64, nanos as u32);
+        OscTime::epoch() + duration_since_osc_epoch
     }
 }
 
@@ -298,6 +337,7 @@ mod tests {
     const TOLERANCE_NANOS: u64 = 5;
 
     #[test]
+    #[cfg(not(target_pointer_width="64"))]
     fn system_times_can_be_converted_to_and_from_osc() {
         let times = vec![UNIX_EPOCH, SystemTime::now()];
         for time in times {
@@ -309,6 +349,19 @@ mod tests {
     }
 
     #[test]
+    #[cfg(target_pointer_width="64")]
+    fn system_times_can_be_converted_to_and_from_osc() {
+        let times = vec![UNIX_EPOCH, OscTime::epoch(), UNIX_EPOCH];
+        for time in times {
+            for i in 0..1000 {
+                let time = time + Duration::from_nanos(1) * i;
+                assert_eq_system_times(time, SystemTime::from(OscTime::try_from(time).unwrap()));
+            }
+        }
+    }
+
+    #[test]
+    #[cfg(not(target_pointer_width="64"))]
     fn osc_times_can_be_converted_to_and_from_system_times() {
         let mut times = vec![];
         // Sweep across a few numbers to check for tolerance
@@ -338,8 +391,36 @@ mod tests {
     }
 
     #[test]
+    #[cfg(target_pointer_width="64")]
+    fn osc_times_can_be_converted_to_and_from_system_times() {
+        let mut times = vec![];
+        // Sweep across a few numbers to check for tolerance
+        for seconds in vec![0, 1, 2, 3, u32::MAX - 1, u32::MAX] {
+            let fractional_max = 100;
+            for fractional in 0..fractional_max {
+                times.push((seconds, fractional));
+                times.push((seconds, fractional_max - fractional));
+            }
+        }
+
+        for osc_time in times.into_iter().map(OscTime::from) {
+            assert_eq_osc_times(
+                osc_time,
+                OscTime::try_from(SystemTime::from(osc_time)).unwrap(),
+            );
+        }
+    }
+
+    #[test]
+    #[cfg(not(target_pointer_width="64"))]
     fn osc_time_cannot_represent_times_before_1970_01_01() {
         assert!(OscTime::try_from(UNIX_EPOCH - Duration::from_secs(1)).is_err())
+    }
+
+    #[test]
+    #[cfg(target_pointer_width="64")]
+    fn osc_time_cannot_represent_times_before_1970_01_01() {
+        assert!(OscTime::try_from(OscTime::epoch() - Duration::from_secs(1)).is_err())
     }
 
     fn assert_eq_system_times(a: SystemTime, b: SystemTime) {
