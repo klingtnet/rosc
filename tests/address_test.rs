@@ -9,6 +9,10 @@ fn test_validate_method_address() {
     address::validate_method_address(&String::from("/a"));
 
     // Invalid addresses
+    match address::validate_method_address(&String::from("/foo\0")).err().expect("") {
+        OscError::BadAddress("Address may only contain printable ASCII characters") => assert!(true),
+        _ => assert!(false)
+    }
     match address::validate_method_address(&String::from("öäü")).err().expect("") {
         OscError::BadAddress("Address must only contain ASCII characters") => assert!(true),
         _ => assert!(false)
@@ -33,6 +37,10 @@ fn test_validate_message_address() {
     address::validate_message_address(&String::from("/a"));
 
     // Invalid addresses
+    match address::validate_message_address(&String::from("/foo\0")).err().expect("") {
+        OscError::BadAddress("Address may only contain printable ASCII characters") => assert!(true),
+        _ => assert!(false)
+    }
     match address::validate_message_address(&String::from("öäü")).err().expect("") {
         OscError::BadAddress("Address must only contain ASCII characters") => assert!(true),
         _ => assert!(false)

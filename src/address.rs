@@ -21,11 +21,15 @@ pub fn validate_method_address(addr: &String) -> Result<()>
     }
 
     // Check if address contains illegal characters
-    if chars.any(|x| " #*,?[]{}".chars().any(|y| y == x)) {
-        return Err(OscError::BadAddress("Address may not contain any of the following characters: ' #*,?[]{}'"));
+    for char in chars
+    {
+        if ((char as u8) < 0x20) | ((char as u8) > 0x7E) {
+            return Err(OscError::BadAddress("Address may only contain printable ASCII characters"));
+        }
+        if " #*,?[]{}".chars().any(|x| char == x) {
+            return Err(OscError::BadAddress("Address may not contain any of the following characters: ' #*,?[]{}'"));
+        }
     }
-
-    // TODO: Check if non-printable ascii characters are contained?
 
     return Ok(());
 }
@@ -52,6 +56,9 @@ pub fn validate_message_address(addr: &String) -> Result<()>
     let mut in_string_list = false;
     for char in chars
     {
+        if ((char as u8) < 0x20) | ((char as u8) > 0x7E) {
+            return Err(OscError::BadAddress("Address may only contain printable ASCII characters"));
+        }
         if " #,".chars().any(|x| char == x) {
             return Err(OscError::BadAddress("Address may not contain any of the following characters: ' #,'"));
         }
@@ -86,10 +93,6 @@ pub fn validate_message_address(addr: &String) -> Result<()>
     if in_string_list {
         return Err(OscError::BadAddress("String list (curly brackets) was started but not closed before the end of the address"));
     }
-
-
-    // TODO: Check if non-printable ascii characters are contained?
-
 
     return Ok(());
 }
