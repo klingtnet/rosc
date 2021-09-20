@@ -5,8 +5,8 @@ use rosc::{address, OscError};
 #[test]
 fn test_validate_method_address() {
     // Valid addresses
-    address::validate_method_address(&String::from("/"));
-    address::validate_method_address(&String::from("/a"));
+    address::validate_method_address(&String::from("/")).expect("");
+    address::validate_method_address(&String::from("/a")).expect("");
 
     // Invalid addresses
     match address::validate_method_address(&String::from("/foo\0")).err().expect("") {
@@ -34,7 +34,7 @@ fn test_validate_method_address() {
 #[test]
 fn test_validate_message_address() {
     // Valid addresses
-    address::validate_message_address(&String::from("/a"));
+    address::validate_message_address(&String::from("/a")).expect("");
 
     // Invalid addresses
     match address::validate_message_address(&String::from("/foo\0")).err().expect("") {
