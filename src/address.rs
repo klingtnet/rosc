@@ -2,6 +2,7 @@ use crate::errors::OscError;
 use crate::types::{
     Result
 };
+use regex::Regex;
 
 /// Check if the address of an OSC method is valid
 pub fn validate_method_address(addr: &String) -> Result<()>
@@ -98,4 +99,60 @@ pub fn validate_message_address(addr: &String) -> Result<()>
     }
 
     return Ok(());
+}
+
+
+/// Match a single part of two OSC addresses
+fn match_part(message_part: &str, method_part: &str) -> bool
+{
+    // direct match
+    if message_part == method_part {
+        return true;
+    }
+
+    // Use regex for everything else
+    let mut pattern = message_part.to_string()
+        .replace("*", ".*")
+        .replace("?", ".")
+        .replace("[!", "[^")
+        .replace(",", ")|(?:")
+        .replace("{", "(?:")
+        .replace("}", ")");
+
+    // Anchor the pattern to beginning and end of string
+    pattern = format!("^{}$", pattern);
+
+    let re = Regex::new(pattern.as_str()).unwrap();
+
+    re.is_match(method_part)
+}
+
+/// Check if a message address matches a method address
+pub fn match_address(message_addr: &String, method_addr: &String) -> Result<bool>
+{
+    match validate_message_address(message_addr) {
+        Ok(()) => {},
+        Err(e) => return Err(e)
+    }
+    match validate_method_address(method_addr) {
+        Ok(()) => {},
+        Err(e) => return Err(e)
+    }
+
+    let message_addr_parts: Vec<&str> = message_addr.split('/').collect();
+    let method_addr_parts: Vec<&str> = method_addr.split('/').collect();
+
+    if message_addr_parts.len() != method_addr_parts.len() {
+        // Both addresses must have the same amount of parts
+        return Ok(false);
+    }
+
+    for i in 1..message_addr_parts.len() {
+        //println!("Parts: '{}' '{}' {}", message_addr_parts[i], method_addr_parts[i], match_part(message_addr_parts[i], method_addr_parts[i]));
+        if !match_part(message_addr_parts[i], method_addr_parts[i]) {
+            return Ok(false);
+        }
+    }
+
+    Ok(true)
 }

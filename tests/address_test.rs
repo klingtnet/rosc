@@ -101,3 +101,52 @@ fn test_validate_message_address() {
         _ => assert!(false)
     }
 }
+
+
+#[test]
+pub fn test_match_address() {
+    // Test invalid message and method address
+    match address::match_address(&String::from("asd"), &String::from("/foo")).err().expect("") {
+        OscError::BadAddress(_) => assert!(true),
+        _ => assert!(false)
+    }
+    // Test invalid message address
+    match address::match_address(&String::from("/foo"), &String::from("asd")).err().expect("") {
+        OscError::BadAddress(_) => assert!(true),
+        _ => assert!(false)
+    }
+
+    // Trivial match
+    assert!(address::match_address(&String::from("/foo"), &String::from("/foo")).expect(""));
+    assert!(address::match_address(&String::from("/foo/bar"), &String::from("/foo/bar")).expect(""));
+
+    // Match with wildcard
+    assert!(address::match_address(&String::from("/foo/*"), &String::from("/foo/bar")).expect(""));
+    assert!(address::match_address(&String::from("/foo/b*r"), &String::from("/foo/baaaaaaaaaaaar")).expect(""));
+    assert!(address::match_address(&String::from("/foo/b*r"), &String::from("/foo/barxxxxxxxxxxr")).expect(""));
+    assert!(address::match_address(&String::from("/foo/b*r/baz"), &String::from("/foo/baaaaaaaaaaaar/baz")).expect(""));
+
+    // Single character wildcard
+    assert!(address::match_address(&String::from("/foo/b?r"), &String::from("/foo/bar")).expect(""));
+    assert!(address::match_address(&String::from("/foo/b???r"), &String::from("/foo/baaar")).expect(""));
+
+    // Combine wildcards
+    assert!(address::match_address(&String::from("/foo/b?*?r"), &String::from("/foo/baar")).expect(""));
+    assert!(address::match_address(&String::from("/foo/b?*?r"), &String::from("/foo/baaaar")).expect(""));
+
+    // String lists
+    assert!(address::match_address(&String::from("/foo/{bar,baz}"), &String::from("/foo/bar")).expect(""));
+    assert!(address::match_address(&String::from("/foo/{bar,baz}"), &String::from("/foo/baz")).expect(""));
+    assert!(!address::match_address(&String::from("/foo/{bar,baz}"), &String::from("/foo/bot")).expect(""));
+
+    // Character ranges
+    assert!(address::match_address(&String::from("/foo/b[a-c]r"), &String::from("/foo/bar")).expect(""));
+    assert!(address::match_address(&String::from("/foo/b[a-c]r"), &String::from("/foo/bbr")).expect(""));
+    assert!(address::match_address(&String::from("/foo/b[a-c]r"), &String::from("/foo/bcr")).expect(""));
+    assert!(address::match_address(&String::from("/foo/b[!a-c]r"), &String::from("/foo/bdr")).expect(""));
+
+    // Test that address part matches full address, not just a subset, when using regex
+    assert!(address::match_address(&String::from("/foo/b[ab]r"), &String::from("/foo/bar")).expect(""));
+    assert!(!address::match_address(&String::from("/foo/b[ab]r"), &String::from("/foo/barasd")).expect(""));
+    assert!(!address::match_address(&String::from("/foo/a?d"), &String::from("/foo/barasd")).expect(""));
+}
