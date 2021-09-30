@@ -112,8 +112,8 @@ fn match_part(message_part: &str, method_part: &str) -> bool
 
     // Use regex for everything else
     let mut pattern = message_part.to_string()
-        .replace("*", ".*")
-        .replace("?", ".")
+        .replace("*", "\\w*")
+        .replace("?", "\\w")
         .replace("[!", "[^")
         .replace(",", ")|(?:")
         .replace("{", "(?:")
