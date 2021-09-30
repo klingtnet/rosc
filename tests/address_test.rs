@@ -25,6 +25,10 @@ fn test_validate_method_address() {
         OscError::BadAddress("Address must start with '/'") => assert!(true),
         _ => assert!(false)
     }
+    match address::validate_method_address(&String::from("/foo/")).err().expect("") {
+        OscError::BadAddress("Address must not end with '/'") => assert!(true),
+        _ => assert!(false)
+    }
     match address::validate_method_address(&String::from("/ illegal#*,?[]{}")).err().expect("") {
         OscError::BadAddress("Address may not contain any of the following characters: ' #*,?[]{}'") => assert!(true),
         _ => assert!(false)
@@ -54,6 +58,10 @@ fn test_validate_message_address() {
     }
     match address::validate_message_address(&String::from("foo")).err().expect("") {
         OscError::BadAddress("Address must start with '/'") => assert!(true),
+        _ => assert!(false)
+    }
+    match address::validate_message_address(&String::from("/foo/")).err().expect("") {
+        OscError::BadAddress("Address must not end with '/") => assert!(true),
         _ => assert!(false)
     }
 

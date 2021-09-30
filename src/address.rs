@@ -21,6 +21,11 @@ pub fn validate_method_address(addr: &String) -> Result<()>
         return Err(OscError::BadAddress("Address must start with '/'"));
     }
 
+    // Check if address ends with '/'
+    if addr.ends_with('/') {
+        return Err(OscError::BadAddress("Address must not end with '/'"));
+    }
+
     // Check if address contains illegal characters
     for char in chars
     {
@@ -50,6 +55,11 @@ pub fn validate_message_address(addr: &String) -> Result<()>
     let first = chars.next().unwrap();
     if first != '/' {
         return Err(OscError::BadAddress("Address must start with '/'"));
+    }
+
+    // Check if address ends with '/'
+    if addr.ends_with('/') {
+        return Err(OscError::BadAddress("Address must not end with '/'"));
     }
 
     // Validate rest of address
