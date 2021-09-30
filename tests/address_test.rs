@@ -35,6 +35,9 @@ fn test_validate_method_address() {
 fn test_validate_message_address() {
     // Valid addresses
     address::validate_message_address(&String::from("/a")).expect("");
+    address::validate_message_address(&String::from("/a[!a-z]")).expect("");
+    address::validate_message_address(&String::from("/a{foo,bar}")).expect("");
+    address::validate_message_address(&String::from("/a?/foo*/bar")).expect("");
 
     // Invalid addresses
     match address::validate_message_address(&String::from("/foo\0")).err().expect("") {
@@ -70,7 +73,7 @@ fn test_validate_message_address() {
         _ => assert!(false)
     }
 
-    // Curly brakcets open and never close
+    // Curly brackets open and never close
     match address::validate_message_address(&String::from("/{a/b")).err().expect("") {
         OscError::BadAddress("String list (curly brackets) was started but not closed before the next address part started") => assert!(true),
         _ => assert!(false)
@@ -86,7 +89,7 @@ fn test_validate_message_address() {
         _ => assert!(false)
     }
 
-    // Curly brackets open but don't close before the address ends
+    // Curly brackets within square brackets
     match address::validate_message_address(&String::from("/{a[foo]}/")).err().expect("") {
         OscError::BadAddress("Can not start a character range (square brackets) within string list (curly brackets)") => assert!(true),
         _ => assert!(false)

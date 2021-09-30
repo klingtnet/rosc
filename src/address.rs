@@ -59,8 +59,11 @@ pub fn validate_message_address(addr: &String) -> Result<()>
         if ((char as u8) < 0x20) | ((char as u8) > 0x7E) {
             return Err(OscError::BadAddress("Address may only contain printable ASCII characters"));
         }
-        if " #,".chars().any(|x| char == x) {
-            return Err(OscError::BadAddress("Address may not contain any of the following characters: ' #,'"));
+        if " #".chars().any(|x| char == x) {
+            return Err(OscError::BadAddress("Address may not contain any of the following characters: ' #'"));
+        }
+        if !in_string_list && char == ',' {
+            return Err(OscError::BadAddress("Address may not contain any of the following characters outside of string lists: ','"));
         }
         if char == '[' {
             in_character_range = true;
