@@ -38,15 +38,18 @@ pub fn validate_method_address(addr: &str) -> Result<()> {
 
     // Check if address contains illegal characters
     for char in chars {
-        if ((char as u8) < 0x20) | ((char as u8) > 0x7E) {
-            return Err(OscError::BadAddress(
-                "Address may only contain printable ASCII characters",
-            ));
-        }
-        if " #*,?[]{}".chars().any(|x| char == x) {
-            return Err(OscError::BadAddress(
-                "Address may not contain any of the following characters: ' #*,?[]{}'",
-            ));
+        match char {
+            _c if ((char as u8) < 0x20) | ((char as u8) > 0x7E) => {
+                return Err(OscError::BadAddress(
+                    "Address may only contain printable ASCII characters",
+                ));
+            }
+            _c if " #*,?[]{}".chars().any(|x| char == x) => {
+                return Err(OscError::BadAddress(
+                    "Address may not contain any of the following characters: ' #*,?[]{}'",
+                ));
+            }
+            _ => (),
         }
     }
 
