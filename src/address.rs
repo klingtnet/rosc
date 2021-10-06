@@ -2,7 +2,7 @@ use crate::errors::OscError;
 use crate::types::{
     Result
 };
-use regex::Regex;
+use crate::regex::Regex;
 
 /// Check if the address of an OSC method is valid
 pub fn validate_method_address(addr: &String) -> Result<()>
