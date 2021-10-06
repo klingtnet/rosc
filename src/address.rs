@@ -37,7 +37,7 @@ pub fn validate_method_address(addr: &str) -> Result<()>
         }
     }
 
-    return Ok(());
+    Ok(())
 }
 
 /// Check if the address of an OSC message is valid
@@ -108,7 +108,7 @@ pub fn validate_message_address(addr: &str) -> Result<()>
         return Err(OscError::BadAddress("String list (curly brackets) was started but not closed before the end of the address"));
     }
 
-    return Ok(());
+    Ok(())
 }
 
 
