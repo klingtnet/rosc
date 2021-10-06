@@ -5,7 +5,7 @@ use crate::types::{
 use crate::regex::Regex;
 
 /// Check if the address of an OSC method is valid
-pub fn validate_method_address(addr: &String) -> Result<()>
+pub fn validate_method_address(addr: &str) -> Result<()>
 {
     if !addr.is_ascii() {
         return Err(OscError::BadAddress("Address must only contain ASCII characters"));
@@ -41,7 +41,7 @@ pub fn validate_method_address(addr: &String) -> Result<()>
 }
 
 /// Check if the address of an OSC message is valid
-pub fn validate_message_address(addr: &String) -> Result<()>
+pub fn validate_message_address(addr: &str) -> Result<()>
 {
     if !addr.is_ascii() {
         return Err(OscError::BadAddress("Address must only contain ASCII characters"));
@@ -138,7 +138,7 @@ fn match_part(message_part: &str, method_part: &str) -> bool
 }
 
 /// Check if a message address matches a method address
-pub fn match_address(message_addr: &String, method_addr: &String) -> Result<bool>
+pub fn match_address(message_addr: &str, method_addr: &str) -> Result<bool>
 {
     match validate_message_address(message_addr) {
         Ok(()) => {},
