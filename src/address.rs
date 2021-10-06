@@ -10,7 +10,7 @@ pub fn validate_method_address(addr: &str) -> Result<()>
     if !addr.is_ascii() {
         return Err(OscError::BadAddress("Address must only contain ASCII characters"));
     }
-    if addr.len() < 1 {
+    if addr.is_empty() {
         return Err(OscError::BadAddress("Address must be at least 1 character long"));
     }
     let mut chars = addr.chars();
@@ -46,7 +46,7 @@ pub fn validate_message_address(addr: &str) -> Result<()>
     if !addr.is_ascii() {
         return Err(OscError::BadAddress("Address must only contain ASCII characters"));
     }
-    if addr.len() < 1 {
+    if addr.is_empty() {
         return Err(OscError::BadAddress("Address must be at least 1 character long"));
     }
     let mut chars = addr.chars();
