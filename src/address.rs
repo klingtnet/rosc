@@ -2,8 +2,7 @@ use crate::errors::OscError;
 use crate::regex::Regex;
 use crate::types::Result;
 
-/// Check if the address of an OSC method is valid
-pub fn validate_method_address(addr: &str) -> Result<()> {
+fn validate_address(addr: &str) -> Result<()> {
     if !addr.is_ascii() {
         return Err(OscError::BadAddress(
             "Address must only contain ASCII characters",
@@ -14,11 +13,9 @@ pub fn validate_method_address(addr: &str) -> Result<()> {
             "Address must be at least 1 character long",
         ));
     }
-    let mut chars = addr.chars();
 
     // Check if address starts with '/'
-    let first = chars.next().unwrap();
-    if first != '/' {
+    if !addr.starts_with('/') {
         return Err(OscError::BadAddress("Address must start with '/'"));
     }
 
@@ -26,6 +23,18 @@ pub fn validate_method_address(addr: &str) -> Result<()> {
     if addr.ends_with('/') {
         return Err(OscError::BadAddress("Address must not end with '/'"));
     }
+
+    Ok(())
+}
+
+/// Check if the address of an OSC method is valid
+pub fn validate_method_address(addr: &str) -> Result<()> {
+    match validate_address(addr) {
+        Ok(()) => {}
+        Err(e) => return Err(e),
+    }
+
+    let chars = addr.chars();
 
     // Check if address contains illegal characters
     for char in chars {
@@ -46,28 +55,12 @@ pub fn validate_method_address(addr: &str) -> Result<()> {
 
 /// Check if the address of an OSC message is valid
 pub fn validate_message_address(addr: &str) -> Result<()> {
-    if !addr.is_ascii() {
-        return Err(OscError::BadAddress(
-            "Address must only contain ASCII characters",
-        ));
-    }
-    if addr.is_empty() {
-        return Err(OscError::BadAddress(
-            "Address must be at least 1 character long",
-        ));
-    }
-    let mut chars = addr.chars();
-
-    // Check if address starts with '/'
-    let first = chars.next().unwrap();
-    if first != '/' {
-        return Err(OscError::BadAddress("Address must start with '/'"));
+    match validate_address(addr) {
+        Ok(()) => {}
+        Err(e) => return Err(e),
     }
 
-    // Check if address ends with '/'
-    if addr.ends_with('/') {
-        return Err(OscError::BadAddress("Address must not end with '/'"));
-    }
+    let chars = addr.chars();
 
     // Validate rest of address
     let mut in_character_range = false;
