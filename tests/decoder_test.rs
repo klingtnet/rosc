@@ -13,7 +13,7 @@ fn test_decode_no_args() {
     let addr = encoder::encode_string(raw_addr);
     let type_tags = encoder::encode_string(",");
     let merged: Vec<u8> = addr.into_iter().chain(type_tags.into_iter()).collect();
-    let osc_packet: Result<rosc::OscPacket, rosc::OscError> = decoder::decode(&merged);
+    let osc_packet = decoder::decode(&merged);
     assert!(osc_packet.is_ok());
     match osc_packet {
         Ok(rosc::OscPacket::Message(msg)) => {
@@ -30,7 +30,7 @@ fn test_decode_empty_bundle() {
     let timetag = OscTime::from((4, 2));
     let content = vec![];
     let packet = encoder::encode(&OscPacket::Bundle(OscBundle { timetag, content })).unwrap();
-    let osc_packet: Result<rosc::OscPacket, rosc::OscError> = decoder::decode(&packet);
+    let osc_packet = decoder::decode(&packet);
     match osc_packet {
         Ok(rosc::OscPacket::Bundle(bundle)) => {
             assert_eq!(timetag, bundle.timetag);

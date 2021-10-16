@@ -1,7 +1,9 @@
 extern crate rosc;
 
+#[cfg(feature = "std")]
 use rosc::{OscError, address::Matcher};
 
+#[cfg(feature = "std")]
 #[test]
 fn test_matcher() {
     let matcher = Matcher::new("/oscillator/[0-9]/*/pre[!1234?*]post/{frequency,phase}/x?")
@@ -21,6 +23,7 @@ fn test_matcher() {
     matcher.match_address("invalid_address").expect_err("should fail because address does not start with a slash");
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn test_bad_address_pattern() {
     let expected_err = "bad OSC address pattern: bad address pattern";
@@ -32,6 +35,7 @@ fn test_bad_address_pattern() {
     assert_eq!(Matcher::new("/unclosed/[range-").unwrap_err().to_string(), expected_err);
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn test_bad_address() {
     let matcher = Matcher::new("/does-not-matter").expect("Matcher::new");

@@ -13,7 +13,7 @@ readme = "README.md"
 lints = ["clippy"]
 
 [dependencies]
-byteorder = "1"
+byteorder = {version="1", no-default-features=true}
 clippy = {version="^0", optional=true}
 regex = "1.5"
-nom = "7"
+nom = { version = "7.0.0", default-features = false, features=["alloc"] }
