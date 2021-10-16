@@ -3,6 +3,7 @@
 
 extern crate byteorder;
 extern crate regex;
+extern crate nom;
 
 /// Crate specific error types.
 mod errors;
