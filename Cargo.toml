@@ -11,6 +11,8 @@ readme = "README.md"
 
 [features]
 lints = ["clippy"]
+std = []
+default = ["std"]
 
 [dependencies]
 byteorder = {version="1", no-default-features=true}

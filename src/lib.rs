@@ -1,10 +1,13 @@
 //! **rosc** is an implementation of the [OSC 1.0](http://opensoundcontrol.org/spec-1_0) protocol in pure Rust.
 //!
 
-// #[cfg(all(feature = "alloc", not(feature = "std")))]
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 #[macro_use] extern crate alloc;
+#[cfg(feature = "std")]
+#[macro_use] extern crate core;
+// #[cfg(feature = "std")]
+// extern crate std as alloc;
 
 extern crate nom;
 extern crate byteorder;

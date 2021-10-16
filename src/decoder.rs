@@ -11,17 +11,13 @@ use crate::types::{
     OscType,
 };
 
-#[cfg(feature = "std")]
-use std::io::{BufRead, Read};
-#[cfg(feature = "std")]
-use std::{char, io};
 use crate::alloc::{
     string::{ String, ToString },
     vec::Vec,
 };
 
+use nom::Offset;
 use nom::sequence::terminated;
-use nom::{Offset};
 use nom::bytes::complete::{take, take_till};
 use nom::combinator::{map, map_parser};
 use nom::multi::many0;
@@ -42,7 +38,7 @@ pub fn decode(msg: &[u8]) -> NomResult<OscPacket> {
     decode_packet(msg, msg).map(|(_, packet)| packet)
 }
 
-fn decode_packet<'a>(input: &'a [u8], original_input: &'a [u8]) -> IResult<&'a [u8], OscPacket, OscError> {
+fn decode_packet<'a>(input: &'a [u8], original_input: &'a[u8]) -> IResult<&'a [u8], OscPacket, OscError> {
     if input.is_empty() {
         return Err(nom::Err::Error(OscError::BadPacket("Empty packet.")));
     }
@@ -54,7 +50,7 @@ fn decode_packet<'a>(input: &'a [u8], original_input: &'a [u8]) -> IResult<&'a [
     }
 }
 
-fn decode_message<'a>(input: &'a [u8], original_input: &'a [u8]) -> IResult<&'a [u8], OscPacket, OscError> {
+fn decode_message<'a>(input: &'a [u8], original_input: &'a[u8]) -> IResult<&'a [u8], OscPacket, OscError> {
     let (input, addr) = read_osc_string(input, original_input)?;
     let (input, type_tags) = read_osc_string(input, original_input)?;
 
@@ -66,7 +62,7 @@ fn decode_message<'a>(input: &'a [u8], original_input: &'a [u8]) -> IResult<&'a 
     }
 }
 
-fn decode_bundle<'a>(input: &'a [u8], original_input: &'a [u8]) -> IResult<&'a [u8], OscPacket, OscError> {
+fn decode_bundle<'a>(input: &'a [u8], original_input: &'a[u8]) -> IResult<&'a [u8], OscPacket, OscError> {
     let (input, bundle_tag) = read_osc_string(input, original_input)?;
     if bundle_tag != "#bundle" {
         return Err(nom::Err::Error(OscError::BadBundle(format!(
@@ -89,7 +85,7 @@ fn decode_bundle<'a>(input: &'a [u8], original_input: &'a [u8]) -> IResult<&'a [
     ))
 }
 
-fn read_bundle_element<'a>(input: &'a [u8], original_input: &'a [u8]) -> IResult<&'a [u8], OscPacket, OscError> {
+fn read_bundle_element<'a>(input: &'a [u8], original_input: &'a[u8]) -> IResult<&'a [u8], OscPacket, OscError> {
     let (input, elem_size) = be_u32(input)?;
 
     let result = map_parser(
@@ -106,13 +102,13 @@ fn read_bundle_element<'a>(input: &'a [u8], original_input: &'a [u8]) -> IResult
     result
 }
 
-fn read_osc_string<'a>(input: &'a [u8], original_input: &'a [u8]) -> IResult<&'a [u8], String, OscError> {
+fn read_osc_string<'a>(input: &'a [u8], original_input: &'a[u8]) -> IResult<&'a [u8], String, OscError> {
     map_res(
         terminated(
-            take_till(|c| c == b'0'),
-            |input| pad_to_4_byte_boundary(input, original_input),
+            take_till(|c| c == 0u8),
+            pad_to_32_bit_boundary(original_input),
         ),
-        |str_buf| {
+        |str_buf: &'a[u8]| {
             String::from_utf8(str_buf.into())
                 .map_err(OscError::StringError)
                 .map(|s| s.trim_matches(0u8 as char).to_string())
@@ -122,7 +118,7 @@ fn read_osc_string<'a>(input: &'a [u8], original_input: &'a [u8]) -> IResult<&'a
 
 fn read_osc_args<'a>(
     mut input: &'a[u8],
-    original_input: &'a [u8],
+    original_input: &'a[u8],
     raw_type_tags: String,
 ) ->  IResult<&'a [u8], Vec<OscType>, OscError> {
     let type_tags: Vec<char> = raw_type_tags.chars().skip(1).collect();
@@ -155,7 +151,7 @@ fn read_osc_args<'a>(
     Ok((input, args))
 }
 
-fn read_osc_arg<'a>(input: &'a[u8], original_input: &'a [u8], tag: char) -> IResult<&'a[u8], OscType, OscError> {
+fn read_osc_arg<'a>(input: &'a[u8], original_input: &'a[u8], tag: char) -> IResult<&'a[u8], OscType, OscError> {
     match tag {
         'f' => map(be_f32, OscType::Float)(input),
         'd' => map(be_f64, OscType::Double)(input),
@@ -198,13 +194,13 @@ fn read_char(input: &[u8]) -> IResult<&[u8], OscType, OscError> {
     )(input)
 }
 
-fn read_blob<'a>(input: &'a[u8], original_input: &'a [u8]) -> IResult<&'a[u8], OscType, OscError> {
+fn read_blob<'a>(input: &'a[u8], original_input: &'a[u8]) -> IResult<&'a[u8], OscType, OscError> {
     let (input, size) = be_u32(input)?;
 
     map(
         terminated(
             take(size),
-            |input| pad_to_4_byte_boundary(input, original_input),
+            pad_to_32_bit_boundary(original_input),
         ),
         |blob| OscType::Blob(blob.into()),
     )(input)
@@ -242,8 +238,12 @@ fn read_osc_color<'a>(input: &'a[u8]) -> IResult<&'a[u8], OscType, OscError> {
     })(input)
 }
 
-fn pad_to_4_byte_boundary<'a>(input: &'a[u8], original_input: &'a[u8]) -> IResult<&'a[u8], (), OscError> {
-    let offset = original_input.offset(input);
-    let (input, _) = take(offset)(input)?;
-    Ok((input, ()))
+fn pad_to_32_bit_boundary<'a>(
+    original_input: &'a[u8]
+) -> impl Fn(&'a[u8]) -> IResult<&'a[u8], (), OscError> {
+    move |input| {
+        let offset = 4 - original_input.offset(input) % 4;
+        let (input, _) = take(offset)(input)?;
+        Ok((input, ()))
+    }
 }

@@ -13,15 +13,13 @@ fn test_decode_no_args() {
     let addr = encoder::encode_string(raw_addr);
     let type_tags = encoder::encode_string(",");
     let merged: Vec<u8> = addr.into_iter().chain(type_tags.into_iter()).collect();
-    let osc_packet = decoder::decode(&merged);
-    assert!(osc_packet.is_ok());
+    let osc_packet = decoder::decode(&merged).unwrap();
     match osc_packet {
-        Ok(rosc::OscPacket::Message(msg)) => {
+        rosc::OscPacket::Message(msg) => {
             assert_eq!(raw_addr, msg.addr);
             assert!(msg.args.is_empty());
         }
-        Ok(_) => panic!("Expected an OscMessage!"),
-        Err(e) => panic!(e),
+        _ => panic!("Expected an OscMessage!"),
     }
 }
 
@@ -31,13 +29,12 @@ fn test_decode_empty_bundle() {
     let content = vec![];
     let packet = encoder::encode(&OscPacket::Bundle(OscBundle { timetag, content })).unwrap();
     let osc_packet = decoder::decode(&packet);
-    match osc_packet {
-        Ok(rosc::OscPacket::Bundle(bundle)) => {
+    match osc_packet.unwrap() {
+        rosc::OscPacket::Bundle(bundle) => {
             assert_eq!(timetag, bundle.timetag);
             assert!(bundle.content.is_empty());
         }
-        Ok(_) => panic!("Expected an OscBundle!"),
-        Err(e) => panic!(e),
+        _ => panic!("Expected an OscBundle!"),
     }
 }
 

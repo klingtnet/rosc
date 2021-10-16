@@ -11,7 +11,6 @@ use core::{
 #[cfg(feature = "std")]
 use std::{
     convert::{TryFrom, TryInto},
-    error,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
@@ -319,6 +318,7 @@ mod tests {
     #[cfg(feature = "std")]
     use std::time::UNIX_EPOCH;
 
+    #[cfg(feature = "std")]
     const TOLERANCE_NANOS: u64 = 5;
 
     #[cfg(feature = "std")]

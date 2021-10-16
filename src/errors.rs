@@ -1,5 +1,5 @@
 #[cfg(feature = "std")]
-use std::{error, io};
+use std::error;
 use alloc::{
     fmt,
     string::{ self, String },
@@ -70,7 +70,6 @@ impl error::Error for OscError {
     fn source(&self) -> Option<&(dyn error::Error + 'static)> {
         match self {
             OscError::StringError(ref err) => Some(err),
-            OscError::ReadError(ref err) => Some(err),
             _ => None,
         }
     }

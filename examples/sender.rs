@@ -18,7 +18,7 @@ fn main() {
         &args[0]
     );
     if args.len() < 3 {
-        panic!(usage);
+        panic!("{}", usage);
     }
     let host_addr = get_addr_from_arg(&args[1]);
     let to_addr = get_addr_from_arg(&args[2]);
