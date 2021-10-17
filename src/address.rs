@@ -11,6 +11,7 @@ use regex::Regex;
 
 /// With a Matcher OSC method addresses can be [matched](Matcher::match_address) against an OSC address pattern.
 /// Refer to the OSC specification for details about OSC address spaces: <http://opensoundcontrol.org/spec-1_0.html#osc-address-spaces-and-osc-addresses>
+#[derive(Debug)]
 pub struct Matcher {
     res: Vec<Regex>,
 }
