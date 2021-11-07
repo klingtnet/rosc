@@ -26,7 +26,7 @@ fn test_bad_address_pattern() {
     let expected_err = "bad OSC address pattern: bad address pattern";
     assert_eq!(Matcher::new("").unwrap_err().to_string(), expected_err);
     assert_eq!(Matcher::new("/").unwrap_err().to_string(), expected_err);
-    assert_eq!(Matcher::new("//empty/parts/").unwrap_err().to_string(), expected_err); // FIX: will fail
+    assert_eq!(Matcher::new("//empty/parts/").unwrap_err().to_string(), expected_err);
     assert_eq!(Matcher::new("////").unwrap_err().to_string(), expected_err);
     assert_eq!(Matcher::new("/{unclosed,alternative").unwrap_err().to_string(), expected_err);
     assert_eq!(Matcher::new("/unclosed/[range-").unwrap_err().to_string(), expected_err);

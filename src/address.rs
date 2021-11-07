@@ -1,7 +1,7 @@
 use crate::errors::OscError;
 
 use nom::branch::alt;
-use nom::bytes::complete::{is_not, tag};
+use nom::bytes::complete::{is_not, tag, take_till1};
 use nom::character::complete::char;
 use nom::combinator::{all_consuming, map_parser};
 use nom::multi::many1;
@@ -30,7 +30,7 @@ impl Matcher {
     /// - `*` matches zero or more characters
     /// - `[a-z]` are basically regex [character classes](https://www.regular-expressions.info/charclass.html)
     /// - `{foo,bar}` is an alternative, matching either `foo` or `bar`
-    /// - everything else is matches literally
+    /// - everything else is matched literally
     /// 
     /// Refer to the OSC specification for details about address pattern matching: <osc-message-dispatching-and-pattern-matching>.
     /// 
@@ -44,7 +44,7 @@ impl Matcher {
     /// ```
     pub fn new(pattern: &str) -> Result<Self, OscError> {
         let res = parse_address_pattern(pattern)?;
-        Ok(Matcher { res: res })
+        Ok(Matcher { res })
     }
 
     /// Match an OSC address against an address pattern.
@@ -83,7 +83,7 @@ fn map_alternative(s: &str) -> String {
 }
 
 fn wrap_with(s: &str, pre: &str, post: &str) -> String {
-    pre.to_string() + s + post.into()
+    pre.to_string() + s + post
 }
 
 fn map_wildcard(_: &str) -> String {
@@ -95,13 +95,11 @@ fn map_question_mark(_: &str) -> String {
 }
 
 fn parse_address_part(input: &str) -> IResult<&str, &str> {
-    // TODO: the second parser, is_not, should require a non empty match
-    preceded(char('/'), is_not(" \t\r\n#*,/?[]{}"))(input)
+    preceded(char('/'), take_till1(|c| " \t\r\n#*,/?[]{}".contains(c)))(input)
 }
 
 fn parse_address_pattern_part(input: &str) -> IResult<&str, &str> {
-    // TODO: the second parser, is_not, should require a non empty match
-    preceded(char('/'), is_not(" \n\t\r/"))(input)
+    preceded(char('/'), take_till1(|c| " \n\t\r/".contains(c)))(input)
 }
 
 // Translate OSC pattern rules into an regular expression.
