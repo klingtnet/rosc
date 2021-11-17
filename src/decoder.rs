@@ -1,4 +1,3 @@
-use crate::NomResult;
 use crate::errors::OscError;
 use crate::types::{
     OscArray,
@@ -31,46 +30,91 @@ use nom::{
 /// Common MTU size for ethernet
 pub const MTU: usize = 1536;
 
-/// Takes an byte slice as argument and returns an
-/// OSC packet on success or an `OscError` if the slice
-/// does not contain a valid OSC message.
-pub fn decode(msg: &[u8]) -> NomResult<OscPacket> {
-    decode_packet(msg, msg).map(|(_, packet)| packet)
+/// Takes a bytes slice representing a UDP packet and returns the OSC packet as well as a slice of
+/// any bytes remaining after the OSC packet.
+pub fn decode_udp<'a>(msg: &'a [u8]) -> IResult<&'a [u8], OscPacket, OscError> {
+    decode_packet(msg, msg)
 }
 
-fn decode_packet<'a>(input: &'a [u8], original_input: &'a[u8]) -> IResult<&'a [u8], OscPacket, OscError> {
+/// Takes a bytes slice from a TCP stream (or any stream-based protocol) and returns the first OSC
+/// packet as well as a slice of the bytes remaining after the packet.
+pub fn decode_tcp<'a>(msg: &'a [u8]) -> IResult<&'a [u8], Option<OscPacket>, OscError> {
+    let (input, osc_packet_length) = be_u32(msg)?;
+
+    if osc_packet_length as usize > msg.len() {
+        return Ok((msg, None));
+    }
+
+    decode_packet(input, msg).map(|(remainder, osc_packet)| {
+        (remainder, Some(osc_packet))
+    })
+}
+
+/// Takes a bytes slice from a TCP stream (or any stream-based protocol) and returns a vec of all
+/// OSC packets in the slice as well as a slice of the bytes remaining after the last packet.
+pub fn decode_tcp_vec<'a>(msg: &'a [u8]) -> IResult<&'a [u8], Vec<OscPacket>, OscError> {
+    let mut input = msg;
+    let mut osc_packets = vec![];
+
+    while let (remainder, Some(osc_packet)) = decode_tcp(input)? {
+        input = remainder;
+        osc_packets.push(osc_packet);
+
+        if remainder.len() == 0 {
+            break;
+        }
+    };
+
+    Ok((input, osc_packets))
+}
+
+
+fn decode_packet<'a>(
+    input: &'a [u8],
+    original_input: &'a[u8],
+) -> IResult<&'a [u8], OscPacket, OscError> {
     if input.is_empty() {
         return Err(nom::Err::Error(OscError::BadPacket("Empty packet.")));
     }
 
-    match input[0] as char {
-        '/' => decode_message(input, original_input),
-        '#' => decode_bundle(input, original_input),
-        _ => Err(nom::Err::Error(OscError::BadPacket("Unknown message format."))),
+    let (input, addr) = read_osc_string(input, original_input)?;
+
+    match addr.chars().next() {
+        Some('/') => {
+            decode_message(addr, input, original_input)
+        }
+        Some('#') if &addr == "#bundle" => {
+            decode_bundle(input, original_input)
+        }
+        _ => Err(nom::Err::Error(OscError::BadPacket(
+            "Invalid message address or bundle tag"
+        ))),
     }
 }
 
-fn decode_message<'a>(input: &'a [u8], original_input: &'a[u8]) -> IResult<&'a [u8], OscPacket, OscError> {
-    let (input, addr) = read_osc_string(input, original_input)?;
+fn decode_message<'a>(
+    addr: String,
+    input: &'a [u8],
+    original_input: &'a[u8],
+) -> IResult<&'a [u8], OscPacket, OscError> {
     let (input, type_tags) = read_osc_string(input, original_input)?;
 
     if type_tags.len() > 1 {
-        let (input, args) = read_osc_args(input, original_input, type_tags)?;
+        let (input, args) = read_osc_args(
+            input,
+            original_input,
+            type_tags,
+        )?;
         Ok((input, OscPacket::Message(OscMessage { addr, args })))
     } else {
         Ok((input, OscPacket::Message(OscMessage { addr, args: vec![] })))
     }
 }
 
-fn decode_bundle<'a>(input: &'a [u8], original_input: &'a[u8]) -> IResult<&'a [u8], OscPacket, OscError> {
-    let (input, bundle_tag) = read_osc_string(input, original_input)?;
-    if bundle_tag != "#bundle" {
-        return Err(nom::Err::Error(OscError::BadBundle(format!(
-            "Wrong bundle specifier: {}",
-            bundle_tag
-        ))));
-    }
-
+fn decode_bundle<'a>(
+    input: &'a [u8],
+    original_input: &'a[u8],
+) -> IResult<&'a [u8], OscPacket, OscError> {
     let (input, (timetag, content)) = tuple((
         read_time_tag,
         many0(|input| read_bundle_element(input, original_input)),

@@ -292,7 +292,6 @@ impl<T: Into<OscType>> FromIterator<T> for OscArray {
 }
 
 pub type Result<T> = result::Result<T, errors::OscError>;
-pub type NomResult<T> = result::Result<T, nom::Err<errors::OscError>>;
 
 impl From<String> for OscMessage {
     fn from(s: String) -> OscMessage {

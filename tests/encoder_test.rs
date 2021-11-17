@@ -18,7 +18,7 @@ fn test_encode_message_wo_args() {
         _ => panic!(),
     };
 
-    let dec_msg = match decoder::decode(&enc_msg).unwrap() {
+    let dec_msg = match decoder::decode_udp(&enc_msg).unwrap().1 {
         OscPacket::Message(m) => m,
         _ => panic!("Expected OscMessage!"),
     };
@@ -37,7 +37,7 @@ fn test_encode_empty_bundle() {
     assert_eq!(enc_bundle.len() % 4, 0);
     assert_eq!(enc_bundle.len(), 16);
 
-    let dec_bundle = match decoder::decode(&enc_bundle).unwrap() {
+    let dec_bundle = match decoder::decode_udp(&enc_bundle).unwrap().1 {
         OscPacket::Bundle(m) => m,
         _ => panic!("Expected OscBundle!"),
     };
@@ -99,7 +99,7 @@ fn test_encode_message_with_args() {
     let enc_msg = encoder::encode(&msg_packet).unwrap();
     assert_eq!(enc_msg.len() % 4, 0);
 
-    let dec_msg: OscMessage = match decoder::decode(&enc_msg).unwrap() {
+    let dec_msg: OscMessage = match decoder::decode_udp(&enc_msg).unwrap().1 {
         OscPacket::Message(m) => m,
         _ => panic!("Expected OscMessage!"),
     };
@@ -151,6 +151,6 @@ fn test_encode_bundle() {
     let enc_bundle = encoder::encode(&root_bundle).unwrap();
     assert_eq!(enc_bundle.len() % 4, 0);
 
-    let dec_bundle = decoder::decode(&enc_bundle).unwrap();
+    let dec_bundle = decoder::decode_udp(&enc_bundle).unwrap().1;
     assert_eq!(root_bundle, dec_bundle);
 }

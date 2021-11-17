@@ -25,7 +25,7 @@ fn main() {
         match sock.recv_from(&mut buf) {
             Ok((size, addr)) => {
                 println!("Received packet with size {} from: {}", size, addr);
-                let packet = rosc::decoder::decode(&buf[..size]).unwrap();
+                let (_, packet) = rosc::decoder::decode_udp(&buf[..size]).unwrap();
                 handle_packet(packet);
             }
             Err(e) => {
