@@ -2,6 +2,8 @@
 //!
 
 extern crate byteorder;
+extern crate regex;
+extern crate nom;
 
 /// Crate specific error types.
 mod errors;
@@ -15,3 +17,5 @@ pub use crate::types::*;
 pub mod decoder;
 /// Encodes an `OscPacket` to a byte vector.
 pub mod encoder;
+/// Address checking and matching methods
+pub mod address;

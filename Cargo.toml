@@ -15,3 +15,5 @@ lints = ["clippy"]
 [dependencies]
 byteorder = "1"
 clippy = {version="^0", optional=true}
+regex = "1.5"
+nom = "7"
