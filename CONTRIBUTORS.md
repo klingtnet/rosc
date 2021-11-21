@@ -1,2 +1,0 @@
-- [klingt.net](https://github.com/klingtnet)
-- [eeeeeta](https://github.com/eeeeeta)
