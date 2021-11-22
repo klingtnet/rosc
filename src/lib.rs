@@ -3,8 +3,13 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(not(feature = "std"))]
 #[macro_use] extern crate alloc;
-#[macro_use] extern crate core;
+
+#[cfg(feature = "std")]
+extern crate std as core;
+#[cfg(feature = "std")]
+#[macro_use] extern crate std as alloc;
 
 extern crate nom;
 extern crate byteorder;

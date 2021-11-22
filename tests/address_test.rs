@@ -1,7 +1,7 @@
 extern crate rosc;
 
 #[cfg(feature = "std")]
-use rosc::{OscError, address::Matcher};
+use rosc::address::Matcher;
 
 #[cfg(feature = "std")]
 #[test]

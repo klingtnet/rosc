@@ -14,13 +14,16 @@ use crate::alloc::{string::{ String, ToString }, vec::Vec};
 /// # Examples
 ///
 /// ```
-/// use rosc::OscTime;
-/// use std::{convert::TryFrom, time::UNIX_EPOCH};
+/// #[cfg(feature = "std")]
+/// {
+///     use rosc::OscTime;
+///     use std::{convert::TryFrom, time::UNIX_EPOCH};
 ///
-/// assert_eq!(
-///     OscTime::try_from(UNIX_EPOCH).unwrap(),
-///     OscTime::from((2_208_988_800, 0))
-/// );
+///     assert_eq!(
+///         OscTime::try_from(UNIX_EPOCH).unwrap(),
+///         OscTime::from((2_208_988_800, 0))
+///     );
+/// }
 /// ```
 ///
 /// # Conversions between `(u32, u32)`
