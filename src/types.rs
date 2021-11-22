@@ -1,23 +1,12 @@
 use crate::errors;
 #[cfg(feature = "std")]
-use core::{
-    fmt::{self, Display},
-};
-use core::{
-    iter::FromIterator,
-    result,
-};
+use core::fmt::{self, Display};
+use core::{iter::FromIterator, result};
 
 #[cfg(feature = "std")]
-use std::{
-    convert::{TryFrom, TryInto},
-    time::{Duration, SystemTime, UNIX_EPOCH},
-};
+use std::{convert::{TryFrom, TryInto}, time::{Duration, SystemTime, UNIX_EPOCH}};
 
-use crate::alloc::{
-    string::{ String, ToString },
-    vec::Vec,
-};
+use crate::alloc::{string::{ String, ToString }, vec::Vec};
 
 /// A time tag in OSC message consists of two 32-bit integers where the first one denotes the number of seconds since 1900-01-01 and the second the fractions of a second.
 /// For details on its semantics see http://opensoundcontrol.org/node/3/#timetags
