@@ -4,10 +4,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[macro_use] extern crate alloc;
-#[cfg(feature = "std")]
 #[macro_use] extern crate core;
-// #[cfg(feature = "std")]
-// extern crate std as alloc;
 
 extern crate nom;
 extern crate byteorder;

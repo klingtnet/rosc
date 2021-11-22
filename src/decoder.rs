@@ -1,19 +1,6 @@
 use crate::errors::OscError;
-use crate::types::{
-    OscArray,
-    OscBundle,
-    OscColor,
-    OscMessage,
-    OscMidiMessage,
-    OscPacket,
-    OscTime,
-    OscType,
-};
-
-use crate::alloc::{
-    string::{ String, ToString },
-    vec::Vec,
-};
+use crate::types::{OscArray, OscBundle, OscColor, OscMessage, OscMidiMessage, OscPacket, OscTime, OscType};
+use crate::alloc::{string::{String, ToString}, vec::Vec};
 
 use nom::Offset;
 use nom::sequence::terminated;
@@ -21,11 +8,7 @@ use nom::bytes::complete::{take, take_till};
 use nom::combinator::{map, map_parser};
 use nom::multi::many0;
 use nom::number::complete::{be_f32, be_f64, be_i32, be_i64, be_u32};
-use nom::{
-    IResult,
-    combinator::map_res,
-    sequence::tuple
-};
+use nom::{IResult,combinator::map_res,sequence::tuple};
 
 /// Common MTU size for ethernet
 pub const MTU: usize = 1536;
