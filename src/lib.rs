@@ -7,7 +7,7 @@ extern crate nom;
 
 /// Crate specific error types.
 mod errors;
-/// OSC data types, see [OSC 1.0 specification](http://opensoundcontrol.org/spec-1_0) for details.
+/// OSC data types, see [OSC 1.0 specification](https://opensoundcontrol.stanford.edu/spec-1_0.html) for details.
 mod types;
 
 pub use crate::errors::*;
