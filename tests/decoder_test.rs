@@ -124,8 +124,7 @@ fn test_decode_udp_args() {
         // array content
         .chain(i_bytes.iter())
         .chain(f_bytes.iter())
-        .chain(i_bytes.iter())
-        .map(|x| *x)
+        .chain(i_bytes.iter()).copied()
         .collect::<Vec<u8>>();
 
     let merged: Vec<u8> = addr

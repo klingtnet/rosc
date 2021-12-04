@@ -5,7 +5,7 @@ use rosc::{OscArray, OscType};
 #[test]
 fn test_osc_array_from_iter() {
     use std::iter::FromIterator;
-    let iter = (0..3).map(|i| OscType::Int(i));
+    let iter = (0..3).map(OscType::Int);
     let osc_arr = OscArray::from_iter(iter);
     assert_eq!(
         osc_arr,

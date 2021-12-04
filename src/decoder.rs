@@ -43,7 +43,7 @@ pub fn decode_tcp_vec<'a>(msg: &'a [u8]) -> IResult<&'a [u8], Vec<OscPacket>, Os
         input = remainder;
         osc_packets.push(osc_packet);
 
-        if remainder.len() == 0 {
+        if remainder.is_empty() {
             break;
         }
     };
