@@ -15,13 +15,13 @@ pub const MTU: usize = 1536;
 
 /// Takes a bytes slice representing a UDP packet and returns the OSC packet as well as a slice of
 /// any bytes remaining after the OSC packet.
-pub fn decode_udp<'a>(msg: &'a [u8]) -> IResult<&'a [u8], OscPacket, OscError> {
+pub fn decode_udp(msg: &[u8]) -> IResult<&[u8], OscPacket, OscError> {
     decode_packet(msg, msg)
 }
 
 /// Takes a bytes slice from a TCP stream (or any stream-based protocol) and returns the first OSC
 /// packet as well as a slice of the bytes remaining after the packet.
-pub fn decode_tcp<'a>(msg: &'a [u8]) -> IResult<&'a [u8], Option<OscPacket>, OscError> {
+pub fn decode_tcp(msg: &[u8]) -> IResult<&[u8], Option<OscPacket>, OscError> {
     let (input, osc_packet_length) = be_u32(msg)?;
 
     if osc_packet_length as usize > msg.len() {
@@ -35,7 +35,7 @@ pub fn decode_tcp<'a>(msg: &'a [u8]) -> IResult<&'a [u8], Option<OscPacket>, Osc
 
 /// Takes a bytes slice from a TCP stream (or any stream-based protocol) and returns a vec of all
 /// OSC packets in the slice as well as a slice of the bytes remaining after the last packet.
-pub fn decode_tcp_vec<'a>(msg: &'a [u8]) -> IResult<&'a [u8], Vec<OscPacket>, OscError> {
+pub fn decode_tcp_vec(msg: &[u8]) -> IResult<&[u8], Vec<OscPacket>, OscError> {
     let mut input = msg;
     let mut osc_packets = vec![];
 
@@ -43,7 +43,7 @@ pub fn decode_tcp_vec<'a>(msg: &'a [u8]) -> IResult<&'a [u8], Vec<OscPacket>, Os
         input = remainder;
         osc_packets.push(osc_packet);
 
-        if remainder.len() == 0 {
+        if remainder.is_empty() {
             break;
         }
     };
@@ -125,7 +125,6 @@ fn read_bundle_element<'a>(input: &'a [u8], original_input: &'a[u8]) -> IResult<
         },
         |input| decode_packet(input, original_input),
     )(input);
-    drop(elem_size);
     result
 }
 
@@ -233,7 +232,7 @@ fn read_blob<'a>(input: &'a[u8], original_input: &'a[u8]) -> IResult<&'a[u8], Os
     )(input)
 }
 
-fn read_time_tag<'a>(input: &'a[u8]) -> IResult<&'a[u8], OscTime, OscError> {
+fn read_time_tag(input: &[u8]) -> IResult<&[u8], OscTime, OscError> {
     map(
         tuple((be_u32, be_u32)),
         |(seconds, fractional)| OscTime {
@@ -243,7 +242,7 @@ fn read_time_tag<'a>(input: &'a[u8]) -> IResult<&'a[u8], OscTime, OscError> {
     )(input)
 }
 
-fn read_midi_message<'a>(input: &'a[u8]) -> IResult<&'a[u8], OscType, OscError> {
+fn read_midi_message(input: &[u8]) -> IResult<&[u8], OscType, OscError> {
     map(take(4usize), |buf: &[u8]| {
         OscType::Midi(OscMidiMessage {
             port: buf[0],
@@ -254,7 +253,7 @@ fn read_midi_message<'a>(input: &'a[u8]) -> IResult<&'a[u8], OscType, OscError> 
     })(input)
 }
 
-fn read_osc_color<'a>(input: &'a[u8]) -> IResult<&'a[u8], OscType, OscError> {
+fn read_osc_color(input: &[u8]) -> IResult<&[u8], OscType, OscError> {
     map(take(4usize), |buf: &[u8]| {
         OscType::Color(OscColor {
             red: buf[0],

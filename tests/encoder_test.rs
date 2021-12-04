@@ -51,6 +51,7 @@ fn test_encode_empty_bundle() {
 }
 
 #[test]
+#[allow(clippy::approx_constant)]
 fn test_encode_message_with_args() {
     let msg_packet = OscPacket::Message(OscMessage {
         addr: "/another/address/1".to_string(),

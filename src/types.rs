@@ -329,7 +329,7 @@ mod tests {
     fn osc_times_can_be_converted_to_and_from_system_times() {
         let mut times = vec![];
         // Sweep across a few numbers to check for tolerance
-        for seconds in vec![
+        for seconds in &[
             // We don't start at zero because times before the UNIX_EPOCH cannot be converted to
             // OscTime.
             OscTime::UNIX_OFFSET as u32,
@@ -337,12 +337,11 @@ mod tests {
             OscTime::UNIX_OFFSET as u32 + 2,
             OscTime::UNIX_OFFSET as u32 + 3,
             u32::MAX - 1,
-            u32::MAX,
-        ] {
+            u32::MAX] {
             let fractional_max = 100;
             for fractional in 0..fractional_max {
-                times.push((seconds, fractional));
-                times.push((seconds, fractional_max - fractional));
+                times.push((*seconds, fractional));
+                times.push((*seconds, fractional_max - fractional));
             }
         }
 
