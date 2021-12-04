@@ -125,7 +125,6 @@ fn read_bundle_element<'a>(input: &'a [u8], original_input: &'a[u8]) -> IResult<
         },
         |input| decode_packet(input, original_input),
     )(input);
-    drop(elem_size);
     result
 }
 
