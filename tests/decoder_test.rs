@@ -75,6 +75,7 @@ fn test_decode_udp_empty_bundle() {
 }
 
 #[test]
+#[allow(clippy::approx_constant)]
 fn test_decode_udp_args() {
     // /another/valid/address/123 ,fdih 3.1415 3.14159265359 12345678i32
     // -1234567891011
