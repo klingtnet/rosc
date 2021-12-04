@@ -13,5 +13,5 @@ fn bench_decode(b: &mut Bencher) {
         73, 76, 76, 65, 84, 79, 82, 83, 47, 79, 83, 67, 50, 47, 65, 68, 83, 82, 47, 122, 0, 0, 0,
         0, 44, 102, 102, 102, 102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ];
-    b.iter(|| rosc::decoder::decode(&raw_msg).unwrap());
+    b.iter(|| rosc::decoder::decode_udp(&raw_msg).unwrap());
 }

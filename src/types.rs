@@ -1,12 +1,12 @@
 use crate::errors;
-use std::{
-    convert::{TryFrom, TryInto},
-    error,
-    fmt::{self, Display},
-    iter::FromIterator,
-    result,
-    time::{Duration, SystemTime, UNIX_EPOCH},
-};
+#[cfg(feature = "std")]
+use core::fmt::{self, Display};
+use core::{iter::FromIterator, result};
+
+#[cfg(feature = "std")]
+use std::{convert::{TryFrom, TryInto}, time::{Duration, SystemTime, UNIX_EPOCH}};
+
+use crate::alloc::{string::{ String, ToString }, vec::Vec};
 
 /// A time tag in OSC message consists of two 32-bit integers where the first one denotes the number of seconds since 1900-01-01 and the second the fractions of a second.
 /// For details on its semantics see http://opensoundcontrol.org/node/3/#timetags
@@ -14,13 +14,16 @@ use std::{
 /// # Examples
 ///
 /// ```
-/// use rosc::OscTime;
-/// use std::{convert::TryFrom, time::UNIX_EPOCH};
+/// #[cfg(feature = "std")]
+/// {
+///     use rosc::OscTime;
+///     use std::{convert::TryFrom, time::UNIX_EPOCH};
 ///
-/// assert_eq!(
-///     OscTime::try_from(UNIX_EPOCH).unwrap(),
-///     OscTime::from((2_208_988_800, 0))
-/// );
+///     assert_eq!(
+///         OscTime::try_from(UNIX_EPOCH).unwrap(),
+///         OscTime::from((2_208_988_800, 0))
+///     );
+/// }
 /// ```
 ///
 /// # Conversions between `(u32, u32)`
@@ -52,6 +55,7 @@ pub struct OscTime {
     pub fractional: u32,
 }
 
+#[cfg(feature = "std")]
 impl OscTime {
     const UNIX_OFFSET: u64 = 2_208_988_800; // From RFC 5905
     const TWO_POW_32: f64 = (u32::MAX as f64) + 1.0; // Number of bits in a `u32`
@@ -60,10 +64,11 @@ impl OscTime {
     const SECONDS_PER_NANO: f64 = 1.0 / OscTime::NANOS_PER_SECOND;
 }
 
+#[cfg(feature = "std")]
 impl TryFrom<SystemTime> for OscTime {
     type Error = OscTimeError;
 
-    fn try_from(time: SystemTime) -> std::result::Result<OscTime, OscTimeError> {
+    fn try_from(time: SystemTime) -> core::result::Result<OscTime, OscTimeError> {
         let duration_since_epoch = time
             .duration_since(UNIX_EPOCH)
             .map_err(|_| OscTimeError(OscTimeErrorKind::BeforeEpoch))?
@@ -79,6 +84,7 @@ impl TryFrom<SystemTime> for OscTime {
     }
 }
 
+#[cfg(feature = "std")]
 impl From<OscTime> for SystemTime {
     fn from(time: OscTime) -> SystemTime {
         let nanos =
@@ -106,16 +112,19 @@ impl From<OscTime> for (u32, u32) {
     }
 }
 
+#[cfg(feature = "std")]
 /// An error returned by conversions involving [`OscTime`].
 #[derive(Debug)]
 pub struct OscTimeError(OscTimeErrorKind);
 
+#[cfg(feature = "std")]
 #[derive(Debug)]
 enum OscTimeErrorKind {
     BeforeEpoch,
     Overflow,
 }
 
+#[cfg(feature = "std")]
 impl Display for OscTimeError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.0 {
@@ -129,7 +138,7 @@ impl Display for OscTimeError {
     }
 }
 
-impl error::Error for OscTimeError {}
+// impl error::Error for OscTimeError {}
 
 /// see OSC Type Tag String: [OSC Spec. 1.0](http://opensoundcontrol.org/spec-1_0)
 /// padding: zero bytes (n*4)
@@ -189,6 +198,8 @@ impl From<(u32, u32)> for OscType {
         OscType::Time(time.into())
     }
 }
+
+#[cfg(feature = "std")]
 impl TryFrom<SystemTime> for OscType {
     type Error = OscTimeError;
 
@@ -196,6 +207,7 @@ impl TryFrom<SystemTime> for OscType {
         time.try_into().map(OscType::Time)
     }
 }
+
 impl OscType {
     pub fn time(self) -> Option<OscTime> {
         match self {
@@ -292,11 +304,15 @@ impl<'a> From<&'a str> for OscMessage {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "std")]
     use super::*;
+    #[cfg(feature = "std")]
     use std::time::UNIX_EPOCH;
 
+    #[cfg(feature = "std")]
     const TOLERANCE_NANOS: u64 = 5;
 
+    #[cfg(feature = "std")]
     #[test]
     fn system_times_can_be_converted_to_and_from_osc() {
         let times = vec![UNIX_EPOCH, SystemTime::now()];
@@ -308,6 +324,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "std")]
     #[test]
     fn osc_times_can_be_converted_to_and_from_system_times() {
         let mut times = vec![];
@@ -337,11 +354,13 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "std")]
     #[test]
     fn osc_time_cannot_represent_times_before_1970_01_01() {
         assert!(OscTime::try_from(UNIX_EPOCH - Duration::from_secs(1)).is_err())
     }
 
+    #[cfg(feature = "std")]
     fn assert_eq_system_times(a: SystemTime, b: SystemTime) {
         let difference = if a < b {
             b.duration_since(a).unwrap()
@@ -359,6 +378,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "std")]
     fn assert_eq_osc_times(a: OscTime, b: OscTime) {
         // I did not want to implement subtraction with carrying in order to implement this in the
         // same way as the alternative for system times. Intsead we are compare each part of the

@@ -1,5 +1,8 @@
 use crate::errors::OscError;
 
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 use nom::branch::alt;
 use nom::bytes::complete::{is_not, tag, take_till1};
 use nom::character::complete::char;
@@ -20,7 +23,7 @@ impl Matcher {
 
     /// Instantiates a new `Matcher` with the given address pattern.
     /// An error will be returned if the given address pattern is invalid.
-    /// 
+    ///
     /// Matcher should be instantiated once per pattern and reused because its construction requires parsing the address pattern which is computationally expensive.
     ///
     /// A valid address pattern begins with a `/` and contains at least a method name, e.g. `/tempo`.
@@ -31,14 +34,14 @@ impl Matcher {
     /// - `[a-z]` are basically regex [character classes](https://www.regular-expressions.info/charclass.html)
     /// - `{foo,bar}` is an alternative, matching either `foo` or `bar`
     /// - everything else is matched literally
-    /// 
+    ///
     /// Refer to the OSC specification for details about address pattern matching: <osc-message-dispatching-and-pattern-matching>.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rosc::address::Matcher;
-    /// 
+    ///
     /// Matcher::new("/tempo").expect("valid address");
     /// Matcher::new("").expect_err("address does not start with a slash");
     /// ```
@@ -50,15 +53,15 @@ impl Matcher {
     /// Match an OSC address against an address pattern.
     /// If the address matches the pattern the result will be `true`, otherwise `false`.
     /// An error is returned if the given OSC address is not valid.
-    /// 
+    ///
     /// A valid OSC address begins with a `/` and contains at least a method name, e.g. `/tempo`.
     /// Despite OSC address patterns a plain address must not include any of the following characters `#*,/?[]{}`.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rosc::address::Matcher;
-    /// 
+    ///
     /// let matcher = Matcher::new("/oscillator/[0-9]/{frequency,phase}").unwrap();
     /// assert!(matcher.match_address("/oscillator/1/frequency").unwrap());
     /// assert!(matcher.match_address("/oscillator/8/phase").unwrap());

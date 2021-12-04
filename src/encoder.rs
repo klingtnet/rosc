@@ -1,5 +1,6 @@
 use crate::errors::OscError;
 use crate::types::{OscBundle, OscMessage, OscPacket, OscTime, OscType, Result};
+use crate::alloc::{string::{ String, ToString }, vec::Vec};
 
 use byteorder::{BigEndian, ByteOrder};
 

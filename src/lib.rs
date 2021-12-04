@@ -1,9 +1,20 @@
 //! **rosc** is an implementation of the [OSC 1.0](http://opensoundcontrol.org/spec-1_0) protocol in pure Rust.
 //!
 
-extern crate byteorder;
-extern crate regex;
+#![cfg_attr(not(feature = "std"), no_std)]
+
+#[cfg(not(feature = "std"))]
+#[macro_use] extern crate alloc;
+
+#[cfg(feature = "std")]
+extern crate std as core;
+#[cfg(feature = "std")]
+#[macro_use] extern crate std as alloc;
+
 extern crate nom;
+extern crate byteorder;
+#[cfg(feature = "std")]
+extern crate regex;
 
 /// Crate specific error types.
 mod errors;
@@ -18,4 +29,5 @@ pub mod decoder;
 /// Encodes an `OscPacket` to a byte vector.
 pub mod encoder;
 /// Address checking and matching methods
+#[cfg(feature = "std")]
 pub mod address;

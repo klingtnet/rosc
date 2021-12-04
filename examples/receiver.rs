@@ -14,7 +14,7 @@ fn main() {
     }
     let addr = match SocketAddrV4::from_str(&args[1]) {
         Ok(addr) => addr,
-        Err(_) => panic!(usage),
+        Err(_) => panic!("{}", usage),
     };
     let sock = UdpSocket::bind(addr).unwrap();
     println!("Listening to {}", addr);
@@ -25,7 +25,7 @@ fn main() {
         match sock.recv_from(&mut buf) {
             Ok((size, addr)) => {
                 println!("Received packet with size {} from: {}", size, addr);
-                let packet = rosc::decoder::decode(&buf[..size]).unwrap();
+                let (_, packet) = rosc::decoder::decode_udp(&buf[..size]).unwrap();
                 handle_packet(packet);
             }
             Err(e) => {
