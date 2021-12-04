@@ -112,11 +112,9 @@ fn decode_bundle<'a>(
     ))
 }
 
-
 fn read_bundle_element<'a>(input: &'a [u8], original_input: &'a[u8]) -> IResult<&'a [u8], OscPacket, OscError> {
     let (input, elem_size) = be_u32(input)?;
 
-    #[allow(clippy::let_and_return)]
     let result = map_parser(
         |input| {
             take(elem_size)(input).map_err(|_: nom::Err<OscError>| {

@@ -303,7 +303,6 @@ impl<'a> From<&'a str> for OscMessage {
 }
 
 #[cfg(test)]
-#[allow(clippy::all)]
 mod tests {
     #[cfg(feature = "std")]
     use super::*;
