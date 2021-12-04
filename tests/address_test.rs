@@ -8,17 +8,15 @@ use rosc::address::Matcher;
 fn test_matcher() {
     let matcher = Matcher::new("/oscillator/[0-9]/*/pre[!1234?*]post/{frequency,phase}/x?")
         .expect("Matcher::new");
-    assert_eq!(
+    assert!(
         matcher
             .match_address("/oscillator/1/something/preXpost/phase/xy")
             .expect("should match"),
-        true
     );
-    assert_eq!(
-        matcher
+    assert!(
+        !matcher
             .match_address("/oscillator/1/something/pre1post/phase/xy")
             .expect("should not match"),
-        false
     );
     matcher.match_address("invalid_address").expect_err("should fail because address does not start with a slash");
 }
