@@ -2,7 +2,7 @@ extern crate byteorder;
 extern crate rosc;
 
 use byteorder::{BigEndian, ByteOrder};
-use std::mem;
+
 
 use rosc::{decoder, encoder, OscBundle, OscPacket, OscTime, OscType};
 
@@ -92,12 +92,12 @@ fn test_decode_udp_args() {
     assert_eq!(BigEndian::read_f64(&d_bytes), d);
 
     let i = 12345678i32;
-    let i_bytes: [u8; 4] = unsafe { mem::transmute(i.to_be()) };
+    let i_bytes: [u8; 4] = i.to_be().to_ne_bytes();
 
     let l = -1234567891011i64;
-    let h_bytes: [u8; 8] = unsafe { mem::transmute(l.to_be()) };
+    let h_bytes: [u8; 8] = l.to_be().to_ne_bytes();
 
-    let blob_size: [u8; 4] = unsafe { mem::transmute(6u32.to_be()) };
+    let blob_size: [u8; 4] = 6u32.to_be().to_ne_bytes();
     let blob: Vec<u8> = vec![1u8, 2u8, 3u8, 4u8, 5u8, 6u8];
 
     let s = "I am an osc test string.";
@@ -106,7 +106,7 @@ fn test_decode_udp_args() {
     let s_bytes: Vec<u8> = encoder::encode_string(s);
 
     let c = '$';
-    let c_bytes: [u8; 4] = unsafe { mem::transmute((c as u32).to_be()) };
+    let c_bytes: [u8; 4] = (c as u32).to_be().to_ne_bytes();
 
     let a = vec![OscType::Int(i), OscType::Float(f), OscType::Int(i)];
 
