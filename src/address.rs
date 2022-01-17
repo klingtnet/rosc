@@ -47,7 +47,7 @@ impl Matcher {
     /// Matcher::new("").expect_err("address does not start with a slash");
     /// ```
     pub fn new(pattern: &str) -> Result<Self, OscError> {
-        let pattern_parts = match all_consuming(many1(get_address_pattern_components))(pattern) {
+        let pattern_parts = match all_consuming(many1(map_address_pattern_component))(pattern) {
             Ok((_, parts)) => { parts }
             Err(_) => panic!("Address must be valid")
         };
@@ -229,7 +229,7 @@ enum AddressPatternComponent {
     Choice(Vec<String>),
 }
 
-fn get_address_pattern_components(input: &str) -> IResult<&str, AddressPatternComponent>
+fn map_address_pattern_component(input: &str) -> IResult<&str, AddressPatternComponent>
 {
     alt((
         // Anything that's alphanumeric gets matched literally
@@ -308,7 +308,7 @@ fn match_wildcard<'a>(input: &'a str, minimum_length: usize, next: Option<&Addre
                     AddressPatternComponent::Tag(s) => match_literally(substring, s.as_str()),
                     AddressPatternComponent::CharacterClass(cc) => match_character_class(substring, cc),
                     AddressPatternComponent::Choice(s) => match_choice(substring, s),
-                    // These two cases are prevented from happening by get_address_pattern_part
+                    // These two cases are prevented from happening by map_address_pattern_component
                     AddressPatternComponent::WildcardSingle => panic!("Single wildcard ('?') must not follow wildcard ('*')"),
                     AddressPatternComponent::Wildcard(_) => panic!("Double wildcards must be condensed into one"),
                 };
