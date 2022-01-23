@@ -159,6 +159,12 @@ fn parse_address_pattern(input: &str) -> Result<Vec<Regex>, OscError> {
         .map_err(|err| OscError::RegexError(err.to_string()))
 }
 
+/// A characters class is defined by a set or range of characters that it matches.
+/// For example, [a-z] matches all lowercase alphabetic letters. It can also contain multiple
+/// ranges, like [a-zA-Z]. Instead of a range you can also directly provide the characters to match,
+/// e.g. [abc123]. You can also combine this with ranges, like [a-z123].
+/// If the first characters is an exclamation point, the match is negated, e.g. [!0-9] will match
+/// anything except numbers.
 #[derive(Debug)]
 struct CharacterClass {
     pub negated: bool,
@@ -166,6 +172,8 @@ struct CharacterClass {
 }
 
 /// Expand a character range like 'a-d' to all the letters contained in the range, e.g. 'abcd'
+/// This is done by converting the characters to their ASCII values and then getting every ASCII
+/// in between.
 fn expand_character_range<'a>(first: char, second: char) -> String {
     let start = first as u8;
     let end = second as u8;
