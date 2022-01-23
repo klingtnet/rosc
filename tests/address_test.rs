@@ -5,7 +5,7 @@ use rosc::address::Matcher;
 
 #[cfg(feature = "std")]
 #[test]
-fn test_matcher_new() {
+fn test_matcher() {
     let mut matcher;
 
     // Regular address using only alphanumeric parts
@@ -112,6 +112,10 @@ fn test_matcher_new() {
     matcher.match_address("/oscillator/foobar/frequency").expect("Should match");
     matcher.match_address("/oscillator/baz/frequency").expect("Should match");
     matcher.match_address("/oscillator/something/frequency").expect_err("Should not match");
+
+    // Check for allowed literal characters
+    matcher = Matcher::new("/[!-~]").expect("Should be valid");
+    matcher.match_address("/a").expect("Should match");
 }
 
 #[cfg(feature = "std")]
