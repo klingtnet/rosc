@@ -4,8 +4,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
 use nom::branch::alt;
-use nom::bytes::complete::{is_not, tag, take_till1, take, is_a};
-use nom::character::complete::{alphanumeric1, char, satisfy};
+use nom::bytes::complete::{is_not, tag, take_till1, take, is_a, take_while1};
+use nom::character::complete::{char, satisfy};
 use nom::combinator::{all_consuming, complete, map_parser, verify};
 use nom::multi::{many1, separated_list0};
 use nom::sequence::{delimited, preceded, separated_pair};
@@ -246,7 +246,7 @@ fn map_address_pattern_component(input: &str) -> IResult<&str, AddressPatternCom
 {
     alt((
         // Anything that's alphanumeric gets matched literally
-        alphanumeric1.map(|s: &str| { AddressPatternComponent::Tag(String::from(s)) }), // TODO: this should be all printable ascii characters, not just alphanum!
+        take_while1(is_address_character).map(|s: &str| { AddressPatternComponent::Tag(String::from(s)) }),
         // Slashes must be seperated into their own tag for the non-greedy implementation of wildcards
         char('/').map(|c: char| { AddressPatternComponent::Tag(c.to_string()) }),
         tag("?").map(|_| { AddressPatternComponent::WildcardSingle }),
@@ -258,9 +258,10 @@ fn map_address_pattern_component(input: &str) -> IResult<&str, AddressPatternCom
         is_a("*?").map(|x: &str| { AddressPatternComponent::Wildcard(x.matches("?").count()) }),
         map_parser(
             delimited(char('{'), is_not("}"), char('}')),
-            separated_list0(char(','.into()), alphanumeric1),
+            separated_list0(char(','.into()), take_while1(is_address_character)),
         ).map(|alternatives: Vec<&str>| { AddressPatternComponent::Choice(alternatives.iter().map(|x| x.to_string()).collect()) }),
-        delimited(char('['), is_not("]") /*TODO: Only allowed: alphanum and '!-' */, char(']')).map(|s: &str| { AddressPatternComponent::CharacterClass(CharacterClass::new(s)) })
+        // TODO: prevent an empty character class, i.e. [!]
+        delimited(char('['), take_while1(is_address_character), char(']')).map(|s: &str| { AddressPatternComponent::CharacterClass(CharacterClass::new(s)) })
     ))(input)
 }
 
@@ -302,8 +303,8 @@ fn match_choice<'a>(input: &'a str, choices: &Vec<String>) -> IResult<&'a str, &
 fn match_wildcard<'a>(input: &'a str, minimum_length: usize, next: Option<&AddressPatternComponent>) -> IResult<&'a str, &'a str>
 {
     match next {
-        // No next component, consume all alphanumeric characters until end or next '/'
-        None => verify(alphanumeric1, |s: &str| s.len() >= minimum_length)(input),
+        // No next component, consume all allowed characters until end or next '/'
+        None => verify(take_while1(is_address_character), |s: &str| s.len() >= minimum_length)(input),
         // There is another element in this part, so logic gets a bit more complicated
         Some(component) => {
             // Wildcards can only match within the current address part, discard the rest
