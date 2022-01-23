@@ -159,6 +159,15 @@ fn parse_address_pattern(input: &str) -> Result<Vec<Regex>, OscError> {
         .map_err(|err| OscError::RegexError(err.to_string()))
 }
 
+/// Check whether a character is an allowed address character
+/// All printable ASCII characters except for a few special characters are allowed
+fn is_address_character(x: char) -> bool {
+    match x {
+        ' ' | '#' | '*' | ',' | '/' | '?' | '[' | ']' | '{' | '}' => false,
+        c => c > '\x20' && c < '\x7F'
+    }
+}
+
 /// A characters class is defined by a set or range of characters that it matches.
 /// For example, [a-z] matches all lowercase alphabetic letters. It can also contain multiple
 /// ranges, like [a-zA-Z]. Instead of a range you can also directly provide the characters to match,
@@ -193,15 +202,6 @@ fn expand_character_range<'a>(first: char, second: char) -> String {
         }
     }
     out
-}
-
-/// Check whether a character is an allowed address character
-/// All printable ASCII characters except for a few special characters are allowed
-fn is_address_character(x: char) -> bool {
-    match x {
-        ' ' | '#' | '*' | ',' | '/' | '?' | '[' | ']' | '{' | '}' => false,
-        c => c > '\x20' && c < '\x7F'
-    }
 }
 
 impl CharacterClass {
