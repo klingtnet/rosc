@@ -82,6 +82,7 @@ fn test_matcher() {
     // meaning it will match the longest possible sequence
     matcher = Matcher::new("/oscillator/*/frequency").expect("Should be valid");
     matcher.match_address("/oscillator/anything123/frequency").expect("Should match");
+    matcher.match_address("/oscillator/!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~/frequency").expect("Should match");
     // Test that wildcard doesn't cross part boundary
     matcher.match_address("/oscillator/extra/part/frequency").expect_err("Should not match");
     matcher.match_address("/oscillator//frequency").expect_err("Should not match");
