@@ -275,7 +275,7 @@ fn match_literally<'a>(input: &'a str, pattern: &str) -> IResult<&'a str, &'a st
 fn match_wildcard_single(input: &str) -> IResult<&str, &str>
 {
     // TODO: this has to be possible with a simpler parser?
-    verify(take(1usize), |s: &str| s.chars().all(char::is_alphanumeric))(input)
+    verify(take(1usize), |s: &str| s.chars().all(is_address_character))(input)
 }
 
 fn match_character_class<'a>(input: &'a str, character_class: &'a CharacterClass) -> IResult<&'a str, &'a str> {

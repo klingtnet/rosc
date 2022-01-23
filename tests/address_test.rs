@@ -117,6 +117,13 @@ fn test_matcher() {
     // Check for allowed literal characters
     matcher = Matcher::new("/!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~").expect("Should be valid");
     matcher.match_address("/!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~").expect("Should match");
+
+    // Check that single wildcard matches all legal characters
+    matcher = Matcher::new("/?").expect("Should be valid");
+    let legal = "!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~";
+    for c in legal.chars() {
+        matcher.match_address(format!("/{}", c).as_str()).expect("Should match");
+    }
 }
 
 #[cfg(feature = "std")]
