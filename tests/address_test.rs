@@ -114,8 +114,8 @@ fn test_matcher() {
     matcher.match_address("/oscillator/something/frequency").expect_err("Should not match");
 
     // Check for allowed literal characters
-    matcher = Matcher::new("/!\"$%&'()+-./0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~").expect("Should be valid");
-    matcher.match_address("/!\"$%&'()+-./0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~").expect("Should match");
+    matcher = Matcher::new("/!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~").expect("Should be valid");
+    matcher.match_address("/!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~").expect("Should match");
 }
 
 #[cfg(feature = "std")]
