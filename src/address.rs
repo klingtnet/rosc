@@ -187,9 +187,11 @@ fn expand_character_range<'a>(first: char, second: char) -> String {
 
     let mut out = String::from("");
     for c in range {
-        out.push(c as char);
+        // For funky ranges like [0-a], some illegal characters are contained
+        if is_address_character(c as char) {
+            out.push(c as char);
+        }
     }
-    // TODO: for funky but legal ranges like '0-a' we need to clean up the ranges
     out
 }
 
