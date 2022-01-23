@@ -193,8 +193,13 @@ fn expand_character_range<'a>(first: char, second: char) -> String {
     out
 }
 
-fn is_alphanumeric_char(x: char) -> bool {
-    x.is_alphanumeric()
+/// Check whether a character is an allowed address character
+/// All printable ASCII characters except for a few special characters are allowed
+fn is_address_character(x: char) -> bool {
+    match x {
+        ' ' | '#' | '*' | ',' | '/' | '?' | '[' | ']' | '{' | '}' => false,
+        c => c > '\x20' && c < '\x7F'
+    }
 }
 
 impl CharacterClass {
@@ -213,9 +218,9 @@ impl CharacterClass {
             // '!' besides at beginning has no special meaning, but is legal
             char::<_, nom::error::Error<&str>>('!').map(|_| String::from("")),
             // attempt to match a range like a-z or 0-9
-            separated_pair(satisfy(is_alphanumeric_char), char('-'), satisfy(is_alphanumeric_char)).map(|(first, second)| expand_character_range(first, second)),
+            separated_pair(satisfy(is_address_character), char('-'), satisfy(is_address_character)).map(|(first, second)| expand_character_range(first, second)),
             // Match characters literally
-            satisfy(is_alphanumeric_char).map(|x| x.to_string()),
+            satisfy(is_address_character).map(|x| x.to_string()),
             // Trailing dash
             char('-').map(|_| { String::from("-") })
         ))))(input);
