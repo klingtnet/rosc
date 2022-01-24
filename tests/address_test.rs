@@ -1,7 +1,7 @@
 extern crate rosc;
 
 #[cfg(feature = "std")]
-use rosc::address::Matcher;
+use rosc::address::{Matcher, verify_address};
 
 #[cfg(feature = "std")]
 #[test]
@@ -124,6 +124,24 @@ fn test_matcher() {
     for c in legal.chars() {
         matcher.match_address(format!("/{}", c).as_str()).expect("Should match");
     }
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn test_verify_address() {
+    verify_address("/test").expect("Should be valid");
+    verify_address("/oscillator/1/frequency").expect("Should be valid");
+    verify_address("/!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~/foo").expect("Should be valid");
+
+    // No '/' at beginning
+    verify_address("test").expect_err("Should not be valid");
+    // '/' at the end
+    verify_address("/test/").expect_err("Should not be valid");
+    // Different address pattern elements that are not allowed in regular addresses
+    verify_address("/test*").expect_err("Should not be valid");
+    verify_address("/test?").expect_err("Should not be valid");
+    verify_address("/test{foo,bar}").expect_err("Should not be valid");
+    verify_address("/test[a-z]").expect_err("Should not be valid");
 }
 
 #[cfg(feature = "std")]

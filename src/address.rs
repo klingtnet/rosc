@@ -8,7 +8,7 @@ use nom::bytes::complete::{is_not, tag, take_till1, take, is_a, take_while1};
 use nom::character::complete::{char, satisfy};
 use nom::combinator::{all_consuming, complete, map_parser, verify};
 use nom::multi::{many1, separated_list0};
-use nom::sequence::{delimited, preceded, separated_pair};
+use nom::sequence::{delimited, pair, preceded, separated_pair};
 use nom::{IResult, Parser};
 use nom::error::{ErrorKind, ParseError};
 use regex::Regex;
@@ -336,5 +336,26 @@ fn match_wildcard<'a>(input: &'a str, minimum_length: usize, next: Option<&Addre
             }
             verify(take(longest), |s: &str| s.len() >= minimum_length)(input)
         }
+    }
+}
+
+/// Verify that an address is valid
+///
+/// # Examples
+/// ```
+/// use rosc::address::verify_address;
+///
+/// match verify_address("/oscillator/1") {
+///     Ok(()) => println!("Address is valid"),
+///     Err(e) => println!("Address is not valid")
+/// }
+/// ```
+pub fn verify_address(input: &str) -> Result<(), OscError>
+{
+    match all_consuming::<_,_,nom::error::Error<&str>,_>(
+        many1(pair(tag("/"), take_while1(is_address_character)))
+    )(input) {
+        Ok((a,b)) => Ok(()),
+        Err(_) => Err(OscError::BadAddress("Invalid address".to_string()))
     }
 }
