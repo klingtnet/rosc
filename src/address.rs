@@ -6,8 +6,8 @@ use alloc::vec::Vec;
 use nom::branch::alt;
 use nom::bytes::complete::{is_not, tag, take_till1, take, is_a, take_while1};
 use nom::character::complete::{char, satisfy};
-use nom::combinator::{all_consuming, complete, map_parser, verify};
-use nom::multi::{many1, separated_list0};
+use nom::combinator::{all_consuming, complete, map_parser, recognize, verify};
+use nom::multi::{many1, separated_list0, separated_list1};
 use nom::sequence::{delimited, pair, preceded, separated_pair};
 use nom::{IResult, Parser};
 use nom::error::{ErrorKind, ParseError};
@@ -355,7 +355,46 @@ pub fn verify_address(input: &str) -> Result<(), OscError>
     match all_consuming::<_,_,nom::error::Error<&str>,_>(
         many1(pair(tag("/"), take_while1(is_address_character)))
     )(input) {
-        Ok((a,b)) => Ok(()),
+        Ok((_)) => Ok(()),
         Err(_) => Err(OscError::BadAddress("Invalid address".to_string()))
+    }
+}
+
+/// Parse an address pattern's part until the next '/' or the end
+fn address_pattern_part_parser(input: &str) -> IResult<&str, Vec<&str>> {
+    many1::<_, _, nom::error::Error<&str>, _>(
+        alt((
+            take_while1(is_address_character),
+            tag("?"),
+            tag("*"),
+            recognize(delimited(char('{'), separated_list1(tag(","), take_while1(is_address_character)), char('}'))),
+            delimited(char('['), take_while1(is_address_character), char(']')),
+        ))
+    )(input)
+}
+
+/// Verify that an address pattern is valid
+///
+/// # Examples
+/// ```
+/// use rosc::address::verify_address_pattern;
+///
+/// match verify_address_pattern("/oscillator/[0-9]/*") {
+///     Ok(()) => println!("Address is valid"),
+///     Err(e) => println!("Address is not valid")
+/// }
+/// ```
+pub fn verify_address_pattern(input: &str) -> Result<(), OscError>
+{
+    match all_consuming(many1(
+        // Each part must start with a '/'. This automatically also prevents a trailing '/'
+        pair(
+            tag("/"),
+            address_pattern_part_parser.map(|x| x.concat()),
+        )
+    ))(input)
+    {
+        Ok((_)) => Ok(()),
+        Err(_) => Err(OscError::BadAddress("Invalid address pattern".to_string()))
     }
 }

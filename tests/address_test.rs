@@ -2,6 +2,7 @@ extern crate rosc;
 
 #[cfg(feature = "std")]
 use rosc::address::{Matcher, verify_address};
+use rosc::address::verify_address_pattern;
 
 #[cfg(feature = "std")]
 #[test]
@@ -142,6 +143,32 @@ fn test_verify_address() {
     verify_address("/test?").expect_err("Should not be valid");
     verify_address("/test{foo,bar}").expect_err("Should not be valid");
     verify_address("/test[a-z]").expect_err("Should not be valid");
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn test_verify_address_pattern() {
+    verify_address_pattern("/test").expect("Should be valid");
+    verify_address_pattern("/oscillator/1/frequency").expect("Should be valid");
+    verify_address_pattern("/!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~/foo").expect("Should be valid");
+
+    // No '/' at beginning
+    verify_address_pattern("test").expect_err("Should not be valid");
+    // '/' at the end
+    verify_address_pattern("/test/").expect_err("Should not be valid");
+
+    // Different address pattern elements
+    verify_address_pattern("/test*").expect("Should be valid");
+    verify_address_pattern("/test?").expect("Should be valid");
+    verify_address_pattern("/test{foo,bar}").expect("Should be valid");
+    verify_address_pattern("/test[a-z]").expect("Should be valid");
+    verify_address_pattern("/test[a-z]*??/{foo,bar,baz}[!a-z0-9]/*").expect("Should be valid");
+    verify_address_pattern("/test{foo}").expect("Should be valid");
+
+    // Empty element in choice
+    verify_address_pattern("/{asd,}/").expect_err("Should not be valid");
+    // Illegal character in range
+    verify_address_pattern("/[a-b*]/").expect_err("Should not be valid");
 }
 
 #[cfg(feature = "std")]
