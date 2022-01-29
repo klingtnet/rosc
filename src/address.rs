@@ -50,7 +50,8 @@ impl Matcher {
         verify_address_pattern(pattern)?;
         let pattern_parts = match all_consuming(many1(map_address_pattern_component))(pattern) {
             Ok((_, parts)) => { parts }
-            Err(_) => panic!("Address must be valid")
+            // This should never happen because pattern is verified above
+            Err(_) => panic!("Address pattern must be valid")
         };
 
         Ok(Matcher { pattern: String::from(pattern), pattern_parts })
@@ -74,7 +75,13 @@ impl Matcher {
     /// assert_eq!(matcher.match_address("/oscillator/4/detune").unwrap(), false);
     /// ```
     pub fn match_address(&self, address: &str) -> Result<bool, OscError> {
+        verify_address(address)?;   // TODO: Create an address struct so we don't have to re-check addresses every time we match
+        // Trivial case
+        if address == self.pattern {
+            return Ok(true);
+        }
         let mut remainder: &str = address;
+        // Match the the address component by component
         for (index, part) in self.pattern_parts.as_slice().iter().enumerate() {
             let result = match part {
                 AddressPatternComponent::Tag(s) => match_literally(remainder, s.as_str()),
@@ -98,13 +105,15 @@ impl Matcher {
 
             match result {
                 Ok((i, _)) => remainder = i,
-                Err(_) => return Err(OscError::Unimplemented) // TODO
+                Err(_) => return Ok(false)  // Component didn't match, goodbye
             };
         }
+
+        // Address is only matched if it was consumed entirely
         return if remainder.len() == 0 {
             Ok(true)
         } else {
-            Err(OscError::Unimplemented)     // TODO
+            Ok(false)
         };
     }
 }

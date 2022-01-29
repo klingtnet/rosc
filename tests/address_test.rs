@@ -11,18 +11,18 @@ fn test_matcher() {
 
     // Regular address using only alphanumeric parts
     matcher = Matcher::new("/oscillator/1/frequency").expect("Should be valid");
-    matcher.match_address("/oscillator/1/frequency").expect("Should match");
-    matcher.match_address("/oscillator/1/phase").expect_err("Should not match");
-    matcher.match_address("/oscillator/1/frequencyfoo").expect_err("Should not match");
-    matcher.match_address("/prefix/oscillator/1/frequency").expect_err("Should not match");
+    assert_eq!(matcher.match_address("/oscillator/1/frequency").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/1/phase").expect("Valid address pattern"), false);
+    assert_eq!(matcher.match_address("/oscillator/1/frequencyfoo").expect("Valid address pattern"), false);
+    assert_eq!(matcher.match_address("/prefix/oscillator/1/frequency").expect("Valid address pattern"), false);
 
     // Choice
     matcher = Matcher::new("/foo{bar,baz}").expect("Should be valid");
-    matcher.match_address("/foobar").expect("Should match");
-    matcher.match_address("/foobaz").expect("Should match");
+    assert_eq!(matcher.match_address("/foobar").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/foobaz").expect("Valid address pattern"), true);
 
     matcher = Matcher::new("/foo{bar,baz,tron}").expect("Should be valid");
-    matcher.match_address("/footron").expect("Should match");
+    assert_eq!(matcher.match_address("/footron").expect("Valid address pattern"), true);
 
     // Character class
     // Character classes are sets or ranges of characters to match.
@@ -30,100 +30,100 @@ fn test_matcher() {
     // They can be negated with '!', e.g. [!0-9] will match all characters except 0-9
     // Basic example
     matcher = Matcher::new("/oscillator/[0-9]").expect("Should be valid");
-    matcher.match_address("/oscillator/0").expect("Should match");  // Beginning of range included
-    matcher.match_address("/oscillator/6").expect("Should match");  // Middle of range
-    matcher.match_address("/oscillator/9").expect("Should match");  // Last member of range included
+    assert_eq!(matcher.match_address("/oscillator/0").expect("Valid address pattern"), true);  // Beginning of range included
+    assert_eq!(matcher.match_address("/oscillator/6").expect("Valid address pattern"), true);  // Middle of range
+    assert_eq!(matcher.match_address("/oscillator/9").expect("Valid address pattern"), true);  // Last member of range included
 
     // Inverted order should work too
     matcher = Matcher::new("/oscillator/[9-0]").expect("Should be valid");
-    matcher.match_address("/oscillator/0").expect("Should match");
-    matcher.match_address("/oscillator/6").expect("Should match");
-    matcher.match_address("/oscillator/9").expect("Should match");
+    assert_eq!(matcher.match_address("/oscillator/0").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/6").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/9").expect("Valid address pattern"), true);
 
     // Multiple ranges
     matcher = Matcher::new("/oscillator/[a-zA-Z0-9]").expect("Should be valid");
-    matcher.match_address("/oscillator/0").expect("Should match");
-    matcher.match_address("/oscillator/a").expect("Should match");
-    matcher.match_address("/oscillator/A").expect("Should match");
+    assert_eq!(matcher.match_address("/oscillator/0").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/a").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/A").expect("Valid address pattern"), true);
 
     // Negated range
     matcher = Matcher::new("/oscillator/[!0-9]").expect("Should be valid");
-    matcher.match_address("/oscillator/1").expect_err("Should not match");
-    matcher.match_address("/oscillator/a").expect("Should match");
+    assert_eq!(matcher.match_address("/oscillator/1").expect("Valid address pattern"), false);
+    assert_eq!(matcher.match_address("/oscillator/a").expect("Valid address pattern"), true);
 
     // Extra exclamation points must be entirely ignored
     matcher = Matcher::new("/oscillator/[!0-9!a-z!]").expect("Should be valid");
-    matcher.match_address("/oscillator/A").expect("Should match");
+    assert_eq!(matcher.match_address("/oscillator/A").expect("Valid address pattern"), true);
 
     // Trailing dash has no special meaning
     matcher = Matcher::new("/oscillator/[abcd-]").expect("Should be valid");
-    matcher.match_address("/oscillator/a").expect("Should match");
-    matcher.match_address("/oscillator/-").expect("Should match");
+    assert_eq!(matcher.match_address("/oscillator/a").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/-").expect("Valid address pattern"), true);
 
     // Single wildcard
     // A single wildcard '?' matches excatly one alphanumeric character
     matcher = Matcher::new("/oscillator/?/frequency").expect("Should be valid");
-    matcher.match_address("/oscillator/1/frequency").expect("Should match");
-    matcher.match_address("/oscillator/F/frequency").expect("Should match");
-    matcher.match_address("/oscillator//frequency").expect_err("Should not match");
-    matcher.match_address("/oscillator/10/frequency").expect_err("Should not match");
+    assert_eq!(matcher.match_address("/oscillator/1/frequency").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/F/frequency").expect("Valid address pattern"), true);
+    matcher.match_address("/oscillator//frequency").expect_err("Invalid address");
+    assert_eq!(matcher.match_address("/oscillator/10/frequency").expect("Valid address pattern"), false);
 
     // Test if two consecutive wildcards match
     matcher = Matcher::new("/oscillator/??/frequency").expect("Should be valid");
-    matcher.match_address("/oscillator/10/frequency").expect("Should match");
-    matcher.match_address("/oscillator/1/frequency").expect_err("Should not match");
+    assert_eq!(matcher.match_address("/oscillator/10/frequency").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/1/frequency").expect("Valid address pattern"), false);
 
     // Test if it works if it is surrounded by non-wildcards
     matcher = Matcher::new("/oscillator/prefixed?postfixed/frequency").expect("Should be valid");
-    matcher.match_address("/oscillator/prefixed1postfixed/frequency").expect("Should match");
-    matcher.match_address("/oscillator/prefixedpostfixed/frequency").expect_err("Should not match");
+    assert_eq!(matcher.match_address("/oscillator/prefixed1postfixed/frequency").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/prefixedpostfixed/frequency").expect("Valid address pattern"), false);
 
     // Wildcard
     // Wildcards '*' match zero or more alphanumeric characters. The implementation is greedy,
     // meaning it will match the longest possible sequence
     matcher = Matcher::new("/oscillator/*/frequency").expect("Should be valid");
-    matcher.match_address("/oscillator/anything123/frequency").expect("Should match");
-    matcher.match_address("/oscillator/!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~/frequency").expect("Should match");
+    assert_eq!(matcher.match_address("/oscillator/anything123/frequency").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~/frequency").expect("Valid address pattern"), true);
     // Test that wildcard doesn't cross part boundary
-    matcher.match_address("/oscillator/extra/part/frequency").expect_err("Should not match");
-    matcher.match_address("/oscillator//frequency").expect_err("Should not match");
+    assert_eq!(matcher.match_address("/oscillator/extra/part/frequency").expect("Valid address pattern"), false);
+    matcher.match_address("/oscillator//frequency").expect_err("Invalid address");
 
     // Test greediness
     matcher = Matcher::new("/oscillator/*bar/frequency").expect("Should be valid");
-    matcher.match_address("/oscillator/foobar/frequency").expect("Should match");
-    matcher.match_address("/oscillator/foobarbar/frequency").expect("Should match");
+    assert_eq!(matcher.match_address("/oscillator/foobar/frequency").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/foobarbar/frequency").expect("Valid address pattern"), true);
 
     // Minimum length of 2
     matcher = Matcher::new("/oscillator/*??/frequency").expect("Should be valid");
-    matcher.match_address("/oscillator/foobar/frequency").expect("Should match");
-    matcher.match_address("/oscillator/f/frequency").expect_err("Should not match");
+    assert_eq!(matcher.match_address("/oscillator/foobar/frequency").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/f/frequency").expect("Valid address pattern"), false);
 
     // Minimum length of 2 and another component follows
     matcher = Matcher::new("/oscillator/*??baz/frequency").expect("Should be valid");
-    matcher.match_address("/oscillator/foobarbaz/frequency").expect("Should match");
-    matcher.match_address("/oscillator/fbaz/frequency").expect_err("Should not match");
+    assert_eq!(matcher.match_address("/oscillator/foobarbaz/frequency").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/fbaz/frequency").expect("Valid address pattern"), false);
 
     // Mix with character class
     matcher = Matcher::new("/oscillator/*[a-d]/frequency").expect("Should be valid");
-    matcher.match_address("/oscillator/a/frequency").expect("Should match");
-    matcher.match_address("/oscillator/fooa/frequency").expect("Should match");
-    matcher.match_address("/oscillator/foox/frequency").expect_err("Should not match");
+    assert_eq!(matcher.match_address("/oscillator/a/frequency").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/fooa/frequency").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/foox/frequency").expect("Valid address pattern"), false);
 
     // Mix with choice
     matcher = Matcher::new("/oscillator/*{bar,baz}/frequency").expect("Should be valid");
-    matcher.match_address("/oscillator/foobar/frequency").expect("Should match");
-    matcher.match_address("/oscillator/baz/frequency").expect("Should match");
-    matcher.match_address("/oscillator/something/frequency").expect_err("Should not match");
+    assert_eq!(matcher.match_address("/oscillator/foobar/frequency").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/baz/frequency").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/something/frequency").expect("Valid address pattern"), false);
 
     // Check for allowed literal characters
     matcher = Matcher::new("/!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~").expect("Should be valid");
-    matcher.match_address("/!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~").expect("Should match");
+    assert_eq!(matcher.match_address("/!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~").expect("Valid address pattern"), true);
 
     // Check that single wildcard matches all legal characters
     matcher = Matcher::new("/?").expect("Should be valid");
     let legal = "!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~";
     for c in legal.chars() {
-        matcher.match_address(format!("/{}", c).as_str()).expect("Should match");
+        assert_eq!(matcher.match_address(format!("/{}", c).as_str()).expect("Valid address pattern"), true);
     }
 }
 
