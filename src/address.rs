@@ -118,57 +118,6 @@ impl Matcher {
     }
 }
 
-fn map_alternative(s: &str) -> String {
-    wrap_with(&s.replace(',', "|"), "(", ")")
-}
-
-fn wrap_with(s: &str, pre: &str, post: &str) -> String {
-    pre.to_string() + s + post
-}
-
-fn map_wildcard(_: &str) -> String {
-    r"\w*".into()
-}
-
-fn map_question_mark(_: &str) -> String {
-    r"\w?".into()
-}
-
-fn parse_address_part(input: &str) -> IResult<&str, &str> {
-    preceded(char('/'), take_till1(|c| " \t\r\n#*,/?[]{}".contains(c)))(input)
-}
-
-fn parse_address_pattern_part(input: &str) -> IResult<&str, &str> {
-    preceded(char('/'), take_till1(|c| " \n\t\r/".contains(c)))(input)
-}
-
-// Translate OSC pattern rules into an regular expression.
-// A pattern part can contain more than one rule, e.g. `{voice,synth}-[1-9]` contains two rules, an alternative and a number range.
-fn parse_pattern_part(input: &str) -> IResult<&str, String> {
-    many1(alt((
-        delimited(char('{'), is_not("}"), char('}')).map(map_alternative),
-        delimited(tag("[!"), is_not("]"), char(']')).map(|s: &str| wrap_with(s, "[^", "]")),
-        delimited(char('['), is_not("]"), char(']')).map(|s: &str| wrap_with(s, "[", "]")),
-        tag("*").map(map_wildcard),
-        tag("?").map(map_question_mark),
-        is_not("[{").map(|s: &str| s.to_owned()),
-    )))(input)
-    .map(|(input, parts)| (input, parts.concat()))
-}
-
-fn parse_address_pattern(input: &str) -> Result<Vec<Regex>, OscError> {
-    let (_, patterns) = all_consuming(many1(map_parser(
-        parse_address_pattern_part,
-        parse_pattern_part,
-    )))(input)
-    .map_err(|_| OscError::BadAddressPattern("bad address pattern".to_string()))?;
-    patterns
-        .iter()
-        .map(|p| Regex::new(p))
-        .collect::<Result<Vec<Regex>, regex::Error>>()
-        .map_err(|err| OscError::RegexError(err.to_string()))
-}
-
 /// Check whether a character is an allowed address character
 /// All printable ASCII characters except for a few special characters are allowed
 fn is_address_character(x: char) -> bool {
