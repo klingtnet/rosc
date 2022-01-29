@@ -169,6 +169,19 @@ fn test_verify_address_pattern() {
     verify_address_pattern("/{asd,}/").expect_err("Should not be valid");
     // Illegal character in range
     verify_address_pattern("/[a-b*]/").expect_err("Should not be valid");
+
+    // Empty
+    verify_address_pattern("").expect_err("Should not be valid");
+    // Empty part
+    verify_address_pattern("//empty/part").expect_err("Should not be valid");
+    // Unclosed range
+    verify_address_pattern("/[a-/foo").expect_err("Should not be valid");
+    verify_address_pattern("/[a-").expect_err("Should not be valid");
+    // Unclosed alternative
+    verify_address_pattern("/{foo,bar/foo").expect_err("Should not be valid");
+    verify_address_pattern("/{foo,/bar").expect_err("Should not be valid");
+    verify_address_pattern("/{foo").expect_err("Should not be valid");
+    verify_address_pattern("/foo{,").expect_err("Should not be valid");
 }
 
 #[cfg(feature = "std")]
