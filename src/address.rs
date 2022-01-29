@@ -47,6 +47,7 @@ impl Matcher {
     /// Matcher::new("").expect_err("address does not start with a slash");
     /// ```
     pub fn new(pattern: &str) -> Result<Self, OscError> {
+        verify_address_pattern(pattern)?;
         let pattern_parts = match all_consuming(many1(map_address_pattern_component))(pattern) {
             Ok((_, parts)) => { parts }
             Err(_) => panic!("Address must be valid")
