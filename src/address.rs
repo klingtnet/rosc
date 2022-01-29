@@ -127,6 +127,13 @@ fn is_address_character(x: char) -> bool {
     }
 }
 
+/// Parser to turn a choice like '{foo,bar}' into a vector containing the choices, like ["foo", "bar"]
+fn pattern_choice(input: &str) -> IResult<&str, Vec<&str>>
+{
+    delimited(char('{'), separated_list1(tag(","), take_while1(is_address_character)), char('}'))(input)
+}
+
+
 /// A characters class is defined by a set or range of characters that it matches.
 /// For example, [a-z] matches all lowercase alphabetic letters. It can also contain multiple
 /// ranges, like [a-zA-Z]. Instead of a range you can also directly provide the characters to match,
@@ -217,10 +224,7 @@ fn map_address_pattern_component(input: &str) -> IResult<&str, AddressPatternCom
         // match at least the same amount of characters as there are '?' wildcards in the combination.
         // For example, '*??' must match at least 2 characters.
         is_a("*?").map(|x: &str| { AddressPatternComponent::Wildcard(x.matches("?").count()) }),
-        map_parser(
-            delimited(char('{'), is_not("}"), char('}')),
-            separated_list0(char(','.into()), take_while1(is_address_character)),
-        ).map(|alternatives: Vec<&str>| { AddressPatternComponent::Choice(alternatives.iter().map(|x| x.to_string()).collect()) }),
+        pattern_choice.map(|choices: Vec<&str>| { AddressPatternComponent::Choice(choices.iter().map(|x| x.to_string()).collect()) }),
         // TODO: prevent an empty character class, i.e. [!]
         delimited(char('['), take_while1(is_address_character), char(']')).map(|s: &str| { AddressPatternComponent::CharacterClass(CharacterClass::new(s)) })
     ))(input)
@@ -326,7 +330,8 @@ fn address_pattern_part_parser(input: &str) -> IResult<&str, Vec<&str>> {
             take_while1(is_address_character),
             tag("?"),
             tag("*"),
-            recognize(delimited(char('{'), separated_list1(tag(","), take_while1(is_address_character)), char('}'))),
+            recognize(pattern_choice),
+            // TODO: Turn into reusable parser together with map_address_pattern_component
             delimited(char('['), take_while1(is_address_character), char(']')),
         ))
     )(input)
