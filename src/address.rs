@@ -96,12 +96,12 @@ impl Matcher {
                         match next {
                             // If the next component is a '/', there are no more components in the current part and it can be wholly consumed
                             AddressPatternComponent::Tag(s) if s == "/" => {
-                                match_wildcard(remainder, l.clone(), None)
+                                match_wildcard(remainder, *l, None)
                             }
-                            _ => match_wildcard(remainder, l.clone(), Some(next)),
+                            _ => match_wildcard(remainder, *l, Some(next)),
                         }
                     } else {
-                        match_wildcard(remainder, l.clone(), None)
+                        match_wildcard(remainder, *l, None)
                     }
                 }
                 AddressPatternComponent::CharacterClass(cc) => match_character_class(remainder, cc),
@@ -115,11 +115,11 @@ impl Matcher {
         }
 
         // Address is only matched if it was consumed entirely
-        return if remainder.len() == 0 {
+        if remainder.is_empty() {
             Ok(true)
         } else {
             Ok(false)
-        };
+        }
     }
 }
 
@@ -168,16 +168,15 @@ struct CharacterClass {
 /// Expand a character range like 'a-d' to all the letters contained in the range, e.g. 'abcd'
 /// This is done by converting the characters to their ASCII values and then getting every ASCII
 /// in between.
-fn expand_character_range<'a>(first: char, second: char) -> String {
+fn expand_character_range(first: char, second: char) -> String {
     let start = first as u8;
     let end = second as u8;
 
-    let range;
-    if start >= end {
-        range = end..=start;
+    let range = if start >= end {
+        end..=start
     } else {
-        range = start..=end;
-    }
+        start..=end
+    };
 
     let mut out = String::from("");
     for c in range {
@@ -262,7 +261,7 @@ fn map_address_pattern_component(input: &str) -> IResult<&str, AddressPatternCom
         // A '*' wildcard followed by any number of '?' wildcards is also equal to '*' but must
         // match at least the same amount of characters as there are '?' wildcards in the combination.
         // For example, '*??' must match at least 2 characters.
-        is_a("*?").map(|x: &str| AddressPatternComponent::Wildcard(x.matches("?").count())),
+        is_a("*?").map(|x: &str| AddressPatternComponent::Wildcard(x.matches('?').count())),
         pattern_choice.map(|choices: Vec<&str>| {
             AddressPatternComponent::Choice(choices.iter().map(|x| x.to_string()).collect())
         }),
@@ -294,17 +293,16 @@ fn match_character_class<'a>(
 /// Try all the tags in a choice element
 /// Example choice element: '{foo,bar}'
 /// It will get parsed into a vector containing the strings "foo" and "bar", which are then matched
-fn match_choice<'a>(input: &'a str, choices: &Vec<String>) -> IResult<&'a str, &'a str> {
+fn match_choice<'a>(input: &'a str, choices: &[String]) -> IResult<&'a str, &'a str> {
     for choice in choices {
-        match tag::<_, _, nom::error::Error<&str>>(choice.as_str())(input) {
-            Ok((i, o)) => return Ok((i, o)),
-            Err(_) => {}
+        if let Ok((i, o)) = tag::<_, _, nom::error::Error<&str>>(choice.as_str())(input) {
+            return Ok((i, o));
         }
     }
-    return Err(nom::Err::Error(nom::error::Error::from_error_kind(
+    Err(nom::Err::Error(nom::error::Error::from_error_kind(
         input,
         ErrorKind::Tag,
-    )));
+    )))
 }
 
 /// Match Wildcard '*' by either consuming the rest of the part, or, if it's not the last component
@@ -322,7 +320,7 @@ fn match_wildcard<'a>(
         // There is another element in this part, so logic gets a bit more complicated
         Some(component) => {
             // Wildcards can only match within the current address part, discard the rest
-            let address_part = match input.split_once("/") {
+            let address_part = match input.split_once('/') {
                 Some((p, _)) => p,
                 None => input,
             };
@@ -347,9 +345,8 @@ fn match_wildcard<'a>(
                     }
                 };
 
-                match result {
-                    Ok(_) => longest = i,
-                    _ => {}
+                if result.is_ok() {
+                    longest = i
                 }
             }
             verify(take(longest), |s: &str| s.len() >= minimum_length)(input)
