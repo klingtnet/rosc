@@ -1,17 +1,15 @@
 use crate::errors::OscError;
 
-use alloc::borrow::ToOwned;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
 use nom::branch::alt;
-use nom::bytes::complete::{is_not, tag, take_till1, take, is_a, take_while1};
+use nom::bytes::complete::{is_not, tag, take, is_a, take_while1};
 use nom::character::complete::{char, satisfy};
-use nom::combinator::{all_consuming, complete, map_parser, opt, recognize, verify};
-use nom::multi::{many1, separated_list0, separated_list1};
-use nom::sequence::{delimited, pair, preceded, separated_pair};
+use nom::combinator::{all_consuming, complete, opt, recognize, verify};
+use nom::multi::{many1, separated_list1};
+use nom::sequence::{delimited, pair, separated_pair};
 use nom::{IResult, Parser};
 use nom::error::{ErrorKind, ParseError};
-use regex::Regex;
 
 /// With a Matcher OSC method addresses can be [matched](Matcher::match_address) against an OSC address pattern.
 /// Refer to the OSC specification for details about OSC address spaces: <http://opensoundcontrol.org/spec-1_0.html#osc-address-spaces-and-osc-addresses>
