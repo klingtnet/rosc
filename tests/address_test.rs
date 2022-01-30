@@ -115,6 +115,15 @@ fn test_matcher() {
     assert_eq!(matcher.match_address("/oscillator/baz/frequency").expect("Valid address pattern"), true);
     assert_eq!(matcher.match_address("/oscillator/something/frequency").expect("Valid address pattern"), false);
 
+    // Wildcard as last part
+    matcher = Matcher::new("/oscillator/*").expect("Should be valid");
+    assert_eq!(matcher.match_address("/oscillator/foobar").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/foobar/frequency").expect("Valid address pattern"), false);
+
+    // Wildcard with more components in part but it's the last part
+    matcher = Matcher::new("/oscillator/*bar").expect("Should be valid");
+    assert_eq!(matcher.match_address("/oscillator/foobar").expect("Valid address pattern"), true);
+
     // Check for allowed literal characters
     matcher = Matcher::new("/!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~").expect("Should be valid");
     assert_eq!(matcher.match_address("/!\"$%&'()+-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`abcdefghijklmnopqrstuvwxyz|~").expect("Valid address pattern"), true);
