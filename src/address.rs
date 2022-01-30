@@ -6,7 +6,7 @@ use alloc::vec::Vec;
 use nom::branch::alt;
 use nom::bytes::complete::{is_not, tag, take_till1, take, is_a, take_while1};
 use nom::character::complete::{char, satisfy};
-use nom::combinator::{all_consuming, complete, map_parser, recognize, verify};
+use nom::combinator::{all_consuming, complete, map_parser, opt, recognize, verify};
 use nom::multi::{many1, separated_list0, separated_list1};
 use nom::sequence::{delimited, pair, preceded, separated_pair};
 use nom::{IResult, Parser};
@@ -133,6 +133,19 @@ fn pattern_choice(input: &str) -> IResult<&str, Vec<&str>>
     delimited(char('{'), separated_list1(tag(","), take_while1(is_address_character)), char('}'))(input)
 }
 
+/// Parser to recognize a character class like [!a-zA-Z] and return '!a-zA-Z'
+fn pattern_character_class(input: &str) -> IResult<&str, &str>
+{
+    let inner = pair(
+        // It is important to read the leading negating '!' to make sure the rest of the parsed
+        // character class isn't empty. E.g. '[!]' is not a valid character class.
+        recognize(opt(tag("!"))),
+        take_while1(is_address_character)
+    );
+
+    delimited(char('['), recognize(inner) , char(']'))(input)
+}
+
 
 /// A characters class is defined by a set or range of characters that it matches.
 /// For example, [a-z] matches all lowercase alphabetic letters. It can also contain multiple
@@ -226,7 +239,7 @@ fn map_address_pattern_component(input: &str) -> IResult<&str, AddressPatternCom
         is_a("*?").map(|x: &str| { AddressPatternComponent::Wildcard(x.matches("?").count()) }),
         pattern_choice.map(|choices: Vec<&str>| { AddressPatternComponent::Choice(choices.iter().map(|x| x.to_string()).collect()) }),
         // TODO: prevent an empty character class, i.e. [!]
-        delimited(char('['), take_while1(is_address_character), char(']')).map(|s: &str| { AddressPatternComponent::CharacterClass(CharacterClass::new(s)) })
+        pattern_character_class.map(|s: &str| { AddressPatternComponent::CharacterClass(CharacterClass::new(s)) })
     ))(input)
 }
 
@@ -331,8 +344,7 @@ fn address_pattern_part_parser(input: &str) -> IResult<&str, Vec<&str>> {
             tag("?"),
             tag("*"),
             recognize(pattern_choice),
-            // TODO: Turn into reusable parser together with map_address_pattern_component
-            delimited(char('['), take_while1(is_address_character), char(']')),
+            pattern_character_class,
         ))
     )(input)
 }
