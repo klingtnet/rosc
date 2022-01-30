@@ -183,6 +183,19 @@ fn expand_character_range<'a>(first: char, second: char) -> String {
     out
 }
 
+/// Removes all duplicates from a string of characters
+fn deduplicate_characters(input: String) -> String
+{
+    let mut out: String = String::from("");
+    for char in input.chars()
+    {
+        if !out.contains(char) {
+            out.push(char);
+        }
+    }
+    out
+}
+
 impl CharacterClass {
     pub fn new(s: &str) -> Self {
         let mut input = s;
@@ -207,8 +220,7 @@ impl CharacterClass {
         ))))(input);
 
         match characters {
-            // TODO: Deduplicate?
-            Ok((_, o)) => CharacterClass { negated, characters: o.concat() },
+            Ok((_, o)) => CharacterClass { negated, characters: deduplicate_characters(o.concat()) },
             _ => { panic!("Invalid character class formatting {}", s) }
         }
     }
@@ -238,7 +250,6 @@ fn map_address_pattern_component(input: &str) -> IResult<&str, AddressPatternCom
         // For example, '*??' must match at least 2 characters.
         is_a("*?").map(|x: &str| { AddressPatternComponent::Wildcard(x.matches("?").count()) }),
         pattern_choice.map(|choices: Vec<&str>| { AddressPatternComponent::Choice(choices.iter().map(|x| x.to_string()).collect()) }),
-        // TODO: prevent an empty character class, i.e. [!]
         pattern_character_class.map(|s: &str| { AddressPatternComponent::CharacterClass(CharacterClass::new(s)) })
     ))(input)
 }

@@ -125,6 +125,10 @@ fn test_matcher() {
     for c in legal.chars() {
         assert_eq!(matcher.match_address(format!("/{}", c).as_str()).expect("Valid address pattern"), true);
     }
+
+    // Make sure the character class deduplicator is triggered for code coverage
+    matcher = Matcher::new("/[a-za-za-z]").expect("Should be valid");
+    assert_eq!(matcher.match_address("/a").expect("Valid address pattern"), true);
 }
 
 #[cfg(feature = "std")]
@@ -162,6 +166,7 @@ fn test_verify_address_pattern() {
     verify_address_pattern("/test?").expect("Should be valid");
     verify_address_pattern("/test{foo,bar}").expect("Should be valid");
     verify_address_pattern("/test[a-z]").expect("Should be valid");
+    verify_address_pattern("/test[a-za-z]").expect("Should be valid");
     verify_address_pattern("/test[a-z]*??/{foo,bar,baz}[!a-z0-9]/*").expect("Should be valid");
     verify_address_pattern("/test{foo}").expect("Should be valid");
 
