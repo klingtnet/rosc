@@ -48,11 +48,8 @@ impl Matcher {
     /// ```
     pub fn new(pattern: &str) -> Result<Self, OscError> {
         verify_address_pattern(pattern)?;
-        let pattern_parts = match all_consuming(many1(map_address_pattern_component))(pattern) {
-            Ok((_, parts)) => parts,
-            // This should never happen because pattern is verified above
-            Err(_) => panic!("Address pattern must be valid"),
-        };
+        let mut match_fn = all_consuming(many1(map_address_pattern_component));
+        let (_, pattern_parts) = match_fn(pattern).map_err(|err| OscError::BadAddressPattern(err.to_string()))?;
 
         Ok(Matcher {
             pattern: pattern.into(),
