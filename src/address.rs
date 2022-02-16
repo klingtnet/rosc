@@ -2,6 +2,8 @@ use crate::errors::OscError;
 
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
+use std::collections::HashSet;
+use std::iter::FromIterator;
 use nom::branch::alt;
 use nom::bytes::complete::{is_a, is_not, tag, take, take_while1};
 use nom::character::complete::{char, satisfy};
@@ -183,17 +185,6 @@ fn expand_character_range(first: char, second: char) -> String {
     out
 }
 
-/// Removes all duplicates from a string of characters
-fn deduplicate_characters(input: String) -> String {
-    let mut out: String = String::from("");
-    for char in input.chars() {
-        if !out.contains(char) {
-            out.push(char);
-        }
-    }
-    out
-}
-
 impl CharacterClass {
     pub fn new(s: &str) -> Self {
         let mut input = s;
@@ -225,7 +216,7 @@ impl CharacterClass {
         match characters {
             Ok((_, o)) => CharacterClass {
                 negated,
-                characters: deduplicate_characters(o.concat()),
+                characters: HashSet::<char>::from_iter(o.concat().chars()).iter().collect(),
             },
             _ => {
                 panic!("Invalid character class formatting {}", s)
