@@ -114,11 +114,7 @@ impl Matcher {
         }
 
         // Address is only matched if it was consumed entirely
-        if remainder.is_empty() {
-            Ok(true)
-        } else {
-            Ok(false)
-        }
+        Ok(remainder.is_empty())
     }
 }
 
