@@ -175,14 +175,11 @@ fn expand_character_range(first: char, second: char) -> String {
         start..=end
     };
 
-    let mut out = String::from("");
-    for c in range {
-        // For funky ranges like [0-a], some illegal characters are contained
-        if is_address_character(c as char) {
-            out.push(c as char);
-        }
-    }
-    out
+    range
+        .into_iter()
+        .map(char::from)
+        .filter(|c| is_address_character(*c))
+        .collect()
 }
 
 impl CharacterClass {
