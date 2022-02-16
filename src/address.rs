@@ -123,10 +123,11 @@ impl Matcher {
 /// Check whether a character is an allowed address character
 /// All printable ASCII characters except for a few special characters are allowed
 fn is_address_character(x: char) -> bool {
-    match x {
-        ' ' | '#' | '*' | ',' | '/' | '?' | '[' | ']' | '{' | '}' => false,
-        c => c > '\x20' && c < '\x7F',
+    if !x.is_ascii() || x.is_ascii_control() {
+        return false
     }
+
+    return ![' ', '#', '*', ',', '/', '?', '[', ']', '{', '}'].contains(&x)
 }
 
 /// Parser to turn a choice like '{foo,bar}' into a vector containing the choices, like ["foo", "bar"]
