@@ -34,8 +34,7 @@ impl Matcher {
     /// - `{foo,bar}` is an alternative, matching either `foo` or `bar`
     /// - everything else is matched literally
     ///
-    /// Refer to the OSC specification for detaiWhat it does
-
+    /// Refer to the OSC specification for details about address pattern matching: <osc-message-dispatching-and-pattern-matching>.
     ///
     /// # Examples
     ///
