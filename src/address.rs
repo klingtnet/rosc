@@ -273,7 +273,7 @@ fn match_character_class<'a>(
     }
 }
 
-/// Try all the tags in a choice element
+/// Sequentially try all tags from choice element until one matches or return an error
 /// Example choice element: '{foo,bar}'
 /// It will get parsed into a vector containing the strings "foo" and "bar", which are then matched
 fn match_choice<'a>(input: &'a str, choices: &[String]) -> IResult<&'a str, &'a str> {
