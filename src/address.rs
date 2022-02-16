@@ -53,7 +53,7 @@ impl Matcher {
         };
 
         Ok(Matcher {
-            pattern: String::from(pattern),
+            pattern: pattern.into(),
             pattern_parts,
         })
     }
