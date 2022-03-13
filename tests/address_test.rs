@@ -175,6 +175,8 @@ fn test_verify_address_pattern() {
     verify_address_pattern("/test?").expect("Should be valid");
     verify_address_pattern("/test{foo,bar}").expect("Should be valid");
     verify_address_pattern("/test[a-z]").expect("Should be valid");
+    verify_address_pattern("/test[a-defgh]").expect("Should be valid");
+    verify_address_pattern("/test[a-defg-z]").expect("Should be valid");
     verify_address_pattern("/test[a-za-z]").expect("Should be valid");
     verify_address_pattern("/test[a-z]*??/{foo,bar,baz}[!a-z0-9]/*").expect("Should be valid");
     verify_address_pattern("/test{foo}").expect("Should be valid");
@@ -183,6 +185,10 @@ fn test_verify_address_pattern() {
     verify_address_pattern("/{asd,}/").expect_err("Should not be valid");
     // Illegal character in range
     verify_address_pattern("/[a-b*]/").expect_err("Should not be valid");
+    // Character range is reversed
+    verify_address_pattern("/[b-a]").expect_err("Should not be valid");
+    // Character range starting and ending at same character
+    verify_address_pattern("/[a-a]").expect_err("Should not be valid");
 
     // Empty
     verify_address_pattern("").expect_err("Should not be valid");

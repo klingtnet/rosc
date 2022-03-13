@@ -142,7 +142,22 @@ fn pattern_character_class(input: &str) -> IResult<&str, &str> {
         // It is important to read the leading negating '!' to make sure the rest of the parsed
         // character class isn't empty. E.g. '[!]' is not a valid character class.
         recognize(opt(tag("!"))),
-        take_while1(is_address_character),
+        // Read all remaining character ranges and single characters
+        // We also need to verify that ranges are increasing by ASCII value. For example, a-z is
+        // valid, but z-a or a-a is not.
+        recognize(many1(verify(
+            alt((
+                separated_pair(
+                    satisfy(is_address_character),
+                    char('-'),
+                    satisfy(is_address_character),
+                ),
+                // Need to map this into a tuple to make it compatible with the output of the
+                // separated pair parser above. Will always validate as true.
+                satisfy(is_address_character).map(|c| ('\0', c))
+            )),
+            |(o1, o2): &(char, char)| o1 < o2,
+        ))),
     );
 
     delimited(char('['), recognize(inner), char(']'))(input)
