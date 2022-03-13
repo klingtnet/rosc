@@ -5,7 +5,7 @@ use alloc::vec::Vec;
 use std::collections::HashSet;
 use std::iter::FromIterator;
 use nom::branch::alt;
-use nom::bytes::complete::{is_a, is_not, tag, take, take_while1};
+use nom::bytes::complete::{is_a, is_not, tag, take, take_while1, take_while_m_n};
 use nom::character::complete::{char, satisfy};
 use nom::combinator::{all_consuming, complete, opt, recognize, verify};
 use nom::error::{ErrorKind, ParseError};
@@ -267,8 +267,7 @@ fn match_literally<'a>(input: &'a str, pattern: &str) -> IResult<&'a str, &'a st
 }
 
 fn match_wildcard_single(input: &str) -> IResult<&str, &str> {
-    // TODO: this has to be possible with a simpler parser?
-    verify(take(1usize), |s: &str| s.chars().all(is_address_character))(input)
+    take_while_m_n(1, 1, is_address_character)(input)
 }
 
 fn match_character_class<'a>(
