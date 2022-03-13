@@ -167,11 +167,7 @@ fn expand_character_range(first: char, second: char) -> String {
     let start = first as u8;
     let end = second as u8;
 
-    let range = if start >= end {
-        end..=start
-    } else {
-        start..=end
-    };
+    let range = start..=end;
 
     range
         .into_iter()

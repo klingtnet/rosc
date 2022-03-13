@@ -34,11 +34,11 @@ fn test_matcher() {
     assert_eq!(matcher.match_address("/oscillator/6").expect("Valid address pattern"), true);  // Middle of range
     assert_eq!(matcher.match_address("/oscillator/9").expect("Valid address pattern"), true);  // Last member of range included
 
-    // Inverted order should work too
+    // Inverted order should parse as correct pattern, but not match any characters
     matcher = Matcher::new("/oscillator/[9-0]").expect("Should be valid");
-    assert_eq!(matcher.match_address("/oscillator/0").expect("Valid address pattern"), true);
-    assert_eq!(matcher.match_address("/oscillator/6").expect("Valid address pattern"), true);
-    assert_eq!(matcher.match_address("/oscillator/9").expect("Valid address pattern"), true);
+    assert_eq!(matcher.match_address("/oscillator/0").expect("Valid address pattern"), false);
+    assert_eq!(matcher.match_address("/oscillator/6").expect("Valid address pattern"), false);
+    assert_eq!(matcher.match_address("/oscillator/9").expect("Valid address pattern"), false);
 
     // Multiple ranges
     matcher = Matcher::new("/oscillator/[a-zA-Z0-9]").expect("Should be valid");
