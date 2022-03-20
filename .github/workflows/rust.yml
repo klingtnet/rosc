@@ -14,20 +14,24 @@ jobs:
         profile: minimal
         toolchain: stable
         override: true
+    - name: Run cargo build
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --verbose
     - name: Run cargo test
       uses: actions-rs/cargo@v1
       with:
-        command: build --verbose
-    - name: Run cargo test
-      uses: actions-rs/cargo@v1
-      with:
-        command: test --verbose
+        command: test
+        args: --verbose
   clippy_check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - run: rustup component add clippy
       - uses: actions-rs/clippy-check@v1
+        # Do not fail until rust-lang/rust#91523 is fixed.
+        continue-on-error: true
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-features
