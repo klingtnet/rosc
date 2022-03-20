@@ -16,5 +16,5 @@ default = ["std"]
 
 [dependencies]
 byteorder = {version="1", default-features=false}
-nom = { git = "https://github.com/Geal/nom", default-features=false, features=["alloc"] }
+nom = { version="7", default-features=false, features=["alloc"] }
 clippy = {version="^0", optional=true}
