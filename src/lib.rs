@@ -13,8 +13,6 @@ extern crate std as core;
 
 extern crate nom;
 extern crate byteorder;
-#[cfg(feature = "std")]
-extern crate regex;
 
 /// Crate specific error types.
 mod errors;
