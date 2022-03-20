@@ -30,6 +30,8 @@ jobs:
       - uses: actions/checkout@v2
       - run: rustup component add clippy
       - uses: actions-rs/clippy-check@v1
+        # Do not fail until rust-lang/rust#91523 is fixed.
+        continue-on-error: true
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-features
