@@ -81,9 +81,9 @@ impl Matcher {
     /// use rosc::address::{Matcher, OscAddress};
     ///
     /// let matcher = Matcher::new("/oscillator/[0-9]/{frequency,phase}").unwrap();
-    /// assert!(matcher.match_address(OscAddress::new("/oscillator/1/frequency").unwrap()).unwrap());
-    /// assert!(matcher.match_address(OscAddress::new("/oscillator/8/phase").unwrap()).unwrap());
-    /// assert_eq!(matcher.match_address(OscAddress::new("/oscillator/4/detune").unwrap()).unwrap(), false);
+    /// assert!(matcher.match_address(OscAddress::new("/oscillator/1/frequency").unwrap()));
+    /// assert!(matcher.match_address(OscAddress::new("/oscillator/8/phase").unwrap()));
+    /// assert_eq!(matcher.match_address(OscAddress::new("/oscillator/4/detune").unwrap()), false);
     /// ```
     pub fn match_address(&self, address: OscAddress) -> bool {
         // Trivial case
