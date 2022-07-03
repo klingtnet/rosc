@@ -13,6 +13,21 @@ use nom::multi::{many1, separated_list1};
 use nom::sequence::{delimited, pair, separated_pair};
 use nom::{IResult, Parser};
 
+/// A valid OSC method address
+///
+/// A valid OSC address begins with a `/` and contains at least a method name, e.g. `/tempo`.
+/// Despite OSC address patterns a plain address must not include any of the following characters `#*,/?[]{}`.
+pub struct OscAddress<'a>(&'a str);
+
+impl<'a> OscAddress<'a> {
+    pub fn new(address: &'a str) -> Result<Self, OscError> {
+        match verify_address(address) {
+            Ok(_) => Ok(OscAddress(address)),
+            Err(e) => Err(e),
+        }
+    }
+}
+
 /// With a Matcher OSC method addresses can be [matched](Matcher::match_address) against an OSC address pattern.
 /// Refer to the OSC specification for details about OSC address spaces: <http://opensoundcontrol.org/spec-1_0.html#osc-address-spaces-and-osc-addresses>
 #[derive(Debug)]
@@ -59,29 +74,23 @@ impl Matcher {
 
     /// Match an OSC address against an address pattern.
     /// If the address matches the pattern the result will be `true`, otherwise `false`.
-    /// An error is returned if the given OSC address is not valid.
-    ///
-    /// A valid OSC address begins with a `/` and contains at least a method name, e.g. `/tempo`.
-    /// Despite OSC address patterns a plain address must not include any of the following characters `#*,/?[]{}`.
     ///
     /// # Examples
     ///
     /// ```
-    /// use rosc::address::Matcher;
+    /// use rosc::address::{Matcher, OscAddress};
     ///
     /// let matcher = Matcher::new("/oscillator/[0-9]/{frequency,phase}").unwrap();
-    /// assert!(matcher.match_address("/oscillator/1/frequency").unwrap());
-    /// assert!(matcher.match_address("/oscillator/8/phase").unwrap());
-    /// assert_eq!(matcher.match_address("/oscillator/4/detune").unwrap(), false);
+    /// assert!(matcher.match_address(OscAddress::new("/oscillator/1/frequency").unwrap()).unwrap());
+    /// assert!(matcher.match_address(OscAddress::new("/oscillator/8/phase").unwrap()).unwrap());
+    /// assert_eq!(matcher.match_address(OscAddress::new("/oscillator/4/detune").unwrap()).unwrap(), false);
     /// ```
-    pub fn match_address(&self, address: &str) -> Result<bool, OscError> {
-        verify_address(address)?; // TODO: Create an address struct so we don't have to re-check addresses every time we match
-
+    pub fn match_address(&self, address: OscAddress) -> bool {
         // Trivial case
-        if address == self.pattern {
-            return Ok(true);
+        if address.0 == self.pattern {
+            return true;
         }
-        let mut remainder: &str = address;
+        let mut remainder: &str = address.0;
         // Match the the address component by component
         for (index, part) in self.pattern_parts.as_slice().iter().enumerate() {
             let result = match part {
@@ -108,12 +117,12 @@ impl Matcher {
 
             match result {
                 Ok((i, _)) => remainder = i,
-                Err(_) => return Ok(false), // Component didn't match, goodbye
+                Err(_) => return false, // Component didn't match, goodbye
             };
         }
 
         // Address is only matched if it was consumed entirely
-        Ok(remainder.is_empty())
+        remainder.is_empty()
     }
 }
 
