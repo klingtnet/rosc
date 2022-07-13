@@ -9,7 +9,6 @@ use nom::combinator::{map, map_parser};
 use nom::multi::many0;
 use nom::number::complete::{be_f32, be_f64, be_i32, be_i64, be_u32};
 use nom::{IResult,combinator::map_res,sequence::tuple,Err};
-use OscError::BadPacket;
 
 /// Common MTU size for ethernet
 pub const MTU: usize = 1536;
@@ -20,7 +19,7 @@ pub fn decode_udp<'a>(msg: &'a [u8]) -> Result<(&'a [u8], OscPacket), OscError> 
     match decode_packet(msg, msg) {
         Ok((remainder, osc_packet)) => Ok((remainder, osc_packet)),
         Err(e) => match e {
-            Err::Incomplete(_) => Err(BadPacket("Incomplete data")),
+            Err::Incomplete(_) => Err(OscError::BadPacket("Incomplete data")),
             Err::Error(e) => Err(e),
             Err::Failure(e) => Err(e)
         }
@@ -33,7 +32,7 @@ pub fn decode_tcp<'a>(msg: &'a [u8]) -> Result<(&'a [u8], Option<OscPacket>), Os
     let (input, osc_packet_length) = match be_u32(msg) {
         Ok((i, o)) => (i, o),
         Err(e) => match e {
-            Err::Incomplete(_) => return Err(BadPacket("Incomplete data")),
+            Err::Incomplete(_) => return Err(OscError::BadPacket("Incomplete data")),
             Err::Error(e) => return Err(e),
             Err::Failure(e) => return Err(e)
         }
@@ -48,7 +47,7 @@ pub fn decode_tcp<'a>(msg: &'a [u8]) -> Result<(&'a [u8], Option<OscPacket>), Os
     }) {
         Ok((remainder, osc_packet)) => Ok((remainder, osc_packet)),
         Err(e) => match e {
-            Err::Incomplete(_) => Err(BadPacket("Incomplete data")),
+            Err::Incomplete(_) => Err(OscError::BadPacket("Incomplete data")),
             Err::Error(e) => Err(e),
             Err::Failure(e) => Err(e)
         }
