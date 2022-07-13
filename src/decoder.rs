@@ -20,8 +20,7 @@ pub fn decode_udp<'a>(msg: &'a [u8]) -> Result<(&'a [u8], OscPacket), OscError> 
         Ok((remainder, osc_packet)) => Ok((remainder, osc_packet)),
         Err(e) => match e {
             Err::Incomplete(_) => Err(OscError::BadPacket("Incomplete data")),
-            Err::Error(e) => Err(e),
-            Err::Failure(e) => Err(e)
+            Err::Error(e) | Err::Failure(e) => Err(e),
         }
     }
 }
@@ -33,8 +32,7 @@ pub fn decode_tcp<'a>(msg: &'a [u8]) -> Result<(&'a [u8], Option<OscPacket>), Os
         Ok((i, o)) => (i, o),
         Err(e) => match e {
             Err::Incomplete(_) => return Err(OscError::BadPacket("Incomplete data")),
-            Err::Error(e) => return Err(e),
-            Err::Failure(e) => return Err(e)
+            Err::Error(e) | Err::Failure(e) => return Err(e),
         }
     };
 
@@ -48,8 +46,7 @@ pub fn decode_tcp<'a>(msg: &'a [u8]) -> Result<(&'a [u8], Option<OscPacket>), Os
         Ok((remainder, osc_packet)) => Ok((remainder, osc_packet)),
         Err(e) => match e {
             Err::Incomplete(_) => Err(OscError::BadPacket("Incomplete data")),
-            Err::Error(e) => Err(e),
-            Err::Failure(e) => Err(e)
+            Err::Error(e) | Err::Failure(e) => Err(e),
         }
     }
 }
