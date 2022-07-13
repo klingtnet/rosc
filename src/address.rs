@@ -13,7 +13,7 @@ use nom::multi::{many1, separated_list1};
 use nom::sequence::{delimited, pair, separated_pair};
 use nom::{IResult, Parser};
 
-/// A valid OSC method address
+/// A valid OSC method address.
 ///
 /// A valid OSC address begins with a `/` and contains at least a method name, e.g. `/tempo`.
 /// Despite OSC address patterns a plain address must not include any of the following characters `#*,/?[]{}`.
