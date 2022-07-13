@@ -16,7 +16,7 @@ use nom::{IResult, Parser};
 /// A valid OSC method address.
 ///
 /// A valid OSC address begins with a `/` and contains at least a method name, e.g. `/tempo`.
-/// Despite OSC address patterns a plain address must not include any of the following characters `#*,/?[]{}`.
+/// A plain address must not include any of the following characters `#*,/?[]{}`, since they're reserved for OSC address patterns.
 pub struct OscAddress<'a>(&'a str);
 
 impl<'a> OscAddress<'a> {
