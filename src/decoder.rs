@@ -8,34 +8,52 @@ use nom::bytes::complete::{take, take_till};
 use nom::combinator::{map, map_parser};
 use nom::multi::many0;
 use nom::number::complete::{be_f32, be_f64, be_i32, be_i64, be_u32};
-use nom::{IResult,combinator::map_res,sequence::tuple};
+use nom::{IResult,combinator::map_res,sequence::tuple,Err};
 
 /// Common MTU size for ethernet
 pub const MTU: usize = 1536;
 
 /// Takes a bytes slice representing a UDP packet and returns the OSC packet as well as a slice of
 /// any bytes remaining after the OSC packet.
-pub fn decode_udp<'a>(msg: &'a [u8]) -> IResult<&'a [u8], OscPacket, OscError> {
-    decode_packet(msg, msg)
+pub fn decode_udp<'a>(msg: &'a [u8]) -> Result<(&'a [u8], OscPacket), OscError> {
+    match decode_packet(msg, msg) {
+        Ok((remainder, osc_packet)) => Ok((remainder, osc_packet)),
+        Err(e) => match e {
+            Err::Incomplete(_) => Err(OscError::BadPacket("Incomplete data")),
+            Err::Error(e) | Err::Failure(e) => Err(e),
+        }
+    }
 }
 
 /// Takes a bytes slice from a TCP stream (or any stream-based protocol) and returns the first OSC
 /// packet as well as a slice of the bytes remaining after the packet.
-pub fn decode_tcp<'a>(msg: &'a [u8]) -> IResult<&'a [u8], Option<OscPacket>, OscError> {
-    let (input, osc_packet_length) = be_u32(msg)?;
+pub fn decode_tcp<'a>(msg: &'a [u8]) -> Result<(&'a [u8], Option<OscPacket>), OscError> {
+    let (input, osc_packet_length) = match be_u32(msg) {
+        Ok((i, o)) => (i, o),
+        Err(e) => match e {
+            Err::Incomplete(_) => return Err(OscError::BadPacket("Incomplete data")),
+            Err::Error(e) | Err::Failure(e) => return Err(e),
+        }
+    };
 
     if osc_packet_length as usize > msg.len() {
         return Ok((msg, None));
     }
 
-    decode_packet(input, msg).map(|(remainder, osc_packet)| {
+    match decode_packet(input, msg).map(|(remainder, osc_packet)| {
         (remainder, Some(osc_packet))
-    })
+    }) {
+        Ok((remainder, osc_packet)) => Ok((remainder, osc_packet)),
+        Err(e) => match e {
+            Err::Incomplete(_) => Err(OscError::BadPacket("Incomplete data")),
+            Err::Error(e) | Err::Failure(e) => Err(e),
+        }
+    }
 }
 
 /// Takes a bytes slice from a TCP stream (or any stream-based protocol) and returns a vec of all
 /// OSC packets in the slice as well as a slice of the bytes remaining after the last packet.
-pub fn decode_tcp_vec<'a>(msg: &'a [u8]) -> IResult<&'a [u8], Vec<OscPacket>, OscError> {
+pub fn decode_tcp_vec<'a>(msg: &'a [u8]) -> Result<(&'a [u8], Vec<OscPacket>), OscError> {
     let mut input = msg;
     let mut osc_packets = vec![];
 
