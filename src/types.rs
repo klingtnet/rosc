@@ -89,7 +89,7 @@ impl From<OscTime> for SystemTime {
     fn from(time: OscTime) -> SystemTime {
         let nanos =
             (time.fractional as f64) * OscTime::ONE_OVER_TWO_POW_32 * OscTime::NANOS_PER_SECOND;
-        let duration_since_osc_epoch = Duration::new(time.seconds as u64, nanos as u32);
+        let duration_since_osc_epoch = Duration::new(time.seconds as u64, nanos.round() as u32);
         let duration_since_unix_epoch =
             duration_since_osc_epoch - Duration::new(OscTime::UNIX_OFFSET, 0);
         UNIX_EPOCH + duration_since_unix_epoch
