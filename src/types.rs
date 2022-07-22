@@ -89,7 +89,7 @@ impl From<OscTime> for SystemTime {
     fn from(time: OscTime) -> SystemTime {
         let nanos =
             (time.fractional as f64) * OscTime::ONE_OVER_TWO_POW_32 * OscTime::NANOS_PER_SECOND;
-        let duration_since_osc_epoch = Duration::new(time.seconds as u64, nanos as u32);
+        let duration_since_osc_epoch = Duration::new(time.seconds as u64, nanos.round() as u32);
         let duration_since_unix_epoch =
             duration_since_osc_epoch - Duration::new(OscTime::UNIX_OFFSET, 0);
         UNIX_EPOCH + duration_since_unix_epoch
@@ -311,6 +311,17 @@ mod tests {
     use std::time::UNIX_EPOCH;
 
     #[cfg(feature = "std")]
+    #[cfg(target_os = "windows")]
+    // On Windows, the resolution of SystemTime is 100ns, as opposed to 1ns on UNIX
+    // (https://doc.rust-lang.org/std/time/struct.SystemTime.html#platform-specific-behavior).
+    //
+    // As a result, any conversion of OscTime to SystemTime results in the latter being quantized
+    // to the nearest 100ns (rounded down).
+    // This also means both types of round-trips are lossy.
+    const TOLERANCE_NANOS: u64 = 100;
+
+    #[cfg(feature = "std")]
+    #[cfg(not(target_os = "windows"))]
     const TOLERANCE_NANOS: u64 = 5;
 
     #[cfg(feature = "std")]
