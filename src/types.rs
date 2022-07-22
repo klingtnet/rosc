@@ -138,7 +138,8 @@ impl Display for OscTimeError {
     }
 }
 
-// impl error::Error for OscTimeError {}
+#[cfg(feature = "std")]
+impl std::error::Error for OscTimeError {}
 
 /// see OSC Type Tag String: [OSC Spec. 1.0](http://opensoundcontrol.org/spec-1_0)
 /// padding: zero bytes (n*4)
