@@ -12,6 +12,7 @@ use nom::error::{ErrorKind, ParseError};
 use nom::multi::{many1, separated_list1};
 use nom::sequence::{delimited, pair, separated_pair};
 use nom::{IResult, Parser};
+use core::fmt::{Display, Formatter};
 
 /// A valid OSC method address.
 ///
@@ -26,6 +27,12 @@ impl OscAddress {
             Ok(_) => Ok(OscAddress(address)),
             Err(e) => Err(e),
         }
+    }
+}
+
+impl Display for OscAddress {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
