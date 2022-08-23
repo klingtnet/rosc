@@ -17,11 +17,11 @@ use nom::{IResult, Parser};
 ///
 /// A valid OSC address begins with a `/` and contains at least a method name, e.g. `/tempo`.
 /// A plain address must not include any of the following characters `#*,/?[]{}`, since they're reserved for OSC address patterns.
-pub struct OscAddress<'a>(&'a str);
+pub struct OscAddress(String);
 
-impl<'a> OscAddress<'a> {
-    pub fn new(address: &'a str) -> Result<Self, OscError> {
-        match verify_address(address) {
+impl OscAddress {
+    pub fn new(address: String) -> Result<Self, OscError> {
+        match verify_address(&address) {
             Ok(_) => Ok(OscAddress(address)),
             Err(e) => Err(e),
         }
@@ -81,16 +81,16 @@ impl Matcher {
     /// use rosc::address::{Matcher, OscAddress};
     ///
     /// let matcher = Matcher::new("/oscillator/[0-9]/{frequency,phase}").unwrap();
-    /// assert!(matcher.match_address(&OscAddress::new("/oscillator/1/frequency").unwrap()));
-    /// assert!(matcher.match_address(&OscAddress::new("/oscillator/8/phase").unwrap()));
-    /// assert_eq!(matcher.match_address(&OscAddress::new("/oscillator/4/detune").unwrap()), false);
+    /// assert!(matcher.match_address(&OscAddress::new(String::from("/oscillator/1/frequency")).unwrap()));
+    /// assert!(matcher.match_address(&OscAddress::new(String::from("/oscillator/8/phase")).unwrap()));
+    /// assert_eq!(matcher.match_address(&OscAddress::new(String::from("/oscillator/4/detune")).unwrap()), false);
     /// ```
     pub fn match_address(&self, address: &OscAddress) -> bool {
         // Trivial case
         if address.0 == self.pattern {
             return true;
         }
-        let mut remainder: &str = address.0;
+        let mut remainder: &str = address.0.as_str();
         // Match the the address component by component
         for (index, part) in self.pattern_parts.as_slice().iter().enumerate() {
             let result = match part {
