@@ -38,7 +38,7 @@ impl Display for OscAddress {
 
 /// With a Matcher OSC method addresses can be [matched](Matcher::match_address) against an OSC address pattern.
 /// Refer to the OSC specification for details about OSC address spaces: <http://opensoundcontrol.org/spec-1_0.html#osc-address-spaces-and-osc-addresses>
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Matcher {
     pub pattern: String,
     pattern_parts: Vec<AddressPatternComponent>,
@@ -186,7 +186,7 @@ fn pattern_character_class(input: &str) -> IResult<&str, &str> {
 /// e.g. [abc123]. You can also combine this with ranges, like [a-z123].
 /// If the first characters is an exclamation point, the match is negated, e.g. [!0-9] will match
 /// anything except numbers.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct CharacterClass {
     pub negated: bool,
     pub characters: String,
@@ -248,7 +248,7 @@ impl CharacterClass {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 enum AddressPatternComponent {
     Tag(String),
     Wildcard(usize),
