@@ -12,11 +12,13 @@ use nom::error::{ErrorKind, ParseError};
 use nom::multi::{many1, separated_list1};
 use nom::sequence::{delimited, pair, separated_pair};
 use nom::{IResult, Parser};
+use core::fmt::{Display, Formatter};
 
 /// A valid OSC method address.
 ///
 /// A valid OSC address begins with a `/` and contains at least a method name, e.g. `/tempo`.
 /// A plain address must not include any of the following characters `#*,/?[]{}`, since they're reserved for OSC address patterns.
+#[derive(Clone, Debug)]
 pub struct OscAddress(String);
 
 impl OscAddress {
@@ -28,9 +30,15 @@ impl OscAddress {
     }
 }
 
+impl Display for OscAddress {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 /// With a Matcher OSC method addresses can be [matched](Matcher::match_address) against an OSC address pattern.
 /// Refer to the OSC specification for details about OSC address spaces: <http://opensoundcontrol.org/spec-1_0.html#osc-address-spaces-and-osc-addresses>
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Matcher {
     pub pattern: String,
     pattern_parts: Vec<AddressPatternComponent>,
@@ -178,7 +186,7 @@ fn pattern_character_class(input: &str) -> IResult<&str, &str> {
 /// e.g. [abc123]. You can also combine this with ranges, like [a-z123].
 /// If the first characters is an exclamation point, the match is negated, e.g. [!0-9] will match
 /// anything except numbers.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct CharacterClass {
     pub negated: bool,
     pub characters: String,
@@ -240,7 +248,7 @@ impl CharacterClass {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 enum AddressPatternComponent {
     Tag(String),
     Wildcard(usize),
