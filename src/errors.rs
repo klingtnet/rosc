@@ -1,7 +1,10 @@
+use alloc::{
+    fmt,
+    string::{self, String},
+};
+use nom::error::{ErrorKind, FromExternalError, ParseError};
 #[cfg(feature = "std")]
 use std::error;
-use alloc::{fmt, string::{ self, String }};
-use nom::error::{ErrorKind, FromExternalError, ParseError};
 
 /// Represents errors returned by `decode` or `encode`.
 #[derive(Debug)]

@@ -1,14 +1,19 @@
+use crate::alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 use crate::errors::OscError;
-use crate::types::{OscArray, OscBundle, OscColor, OscMessage, OscMidiMessage, OscPacket, OscTime, OscType};
-use crate::alloc::{string::{String, ToString}, vec::Vec};
+use crate::types::{
+    OscArray, OscBundle, OscColor, OscMessage, OscMidiMessage, OscPacket, OscTime, OscType,
+};
 
-use nom::Offset;
-use nom::sequence::terminated;
 use nom::bytes::complete::{take, take_till};
 use nom::combinator::{map, map_parser};
 use nom::multi::many0;
 use nom::number::complete::{be_f32, be_f64, be_i32, be_i64, be_u32};
-use nom::{IResult,combinator::map_res,sequence::tuple,Err};
+use nom::sequence::terminated;
+use nom::Offset;
+use nom::{combinator::map_res, sequence::tuple, Err, IResult};
 
 /// Common MTU size for ethernet
 pub const MTU: usize = 1536;
@@ -21,7 +26,7 @@ pub fn decode_udp(msg: &[u8]) -> Result<(&[u8], OscPacket), OscError> {
         Err(e) => match e {
             Err::Incomplete(_) => Err(OscError::BadPacket("Incomplete data")),
             Err::Error(e) | Err::Failure(e) => Err(e),
-        }
+        },
     }
 }
 
@@ -33,21 +38,19 @@ pub fn decode_tcp(msg: &[u8]) -> Result<(&[u8], Option<OscPacket>), OscError> {
         Err(e) => match e {
             Err::Incomplete(_) => return Err(OscError::BadPacket("Incomplete data")),
             Err::Error(e) | Err::Failure(e) => return Err(e),
-        }
+        },
     };
 
     if osc_packet_length as usize > msg.len() {
         return Ok((msg, None));
     }
 
-    match decode_packet(input, msg).map(|(remainder, osc_packet)| {
-        (remainder, Some(osc_packet))
-    }) {
+    match decode_packet(input, msg).map(|(remainder, osc_packet)| (remainder, Some(osc_packet))) {
         Ok((remainder, osc_packet)) => Ok((remainder, osc_packet)),
         Err(e) => match e {
             Err::Incomplete(_) => Err(OscError::BadPacket("Incomplete data")),
             Err::Error(e) | Err::Failure(e) => Err(e),
-        }
+        },
     }
 }
 
@@ -61,18 +64,17 @@ pub fn decode_tcp_vec(msg: &[u8]) -> Result<(&[u8], Vec<OscPacket>), OscError> {
         input = remainder;
         osc_packets.push(osc_packet);
 
-        if remainder.len() == 0 {
+        if remainder.is_empty() {
             break;
         }
-    };
+    }
 
     Ok((input, osc_packets))
 }
 
-
 fn decode_packet<'a>(
     input: &'a [u8],
-    original_input: &'a[u8],
+    original_input: &'a [u8],
 ) -> IResult<&'a [u8], OscPacket, OscError> {
     if input.is_empty() {
         return Err(nom::Err::Error(OscError::BadPacket("Empty packet.")));
@@ -81,14 +83,10 @@ fn decode_packet<'a>(
     let (input, addr) = read_osc_string(input, original_input)?;
 
     match addr.chars().next() {
-        Some('/') => {
-            decode_message(addr, input, original_input)
-        }
-        Some('#') if &addr == "#bundle" => {
-            decode_bundle(input, original_input)
-        }
+        Some('/') => decode_message(addr, input, original_input),
+        Some('#') if &addr == "#bundle" => decode_bundle(input, original_input),
         _ => Err(nom::Err::Error(OscError::BadPacket(
-            "Invalid message address or bundle tag"
+            "Invalid message address or bundle tag",
         ))),
     }
 }
@@ -96,16 +94,12 @@ fn decode_packet<'a>(
 fn decode_message<'a>(
     addr: String,
     input: &'a [u8],
-    original_input: &'a[u8],
+    original_input: &'a [u8],
 ) -> IResult<&'a [u8], OscPacket, OscError> {
     let (input, type_tags) = read_osc_string(input, original_input)?;
 
     if type_tags.len() > 1 {
-        let (input, args) = read_osc_args(
-            input,
-            original_input,
-            type_tags,
-        )?;
+        let (input, args) = read_osc_args(input, original_input, type_tags)?;
         Ok((input, OscPacket::Message(OscMessage { addr, args })))
     } else {
         Ok((input, OscPacket::Message(OscMessage { addr, args: vec![] })))
@@ -114,23 +108,20 @@ fn decode_message<'a>(
 
 fn decode_bundle<'a>(
     input: &'a [u8],
-    original_input: &'a[u8],
+    original_input: &'a [u8],
 ) -> IResult<&'a [u8], OscPacket, OscError> {
     let (input, (timetag, content)) = tuple((
         read_time_tag,
         many0(|input| read_bundle_element(input, original_input)),
     ))(input)?;
 
-    Ok((
-        input,
-        OscPacket::Bundle(OscBundle {
-            timetag,
-            content,
-        }),
-    ))
+    Ok((input, OscPacket::Bundle(OscBundle { timetag, content })))
 }
 
-fn read_bundle_element<'a>(input: &'a [u8], original_input: &'a[u8]) -> IResult<&'a [u8], OscPacket, OscError> {
+fn read_bundle_element<'a>(
+    input: &'a [u8],
+    original_input: &'a [u8],
+) -> IResult<&'a [u8], OscPacket, OscError> {
     let (input, elem_size) = be_u32(input)?;
 
     let result = map_parser(
@@ -147,13 +138,16 @@ fn read_bundle_element<'a>(input: &'a [u8], original_input: &'a[u8]) -> IResult<
     result
 }
 
-fn read_osc_string<'a>(input: &'a [u8], original_input: &'a[u8]) -> IResult<&'a [u8], String, OscError> {
+fn read_osc_string<'a>(
+    input: &'a [u8],
+    original_input: &'a [u8],
+) -> IResult<&'a [u8], String, OscError> {
     map_res(
         terminated(
             take_till(|c| c == 0u8),
             pad_to_32_bit_boundary(original_input),
         ),
-        |str_buf: &'a[u8]| {
+        |str_buf: &'a [u8]| {
             String::from_utf8(str_buf.into())
                 .map_err(OscError::StringError)
                 .map(|s| s.trim_matches(0u8 as char).to_string())
@@ -162,10 +156,10 @@ fn read_osc_string<'a>(input: &'a [u8], original_input: &'a[u8]) -> IResult<&'a 
 }
 
 fn read_osc_args<'a>(
-    mut input: &'a[u8],
-    original_input: &'a[u8],
+    mut input: &'a [u8],
+    original_input: &'a [u8],
     raw_type_tags: String,
-) ->  IResult<&'a [u8], Vec<OscType>, OscError> {
+) -> IResult<&'a [u8], Vec<OscType>, OscError> {
     let type_tags: Vec<char> = raw_type_tags.chars().skip(1).collect();
 
     let mut args: Vec<OscType> = Vec::with_capacity(type_tags.len());
@@ -182,9 +176,11 @@ fn read_osc_args<'a>(
             let array = OscType::Array(OscArray { content: args });
             match stack.pop() {
                 Some(stashed) => args = stashed,
-                None => return Err(nom::Err::Error(OscError::BadMessage(
-                    "Encountered ] outside array"
-                ))),
+                None => {
+                    return Err(nom::Err::Error(OscError::BadMessage(
+                        "Encountered ] outside array",
+                    )))
+                }
             }
             args.push(array);
         } else {
@@ -196,19 +192,19 @@ fn read_osc_args<'a>(
     Ok((input, args))
 }
 
-fn read_osc_arg<'a>(input: &'a[u8], original_input: &'a[u8], tag: char) -> IResult<&'a[u8], OscType, OscError> {
+fn read_osc_arg<'a>(
+    input: &'a [u8],
+    original_input: &'a [u8],
+    tag: char,
+) -> IResult<&'a [u8], OscType, OscError> {
     match tag {
         'f' => map(be_f32, OscType::Float)(input),
         'd' => map(be_f64, OscType::Double)(input),
         'i' => map(be_i32, OscType::Int)(input),
         'h' => map(be_i64, OscType::Long)(input),
-        's' => {
-            read_osc_string(input, original_input)
-                .map(|(remainder, string)| (remainder, OscType::String(string)))
-        }
-        't' => read_time_tag(input).map(|(remainder, time)| {
-            (remainder, OscType::Time(time))
-        }),
+        's' => read_osc_string(input, original_input)
+            .map(|(remainder, string)| (remainder, OscType::String(string))),
+        't' => read_time_tag(input).map(|(remainder, time)| (remainder, OscType::Time(time))),
         'b' => read_blob(input, original_input),
         'r' => read_osc_color(input),
         'T' => Ok((input, true.into())),
@@ -225,28 +221,23 @@ fn read_osc_arg<'a>(input: &'a[u8], original_input: &'a[u8], tag: char) -> IResu
 }
 
 fn read_char(input: &[u8]) -> IResult<&[u8], OscType, OscError> {
-    map_res(
-        be_u32,
-        |b| {
-            let opt_char = char::from_u32(b);
-            match opt_char {
-                Some(c) => Ok(OscType::Char(c)),
-                None => Err(OscError::BadArg(
-                    "Argument is not a char!".to_string(),
-                )),
-            }
-        },
-    )(input)
+    map_res(be_u32, |b| {
+        let opt_char = char::from_u32(b);
+        match opt_char {
+            Some(c) => Ok(OscType::Char(c)),
+            None => Err(OscError::BadArg("Argument is not a char!".to_string())),
+        }
+    })(input)
 }
 
-fn read_blob<'a>(input: &'a[u8], original_input: &'a[u8]) -> IResult<&'a[u8], OscType, OscError> {
+fn read_blob<'a>(
+    input: &'a [u8],
+    original_input: &'a [u8],
+) -> IResult<&'a [u8], OscType, OscError> {
     let (input, size) = be_u32(input)?;
 
     map(
-        terminated(
-            take(size),
-            pad_to_32_bit_boundary(original_input),
-        ),
+        terminated(take(size), pad_to_32_bit_boundary(original_input)),
         |blob| OscType::Blob(blob.into()),
     )(input)
 }
@@ -281,8 +272,8 @@ fn read_osc_color(input: &[u8]) -> IResult<&[u8], OscType, OscError> {
 }
 
 fn pad_to_32_bit_boundary<'a>(
-    original_input: &'a[u8]
-) -> impl Fn(&'a[u8]) -> IResult<&'a[u8], (), OscError> {
+    original_input: &'a [u8],
+) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], (), OscError> {
     move |input| {
         let offset = 4 - original_input.offset(input) % 4;
         let (input, _) = take(offset)(input)?;
