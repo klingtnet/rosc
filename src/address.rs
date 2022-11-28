@@ -141,7 +141,7 @@ fn is_address_character(x: char) -> bool {
         return false
     }
 
-    return ![' ', '#', '*', ',', '/', '?', '[', ']', '{', '}'].contains(&x)
+    ![' ', '#', '*', ',', '/', '?', '[', ']', '{', '}'].contains(&x)
 }
 
 /// Parser to turn a choice like '{foo,bar}' into a vector containing the choices, like ["foo", "bar"]
