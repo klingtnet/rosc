@@ -2,8 +2,7 @@ use crate::errors::OscError;
 
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
-use std::collections::HashSet;
-use std::iter::FromIterator;
+use core::fmt::{Display, Formatter};
 use nom::branch::alt;
 use nom::bytes::complete::{is_a, is_not, tag, take, take_while1, take_while_m_n};
 use nom::character::complete::{char, satisfy};
@@ -12,7 +11,8 @@ use nom::error::{ErrorKind, ParseError};
 use nom::multi::{many1, separated_list1};
 use nom::sequence::{delimited, pair, separated_pair};
 use nom::{IResult, Parser};
-use core::fmt::{Display, Formatter};
+use std::collections::HashSet;
+use std::iter::FromIterator;
 
 /// A valid OSC method address.
 ///
@@ -72,7 +72,8 @@ impl Matcher {
     pub fn new(pattern: &str) -> Result<Self, OscError> {
         verify_address_pattern(pattern)?;
         let mut match_fn = all_consuming(many1(map_address_pattern_component));
-        let (_, pattern_parts) = match_fn(pattern).map_err(|err| OscError::BadAddressPattern(err.to_string()))?;
+        let (_, pattern_parts) =
+            match_fn(pattern).map_err(|err| OscError::BadAddressPattern(err.to_string()))?;
 
         Ok(Matcher {
             pattern: pattern.into(),
@@ -138,10 +139,10 @@ impl Matcher {
 /// All printable ASCII characters except for a few special characters are allowed
 fn is_address_character(x: char) -> bool {
     if !x.is_ascii() || x.is_ascii_control() {
-        return false
+        return false;
     }
 
-    return ![' ', '#', '*', ',', '/', '?', '[', ']', '{', '}'].contains(&x)
+    ![' ', '#', '*', ',', '/', '?', '[', ']', '{', '}'].contains(&x)
 }
 
 /// Parser to turn a choice like '{foo,bar}' into a vector containing the choices, like ["foo", "bar"]
@@ -171,7 +172,7 @@ fn pattern_character_class(input: &str) -> IResult<&str, &str> {
                 ),
                 // Need to map this into a tuple to make it compatible with the output of the
                 // separated pair parser above. Will always validate as true.
-                satisfy(is_address_character).map(|c| ('\0', c))
+                satisfy(is_address_character).map(|c| ('\0', c)),
             )),
             |(o1, o2): &(char, char)| o1 < o2,
         ))),
@@ -239,7 +240,9 @@ impl CharacterClass {
         match characters {
             Ok((_, o)) => CharacterClass {
                 negated,
-                characters: HashSet::<char>::from_iter(o.concat().chars()).iter().collect(),
+                characters: HashSet::<char>::from_iter(o.concat().chars())
+                    .iter()
+                    .collect(),
             },
             _ => {
                 panic!("Invalid character class formatting {}", s)

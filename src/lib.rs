@@ -4,15 +4,17 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(not(feature = "std"))]
-#[macro_use] extern crate alloc;
+#[macro_use]
+extern crate alloc;
 
 #[cfg(feature = "std")]
 extern crate std as core;
 #[cfg(feature = "std")]
-#[macro_use] extern crate std as alloc;
+#[macro_use]
+extern crate std as alloc;
 
-extern crate nom;
 extern crate byteorder;
+extern crate nom;
 
 /// Crate specific error types.
 mod errors;
@@ -22,10 +24,10 @@ mod types;
 pub use crate::errors::*;
 pub use crate::types::*;
 
+/// Address checking and matching methods
+#[cfg(feature = "std")]
+pub mod address;
 /// Provides a decoding method for OSC packets.
 pub mod decoder;
 /// Encodes an `OscPacket` to a byte vector.
 pub mod encoder;
-/// Address checking and matching methods
-#[cfg(feature = "std")]
-pub mod address;
