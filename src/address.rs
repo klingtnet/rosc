@@ -101,20 +101,18 @@ impl Matcher {
         }
         let mut remainder: &str = address.0.as_str();
         // Match the the address component by component
-        for (index, part) in self.pattern_parts.iter().enumerate() {
+        let mut iter = self.pattern_parts.iter().peekable();
+        while let Some(part) = iter.next() {
             let result = match part {
                 AddressPatternComponent::Tag(s) => match_literally(remainder, s.as_str()),
                 AddressPatternComponent::WildcardSingle => match_wildcard_single(remainder),
                 AddressPatternComponent::Wildcard(l) => {
                     // Check if this is the last pattern component
-                    let next_part = self
-                        .pattern_parts
-                        .get(index + 1)
-                        .and_then(|part| match part {
-                            // If the next component is a '/', there are no more components in the current part and it can be wholly consumed
-                            AddressPatternComponent::Tag(s) if s == "/" => None,
-                            _ => Some(part),
-                        });
+                    let next_part = iter.peek().and_then(|&part| match part {
+                        // If the next component is a '/', there are no more components in the current part and it can be wholly consumed
+                        AddressPatternComponent::Tag(s) if s == "/" => None,
+                        _ => Some(part),
+                    });
                     match_wildcard(remainder, *l, next_part)
                 }
                 AddressPatternComponent::CharacterClass(cc) => match_character_class(remainder, cc),
