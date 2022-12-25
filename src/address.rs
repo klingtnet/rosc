@@ -99,27 +99,31 @@ impl Matcher {
         if address.0 == self.pattern {
             return true;
         }
-        let mut remainder: &str = address.0.as_str();
-        // Match the the address component by component
-        for (index, part) in self.pattern_parts.iter().enumerate() {
-            let result = match part {
-                AddressPatternComponent::Tag(s) => match_literally(remainder, &s),
-                AddressPatternComponent::WildcardSingle => match_wildcard_single(remainder),
-                AddressPatternComponent::Wildcard(l) => {
-                    match_wildcard(remainder, *l, self.pattern_parts.get(index + 1))
-                }
-                AddressPatternComponent::CharacterClass(cc) => match_character_class(remainder, cc),
-                AddressPatternComponent::Choice(s) => match_choice(remainder, s),
-            };
 
-            match result {
-                Ok((i, _)) => remainder = i,
-                Err(_) => return false, // Component didn't match, goodbye
-            };
-        }
+        let remainder = self.pattern_parts.iter().enumerate().fold(
+            Ok(address.0.as_str()),
+            |remainder, (index, part)| {
+                let remainder = remainder?;
+                // Match the the address component by component
+                let result = match part {
+                    AddressPatternComponent::Tag(s) => match_literally(remainder, &s),
+                    AddressPatternComponent::WildcardSingle => match_wildcard_single(remainder),
+                    AddressPatternComponent::Wildcard(l) => {
+                        match_wildcard(remainder, *l, self.pattern_parts.get(index + 1))
+                    }
+                    AddressPatternComponent::CharacterClass(cc) => {
+                        match_character_class(remainder, cc)
+                    }
+                    AddressPatternComponent::Choice(s) => match_choice(remainder, s),
+                };
+
+                // Only carry on if the component matches.
+                result.map(|(i, _)| i)
+            },
+        );
 
         // Address is only matched if it was consumed entirely
-        remainder.is_empty()
+        remainder.map(str::is_empty).unwrap_or(false)
     }
 }
 
