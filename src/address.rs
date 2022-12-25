@@ -101,19 +101,12 @@ impl Matcher {
         }
         let mut remainder: &str = address.0.as_str();
         // Match the the address component by component
-        let mut iter = self.pattern_parts.iter().peekable();
-        while let Some(part) = iter.next() {
+        for (index, part) in self.pattern_parts.iter().enumerate() {
             let result = match part {
-                AddressPatternComponent::Tag(s) => match_literally(remainder, s.as_str()),
+                AddressPatternComponent::Tag(s) => match_literally(remainder, &s),
                 AddressPatternComponent::WildcardSingle => match_wildcard_single(remainder),
                 AddressPatternComponent::Wildcard(l) => {
-                    // Check if this is the last pattern component
-                    let next_part = iter.peek().and_then(|&part| match part {
-                        // If the next component is a '/', there are no more components in the current part and it can be wholly consumed
-                        AddressPatternComponent::Tag(s) if s == "/" => None,
-                        _ => Some(part),
-                    });
-                    match_wildcard(remainder, *l, next_part)
+                    match_wildcard(remainder, *l, self.pattern_parts.get(index + 1))
                 }
                 AddressPatternComponent::CharacterClass(cc) => match_character_class(remainder, cc),
                 AddressPatternComponent::Choice(s) => match_choice(remainder, s),
@@ -318,6 +311,11 @@ fn match_wildcard<'a>(
     minimum_length: usize,
     next: Option<&AddressPatternComponent>,
 ) -> IResult<&'a str, &'a str> {
+    // If the next component is a '/', there are no more components in the current part and it can be wholly consumed
+    let next = next.filter(|&part| match part {
+        AddressPatternComponent::Tag(s) => s != "/",
+        _ => true,
+    });
     match next {
         // No next component, consume all allowed characters until end or next '/'
         None => verify(take_while1(is_address_character), |s: &str| {
