@@ -103,12 +103,14 @@ impl Matcher {
         let mut remainder = address.0.as_str();
         let mut iter = self.pattern_parts.iter().peekable();
 
-        while !remainder.is_empty() && let Some(part) = iter.next() {
+        while let Some(part) = iter.next() {
             // Match the the address component by component
             let result = match part {
                 AddressPatternComponent::Tag(s) => match_literally(remainder, s),
                 AddressPatternComponent::WildcardSingle => match_wildcard_single(remainder),
-                AddressPatternComponent::Wildcard(l) => match_wildcard(remainder, *l, iter.peek().copied()),
+                AddressPatternComponent::Wildcard(l) => {
+                    match_wildcard(remainder, *l, iter.peek().copied())
+                }
                 AddressPatternComponent::CharacterClass(cc) => match_character_class(remainder, cc),
                 AddressPatternComponent::Choice(s) => match_choice(remainder, s),
             };
