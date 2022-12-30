@@ -99,33 +99,24 @@ impl Matcher {
         if address.0 == self.pattern {
             return true;
         }
-        let mut remainder: &str = address.0.as_str();
-        // Match the the address component by component
-        for (index, part) in self.pattern_parts.as_slice().iter().enumerate() {
+
+        let mut remainder = address.0.as_str();
+        let mut iter = self.pattern_parts.iter().peekable();
+
+        while let Some(part) = iter.next() {
+            // Match the the address component by component
             let result = match part {
-                AddressPatternComponent::Tag(s) => match_literally(remainder, s.as_str()),
+                AddressPatternComponent::Tag(s) => match_literally(remainder, s),
                 AddressPatternComponent::WildcardSingle => match_wildcard_single(remainder),
                 AddressPatternComponent::Wildcard(l) => {
-                    // Check if this is the last pattern component
-                    if index < self.pattern_parts.len() - 1 {
-                        let next = &self.pattern_parts[index + 1];
-                        match next {
-                            // If the next component is a '/', there are no more components in the current part and it can be wholly consumed
-                            AddressPatternComponent::Tag(s) if s == "/" => {
-                                match_wildcard(remainder, *l, None)
-                            }
-                            _ => match_wildcard(remainder, *l, Some(next)),
-                        }
-                    } else {
-                        match_wildcard(remainder, *l, None)
-                    }
+                    match_wildcard(remainder, *l, iter.peek().copied())
                 }
                 AddressPatternComponent::CharacterClass(cc) => match_character_class(remainder, cc),
                 AddressPatternComponent::Choice(s) => match_choice(remainder, s),
             };
 
-            match result {
-                Ok((i, _)) => remainder = i,
+            remainder = match result {
+                Ok((i, _)) => i,
                 Err(_) => return false, // Component didn't match, goodbye
             };
         }
@@ -323,6 +314,11 @@ fn match_wildcard<'a>(
     minimum_length: usize,
     next: Option<&AddressPatternComponent>,
 ) -> IResult<&'a str, &'a str> {
+    // If the next component is a '/', there are no more components in the current part and it can be wholly consumed
+    let next = next.filter(|&part| match part {
+        AddressPatternComponent::Tag(s) => s != "/",
+        _ => true,
+    });
     match next {
         // No next component, consume all allowed characters until end or next '/'
         None => verify(take_while1(is_address_character), |s: &str| {
