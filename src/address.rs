@@ -113,12 +113,10 @@ impl Matcher {
                 AddressPatternComponent::Choice(s) => match_choice(remainder, s),
             };
 
-            if let Ok((i, _)) = result {
-                remainder = i;
-            } else {
-                // Only carry on if the component matches.
-                return false;
-            }
+            remainder = match result {
+                Ok((i, _)) => i,
+                Err(_) => return false, // Component didn't match, goodbye
+            };
         }
 
         // Address is only matched if it was consumed entirely
