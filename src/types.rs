@@ -230,7 +230,7 @@ impl<'a> From<&'a str> for OscType {
 }
 /// Represents the parts of a Midi message. Mainly used for
 /// tunneling midi over a network using the OSC protocol.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct OscMidiMessage {
     pub port: u8,
     pub status: u8,
@@ -268,7 +268,7 @@ pub struct OscBundle {
 }
 
 /// An RGBA color.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct OscColor {
     pub red: u8,
     pub green: u8,
