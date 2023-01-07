@@ -124,8 +124,8 @@ fn read_bundle_element<'a>(
 ) -> IResult<&'a [u8], OscPacket, OscError> {
     let (input, elem_size) = be_u32(input)?;
 
-    let result = map_parser(
-        |input| {
+    map_parser(
+        move |input| {
             take(elem_size)(input).map_err(|_: nom::Err<OscError>| {
                 nom::Err::Error(OscError::BadBundle(
                     "Bundle shorter than expected!".to_string(),
@@ -133,9 +133,7 @@ fn read_bundle_element<'a>(
             })
         },
         |input| decode_packet(input, original_input),
-    )(input);
-    drop(elem_size);
-    result
+    )(input)
 }
 
 fn read_osc_string<'a>(
