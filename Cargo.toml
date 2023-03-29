@@ -8,6 +8,7 @@ documentation = "https://docs.rs/rosc"
 repository = "https://github.com/klingtnet/rosc"
 license = "MIT/Apache-2.0"
 readme = "README.md"
+rust-version = "1.52"
 
 [features]
 lints = ["clippy"]
