@@ -1,8 +1,7 @@
 extern crate rosc;
 
 #[cfg(feature = "std")]
-use rosc::address::{verify_address, Matcher};
-use rosc::address::{verify_address_pattern, OscAddress};
+use rosc::address::{verify_address, verify_address_pattern, Matcher, OscAddress};
 
 #[cfg(feature = "std")]
 #[test]
