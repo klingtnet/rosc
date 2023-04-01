@@ -154,3 +154,48 @@ fn test_encode_bundle() {
     let dec_bundle = decoder::decode_udp(&enc_bundle).unwrap().1;
     assert_eq!(root_bundle, dec_bundle);
 }
+
+#[cfg(feature = "std")]
+#[test]
+fn test_encode_bundle_into_cursor() {
+    let msg0 = OscMessage {
+        addr: "/view/1".to_string(),
+        args: vec![],
+    };
+
+    let msg1 = OscMessage {
+        addr: "/mixer/channel/1/amp".to_string(),
+        args: vec![0.9f32.into()],
+    };
+
+    let msg2 = OscMessage {
+        addr: "/osc/1/freq".to_string(),
+        args: vec![440i32.into()],
+    };
+
+    let msg3 = OscMessage {
+        addr: "/osc/1/phase".to_string(),
+        args: vec![(-0.4f32).into()],
+    };
+
+    let bundle1 = OscBundle {
+        timetag: (5678, 8765).into(),
+        content: vec![OscPacket::Message(msg2), OscPacket::Message(msg3)],
+    };
+
+    let root_bundle = OscPacket::Bundle(OscBundle {
+        timetag: (1234, 4321).into(),
+        content: vec![
+            OscPacket::Message(msg0),
+            OscPacket::Message(msg1),
+            OscPacket::Bundle(bundle1),
+        ],
+    });
+
+    let mut buffer = Vec::new();
+    encoder::encode_into(&root_bundle, &mut encoder::WriteOutput(std::io::Cursor::new(&mut buffer))).unwrap();
+    assert_eq!(buffer.len() % 4, 0);
+
+    let dec_bundle = decoder::decode_udp(&buffer).unwrap().1;
+    assert_eq!(root_bundle, dec_bundle);
+}
