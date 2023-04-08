@@ -193,7 +193,11 @@ fn test_encode_bundle_into_cursor() {
     });
 
     let mut buffer = Vec::new();
-    encoder::encode_into(&root_bundle, &mut encoder::WriteOutput(std::io::Cursor::new(&mut buffer))).unwrap();
+    encoder::encode_into(
+        &root_bundle,
+        &mut encoder::WriteOutput(std::io::Cursor::new(&mut buffer)),
+    )
+    .unwrap();
     assert_eq!(buffer.len() % 4, 0);
 
     let dec_bundle = decoder::decode_udp(&buffer).unwrap().1;
