@@ -37,12 +37,11 @@ fn test_decode_tcp_vec() {
 
     let tcp_msg = std::iter::repeat_with(|| merged.clone())
         .take(2)
-        .map(|bytes| {
+        .flat_map(|bytes| {
             // Prefix the tcp packet with a length byte
             let packet_size_header = (bytes.len() as u32).to_be_bytes().to_vec();
             vec![packet_size_header, bytes].concat()
         })
-        .flatten()
         .collect::<Vec<u8>>();
 
     let (remainder, osc_packet) = decoder::decode_tcp_vec(&tcp_msg).unwrap();
@@ -125,7 +124,7 @@ fn test_decode_udp_args() {
         .chain(i_bytes.iter())
         .chain(f_bytes.iter())
         .chain(i_bytes.iter())
-        .map(|x| *x)
+        .copied()
         .collect::<Vec<u8>>();
 
     let merged: Vec<u8> = addr
