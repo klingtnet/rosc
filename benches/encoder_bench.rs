@@ -42,9 +42,7 @@ fn bench_encode_args_bool(b: &mut Bencher) {
     // true.
     let packet = OscPacket::Message(OscMessage {
         addr: "/OSC/Bools".into(),
-        args: (0..1000)
-            .map(|x| OscType::Bool((x % 2) == 1))
-            .collect(),
+        args: (0..1000).map(|x| OscType::Bool((x % 2) == 1)).collect(),
     });
 
     b.iter(|| rosc::encoder::encode(&packet).unwrap());
@@ -55,9 +53,7 @@ fn bench_encode_args_double(b: &mut Bencher) {
     // Encoded message contains 1000 arguments, each of which is a Double.
     let packet = OscPacket::Message(OscMessage {
         addr: "/OSC/Doubles".into(),
-        args: (0..1000)
-            .map(|x| OscType::Double(x as f64))
-            .collect(),
+        args: (0..1000).map(|x| OscType::Double(x as f64)).collect(),
     });
 
     b.iter(|| rosc::encoder::encode(&packet).unwrap());
@@ -68,9 +64,7 @@ fn bench_encode_args_float(b: &mut Bencher) {
     // Encoded message contains 1000 arguments, each of which is a Float.
     let packet = OscPacket::Message(OscMessage {
         addr: "/OSC/Floats".into(),
-        args: (0..1000)
-            .map(|x| OscType::Float(x as f32))
-            .collect(),
+        args: (0..1000).map(|x| OscType::Float(x as f32)).collect(),
     });
 
     b.iter(|| rosc::encoder::encode(&packet).unwrap());
@@ -115,9 +109,7 @@ fn bench_encode_args_string(b: &mut Bencher) {
     // representation of its argument index.
     let packet = OscPacket::Message(OscMessage {
         addr: "/OSC/Strings".into(),
-        args: (0..1000)
-            .map(|x| OscType::String(x.to_string()))
-            .collect(),
+        args: (0..1000).map(|x| OscType::String(x.to_string())).collect(),
     });
 
     b.iter(|| rosc::encoder::encode(&packet).unwrap());
@@ -195,10 +187,7 @@ fn bench_encode_huge_bundle(b: &mut Bencher) {
                     3.1415926f32.into(),
                     3.14159265359f64.into(),
                     "String".into(),
-                    (0..1024)
-                        .map(|x| x as u8)
-                        .collect::<Vec<u8>>()
-                        .into(),
+                    (0..1024).map(|x| x as u8).collect::<Vec<u8>>().into(),
                     (123, 456).into(),
                     'c'.into(),
                     false.into(),
@@ -255,10 +244,7 @@ fn bench_encode_huge_bundle_into_new_vec(b: &mut Bencher) {
                     3.1415926f32.into(),
                     3.14159265359f64.into(),
                     "String".into(),
-                    (0..1024)
-                        .map(|x| x as u8)
-                        .collect::<Vec<u8>>()
-                        .into(),
+                    (0..1024).map(|x| x as u8).collect::<Vec<u8>>().into(),
                     (123, 456).into(),
                     'c'.into(),
                     false.into(),
@@ -315,10 +301,7 @@ fn bench_encode_huge_bundle_into_reused_vec(b: &mut Bencher) {
                     3.1415926f32.into(),
                     3.14159265359f64.into(),
                     "String".into(),
-                    (0..1024)
-                        .map(|x| x as u8)
-                        .collect::<Vec<u8>>()
-                        .into(),
+                    (0..1024).map(|x| x as u8).collect::<Vec<u8>>().into(),
                     (123, 456).into(),
                     'c'.into(),
                     false.into(),
