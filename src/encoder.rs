@@ -27,6 +27,18 @@ pub fn encode(packet: &OscPacket) -> crate::types::Result<Vec<u8>> {
     Ok(bytes)
 }
 
+///Takes a reference to an OSC packet, encodes this one to TCP
+/// and returns a byte vector on success.
+/// Osc specification 1.0 expects in streamed protocol as TCP packets should begin
+/// with an int32 giving the size of the packet.
+/// If the packet was invalid an `OscError` is returned.
+pub fn encode_tcp(packet: &OscPacket) -> crate::types::Result<Vec<u8>> {
+    let packet = encode(&packet)?;
+    let size_bytes = (packet.len() as u32).to_be_bytes().to_vec();
+    Ok([size_bytes, packet].concat())
+}
+    
+
 /// Takes a reference to an OSC packet and writes the
 /// encoded bytes to the given output. On success, the
 /// number of bytes written will be returned. If an error
