@@ -34,18 +34,18 @@ pub fn encode(packet: &OscPacket) -> crate::types::Result<Vec<u8>> {
 /// If the packet was invalid an `OscError` is returned.
 pub fn encode_tcp(packets: &Vec<OscPacket>) -> crate::types::Result<Vec<u8>> {
     let mut bytes = Vec::<u8>::new();
-    let mut index = 0;
+    let mut index;
     for packet in packets.iter() {
         bytes.extend(vec![0, 0, 0, 0]);
+        index = bytes.len();
         encode_into(packet, &mut bytes).expect("Failed to write encoded packet into Vec");
         let size = (bytes.len() - index) as u32;
         let size_bytes = size.to_be_bytes();
         for i in 0..4 {
-            if let Some(b) = bytes.get_mut(index + i) {
+            if let Some(b) = bytes.get_mut(index - 4 + i) {
                 *b = size_bytes[i];
             }
         }
-        index = bytes.len();
     }
     Ok(bytes)
 }
