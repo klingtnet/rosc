@@ -15,7 +15,7 @@ use crate::alloc::{
 };
 
 /// A time tag in OSC message consists of two 32-bit integers where the first one denotes the number of seconds since 1900-01-01 and the second the fractions of a second.
-/// For details on its semantics see http://opensoundcontrol.org/node/3/#timetags
+/// For details on its semantics see <http://opensoundcontrol.org/node/3/#timetags>
 ///
 /// # Examples
 ///
