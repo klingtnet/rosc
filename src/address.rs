@@ -59,7 +59,7 @@ impl Matcher {
     /// - `{foo,bar}` is an alternative, matching either `foo` or `bar`
     /// - everything else is matched literally
     ///
-    /// Refer to the OSC specification for details about address pattern matching: <osc-message-dispatching-and-pattern-matching>.
+    /// Refer to the OSC specification for details about address pattern matching: <https://opensoundcontrol.stanford.edu/spec-1_0.html#osc-message-dispatching-and-pattern-matching>.
     ///
     /// # Examples
     ///

@@ -32,6 +32,15 @@ pub fn decode_udp(msg: &[u8]) -> Result<(&[u8], OscPacket), OscError> {
 
 /// Takes a bytes slice from a TCP stream (or any stream-based protocol) and returns the first OSC
 /// packet as well as a slice of the bytes remaining after the packet.
+///
+/// # Difference to `decode_udp`
+///
+/// For stream-based protocols, such as TCP, the [OSC specification][^1] requires the size of
+/// the first packet to be send as a 32-bit integer before the actual packet data.
+///
+/// [^1]: _In a stream-based protocol such as TCP, the stream should begin with an int32 giving the size of the first packet, followed by the contents of the first packet, followed by the size of the second packet, etc._
+///
+/// [OSC specification]: https://cnmat.org/OpenSoundControl/OSC-spec.html
 pub fn decode_tcp(msg: &[u8]) -> Result<(&[u8], Option<OscPacket>), OscError> {
     let (input, osc_packet_length) = match be_u32(msg) {
         Ok((i, o)) => (i, o),
