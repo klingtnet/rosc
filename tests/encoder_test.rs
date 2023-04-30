@@ -32,10 +32,12 @@ fn test_encode_tcp_message_wo_args() {
         addr: "/some/addr".to_string(),
         args: vec![],
     });
-
-    let enc_msg = encoder::encode_tcp(&msg_packet).unwrap();
+    let messages = vec! [msg_packet];
+    let enc_msg = encoder::encode_tcp(&messages).unwrap();
     assert_eq!(enc_msg.len() % 4, 0);
+    assert_eq!(enc_msg.get(3), Some(&(20 as u8)));
 
+    let msg_packet = &messages[0];
     let msg = match msg_packet {
         OscPacket::Message(ref msg) => msg,
         _ => panic!(),
@@ -79,10 +81,12 @@ fn test_encode_tcp_empty_bundle() {
         timetag: (4, 2).into(),
         content: vec![],
     });
+    let packets = vec! [bundle_packet.clone()];
 
-    let enc_bundle = encoder::encode_tcp(&bundle_packet).unwrap();
+    let enc_bundle = encoder::encode_tcp(&packets).unwrap();
     assert_eq!(enc_bundle.len() % 4, 0);
     assert_eq!(enc_bundle.len(), 20);
+    assert_eq!(enc_bundle.get(3), Some(&(20 as u8)));
 
     let dec_bundle = match decoder::decode_tcp(&enc_bundle).unwrap().1 {
         Some(OscPacket::Bundle(m)) => m,
@@ -145,6 +149,7 @@ fn test_encode_message_with_args() {
 
     let enc_msg = encoder::encode(&msg_packet).unwrap();
     assert_eq!(enc_msg.len() % 4, 0);
+    assert_eq!(enc_msg.get(3), Some(&(111 as u8)));
 
     let dec_msg: OscMessage = match decoder::decode_udp(&enc_msg).unwrap().1 {
         OscPacket::Message(m) => m,
@@ -204,10 +209,11 @@ fn test_encode_tcp_message_with_args() {
             .into(),
         ],
     });
-
-    let enc_msg = encoder::encode_tcp(&msg_packet).unwrap();
+    let messages = vec! [msg_packet.clone()];
+    let enc_msg = encoder::encode_tcp(&messages).unwrap();
     assert_eq!(enc_msg.len() % 4, 0);
-
+    assert_eq!(enc_msg.get(3), Some(&(172 as u8)));
+        
     let dec_msg: OscMessage = match decoder::decode_tcp(&enc_msg).unwrap().1 {
         Some(OscPacket::Message(m)) => m,
         _ => panic!("Expected OscMessage!"),
@@ -299,9 +305,10 @@ fn test_encode_tcp_bundle() {
             OscPacket::Bundle(bundle1),
         ],
     });
-
-    let enc_bundle = encoder::encode_tcp(&root_bundle).unwrap();
+    let messages = vec! [root_bundle.clone()];
+    let enc_bundle = encoder::encode_tcp(&messages).unwrap();
     assert_eq!(enc_bundle.len() % 4, 0);
+    assert_eq!(enc_bundle.get(3), Some(&(144 as u8)));
 
     let dec_bundle = decoder::decode_tcp(&enc_bundle).unwrap().1;
     assert_eq!(Some(root_bundle), dec_bundle);
