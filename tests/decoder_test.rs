@@ -2,7 +2,6 @@ extern crate byteorder;
 extern crate rosc;
 
 use byteorder::{BigEndian, ByteOrder};
-use std::mem;
 
 use rosc::{decoder, encoder, OscBundle, OscPacket, OscTime, OscType};
 
