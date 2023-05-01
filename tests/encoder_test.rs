@@ -32,7 +32,7 @@ fn test_encode_tcp_message_wo_args() {
         addr: "/some/addr".to_string(),
         args: vec![],
     });
-    let messages = vec! [msg_packet];
+    let messages = vec![msg_packet];
     let enc_msg = encoder::encode_tcp(&messages).unwrap();
     assert_eq!(enc_msg.len() % 4, 0);
     assert_eq!(enc_msg.get(3), Some(&(16 as u8)));
@@ -81,7 +81,7 @@ fn test_encode_tcp_empty_bundle() {
         timetag: (4, 2).into(),
         content: vec![],
     });
-    let packets = vec! [bundle_packet.clone()];
+    let packets = vec![bundle_packet.clone()];
 
     let enc_bundle = encoder::encode_tcp(&packets).unwrap();
     assert_eq!(enc_bundle.len() % 4, 0);
@@ -209,11 +209,11 @@ fn test_encode_tcp_message_with_args() {
             .into(),
         ],
     });
-    let messages = vec! [msg_packet.clone()];
+    let messages = vec![msg_packet.clone()];
     let enc_msg = encoder::encode_tcp(&messages).unwrap();
     assert_eq!(enc_msg.len() % 4, 0);
     assert_eq!(enc_msg.get(3), Some(&(168 as u8)));
-        
+
     let dec_msg: OscMessage = match decoder::decode_tcp(&enc_msg).unwrap().1 {
         Some(OscPacket::Message(m)) => m,
         _ => panic!("Expected OscMessage!"),
@@ -225,6 +225,88 @@ fn test_encode_tcp_message_with_args() {
     };
 
     assert_eq!(*msg, dec_msg);
+}
+
+#[test]
+fn test_encode_tcp_several_messages_with_args() {
+    let msg_packets = vec![
+        OscPacket::Message(OscMessage {
+            addr: "/another/address/1".to_string(),
+            args: vec![
+                4i32.into(),
+                42i64.into(),
+                3.1415926f32.into(),
+                3.14159265359f64.into(),
+                "This is a string.".to_string().into(),
+                "This is a string too.".into(),
+                vec![1u8, 2u8, 3u8].into(),
+                (123, 456).into(),
+                'c'.into(),
+                false.into(),
+                true.into(),
+                OscType::Nil,
+                OscType::Inf,
+                OscMidiMessage {
+                    port: 4,
+                    status: 41,
+                    data1: 42,
+                    data2: 129,
+                }
+                .into(),
+                OscColor {
+                    red: 255,
+                    green: 192,
+                    blue: 42,
+                    alpha: 13,
+                }
+                .into(),
+                OscArray {
+                    content: vec![
+                        42i32.into(),
+                        OscArray {
+                            content: vec![1.23.into(), 3.21.into()],
+                        }
+                        .into(),
+                        "Yay".into(),
+                    ],
+                }
+                .into(),
+            ],
+        }),
+        OscPacket::Message(OscMessage {
+            addr: "/some/addr".to_string(),
+            args: vec![],
+        }),
+    ];
+    let enc_msg = encoder::encode_tcp(&msg_packets).unwrap();
+    assert_eq!(enc_msg.len() % 4, 0);
+    assert_eq!(enc_msg.len(), 192);
+    assert_eq!(enc_msg.get(3), Some(&(168 as u8)));
+    assert_eq!(enc_msg.get(175), Some(&(16 as u8)));
+
+    let (remainder, dec_msg) = match decoder::decode_tcp(&enc_msg).unwrap() {
+        (v, Some(OscPacket::Message(m))) => (v, m),
+        _ => panic!("Expected OscMessage!"),
+    };
+
+    let msg = match msg_packets[0] {
+        OscPacket::Message(ref msg) => msg,
+        _ => panic!(),
+    };
+
+    assert_eq!(*msg, dec_msg);
+
+    let (remainder, dec_msg) = match decoder::decode_tcp(&remainder).unwrap() {
+        (v, Some(OscPacket::Message(m))) => (v, m),
+        _ => panic!("Expected OscMessage!"),
+    };
+
+    let msg = match msg_packets[1] {
+        OscPacket::Message(ref msg) => msg,
+        _ => panic!(),
+    };
+    assert_eq!(*msg, dec_msg);
+    assert!(remainder.is_empty());
 }
 
 #[test]
@@ -305,7 +387,7 @@ fn test_encode_tcp_bundle() {
             OscPacket::Bundle(bundle1),
         ],
     });
-    let messages = vec! [root_bundle.clone()];
+    let messages = vec![root_bundle.clone()];
     let enc_bundle = encoder::encode_tcp(&messages).unwrap();
     assert_eq!(enc_bundle.len() % 4, 0);
     assert_eq!(enc_bundle.get(3), Some(&(140 as u8)));
