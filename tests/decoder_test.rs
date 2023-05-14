@@ -7,77 +7,62 @@ use rosc::{decoder, encoder, OscBundle, OscPacket, OscTime, OscType};
 
 #[test]
 fn test_decode_udp_no_args() {
-    // message to build: /some/valid/address/4 ,
     let raw_addr = "/some/valid/address/4";
     let addr = encoder::encode_string(raw_addr);
     let type_tags = encoder::encode_string(",");
-    let merged: Vec<u8> = addr.into_iter().chain(type_tags.into_iter()).collect();
-    let (remainder, osc_packet) = decoder::decode_udp(&merged).unwrap();
+    let bytes: Vec<u8> = addr.into_iter().chain(type_tags.into_iter()).collect();
+    let (remainder, packet) = decoder::decode_udp(&bytes).expect("decode failed");
 
     assert_eq!(remainder.len(), 0);
-    match osc_packet {
-        rosc::OscPacket::Message(msg) => {
-            assert_eq!(raw_addr, msg.addr);
-            assert!(msg.args.is_empty());
-        }
-        _ => panic!("Expected an OscMessage!"),
-    }
+    assert_eq!(
+        OscPacket::Message(rosc::OscMessage {
+            addr: raw_addr.into(),
+            args: vec![],
+        }),
+        packet,
+    );
 }
 
 #[test]
-fn test_decode_tcp_vec() {
-    use rosc::OscPacket::Message;
-
-    // message to build: /some/valid/address/4 ,
+fn test_decode_tcp_no_args() {
     let raw_addr = "/some/valid/address/4";
     let addr = encoder::encode_string(raw_addr);
     let type_tags = encoder::encode_string(",");
-    let merged: Vec<u8> = addr.into_iter().chain(type_tags.into_iter()).collect();
+    let mut bytes: Vec<u8> = addr.into_iter().chain(type_tags.into_iter()).collect();
 
-    let tcp_msg = std::iter::repeat_with(|| merged.clone())
-        .take(2)
-        .flat_map(|bytes| {
-            // Prefix the tcp packet with a length byte
-            let packet_size_header = (bytes.len() as u32).to_be_bytes().to_vec();
-            vec![packet_size_header, bytes].concat()
-        })
-        .collect::<Vec<u8>>();
+    let packet_size_header = (bytes.len() as u32).to_be_bytes().to_vec();
+    bytes = vec![packet_size_header, bytes].concat();
 
-    let (remainder, osc_packet) = decoder::decode_tcp_vec(&tcp_msg).unwrap();
+    let (remainder, packet) = decoder::decode_tcp_vec(&bytes).expect("decode failed");
 
     assert_eq!(remainder.len(), 0);
-    match &osc_packet[..] {
-        [Message(msg1), Message(msg2)] => {
-            assert_eq!(raw_addr, msg1.addr);
-            assert!(msg1.args.is_empty());
-            assert_eq!(raw_addr, msg2.addr);
-            assert!(msg2.args.is_empty());
-        }
-        _ => panic!("Expected an OscMessage!"),
-    }
+    assert_eq!(
+        vec![OscPacket::Message(rosc::OscMessage {
+            addr: raw_addr.into(),
+            args: vec![],
+        }),],
+        packet,
+    )
 }
 
 #[test]
 fn test_decode_udp_empty_bundle() {
     let timetag = OscTime::from((4, 2));
     let content = vec![];
-    let packet = encoder::encode(&OscPacket::Bundle(OscBundle { timetag, content })).unwrap();
-    let osc_packet = decoder::decode_udp(&packet);
-    match osc_packet.unwrap().1 {
-        rosc::OscPacket::Bundle(bundle) => {
-            assert_eq!(timetag, bundle.timetag);
-            assert!(bundle.content.is_empty());
-        }
-        _ => panic!("Expected an OscBundle!"),
-    }
+    let bytes = encoder::encode(&OscPacket::Bundle(OscBundle {
+        timetag: timetag,
+        content: content.clone(),
+    }))
+    .expect("encode failed");
+    let (remainder, packet) = decoder::decode_udp(&bytes).expect("decode failed");
+
+    assert_eq!(remainder.len(), 0);
+    assert_eq!(OscPacket::Bundle(OscBundle { timetag, content }), packet)
 }
 
 #[test]
 fn test_decode_udp_args() {
-    // /another/valid/address/123 ,fdih 3.1415 3.14159265359 12345678i32
-    // -1234567891011
     let addr = encoder::encode_string("/another/valid/address/123");
-    // args
     let f = 3.1415f32;
     let mut f_bytes: [u8; 4] = [0u8; 4];
     BigEndian::write_f32(&mut f_bytes, f);
@@ -99,7 +84,6 @@ fn test_decode_udp_args() {
 
     let s = "I am an osc test string.";
     assert!(s.is_ascii());
-    // Osc strings are null terminated like in C!
     let s_bytes: Vec<u8> = encoder::encode_string(s);
 
     let c = '$';
@@ -126,35 +110,32 @@ fn test_decode_udp_args() {
         .copied()
         .collect::<Vec<u8>>();
 
-    let merged: Vec<u8> = addr
+    let bytes: Vec<u8> = addr
         .into_iter()
         .chain(type_tags.into_iter())
         .chain(args)
         .collect::<Vec<u8>>();
 
-    match decoder::decode_udp(&merged).unwrap().1 {
-        rosc::OscPacket::Message(msg) => {
-            for arg in msg.args {
-                match arg {
-                    rosc::OscType::Int(x) => assert_eq!(i, x),
-                    rosc::OscType::Long(x) => assert_eq!(l, x),
-                    rosc::OscType::Float(x) => assert_eq!(f, x),
-                    rosc::OscType::Double(x) => assert_eq!(d, x),
-                    rosc::OscType::String(x) => assert_eq!(s, x),
-                    rosc::OscType::Blob(x) => assert_eq!(blob, x),
-                    // cant assign bool args to type_tag
-                    // , so there is no real test wether the value is
-                    // correct or not
-                    rosc::OscType::Bool(_) => (),
-                    rosc::OscType::Inf => (),
-                    rosc::OscType::Nil => (),
-                    // test time-tags, midi-messages and chars
-                    rosc::OscType::Char(x) => assert_eq!(c, x),
-                    rosc::OscType::Array(x) => assert_eq!(a, x.content),
-                    _ => panic!(),
-                }
-            }
-        }
-        _ => panic!("Expected an OSC message!"),
-    }
+    let (remainder, packet) = decoder::decode_udp(&bytes).expect("decode failed");
+    assert_eq!(remainder.len(), 0);
+    assert_eq!(
+        OscPacket::Message(rosc::OscMessage {
+            addr: "/another/valid/address/123".into(),
+            args: vec![
+                rosc::OscType::Float(f),
+                rosc::OscType::Double(d),
+                rosc::OscType::String(s.into()),
+                rosc::OscType::Bool(true),
+                rosc::OscType::Bool(false),
+                rosc::OscType::Int(i),
+                rosc::OscType::Blob(blob),
+                rosc::OscType::Long(l),
+                rosc::OscType::Nil,
+                rosc::OscType::Inf,
+                rosc::OscType::Char(c),
+                rosc::OscType::Array(rosc::OscArray { content: a }),
+            ]
+        }),
+        packet
+    )
 }
