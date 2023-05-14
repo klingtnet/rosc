@@ -109,7 +109,7 @@ fn assert_eq_osc_times(a: OscTime, b: OscTime) {
     const NANOS_PER_SECOND: f64 = 1.0e9;
 
     // I did not want to implement subtraction with carrying in order to implement this in the
-    // same way as the alternative for system times. Intsead we are compare each part of the
+    // same way as the alternative for system times. Instead we are compare each part of the
     // OSC times separately.
     let tolerance_fractional_seconds =
         ((TOLERANCE_NANOS as f64 * TWO_POW_32) / NANOS_PER_SECOND).round() as i64;

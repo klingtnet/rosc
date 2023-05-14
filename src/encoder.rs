@@ -239,7 +239,7 @@ pub trait Output {
 
     /// Writes a block of data to the output.
     ///
-    /// Note that, unlike `std::io::Writo::write`, this
+    /// Note that, unlike `std::io::Write::write`, this
     /// function is expected to write all of the given data prior to returning.
     fn write(&mut self, data: &[u8]) -> Result<usize, Self::Err>;
 
@@ -280,7 +280,7 @@ impl Output for Vec<u8> {
     }
 }
 
-/// A newtype which can be used to wrap any type which
+/// A new type which can be used to wrap any type which
 /// implements `std::io::Seek` and `std::io::Write` to allow
 /// it to be used as an `Output`.
 #[cfg(feature = "std")]

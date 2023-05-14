@@ -7,7 +7,7 @@ use rosc::*;
 
 #[bench]
 fn bench_encode_args_array(b: &mut Bencher) {
-    // Encoded message contains 100 argumnts, each of which is an Array containing 0-20 Int values.
+    // Encoded message contains 100 arguments, each of which is an Array containing 0-20 Int values.
     let packet = OscPacket::Message(OscMessage {
         addr: "/OSC/Array".into(),
         args: (0..100)
@@ -25,7 +25,7 @@ fn bench_encode_args_array(b: &mut Bencher) {
 
 #[bench]
 fn bench_encode_args_blob(b: &mut Bencher) {
-    // Encoded message contains 1000 argumnts, each of which is a Blob containing 0-20 bytes.
+    // Encoded message contains 1000 arguments, each of which is a Blob containing 0-20 bytes.
     let packet = OscPacket::Message(OscMessage {
         addr: "/OSC/Blobs".into(),
         args: (0..1000)
@@ -41,7 +41,7 @@ fn bench_encode_args_bool(b: &mut Bencher) {
     // Encoded message contains 1000 arguments, each of which is a Bool. Half are false and half are
     // true.
     let packet = OscPacket::Message(OscMessage {
-        addr: "/OSC/Bools".into(),
+        addr: "/OSC/bools".into(),
         args: (0..1000).map(|x| OscType::Bool((x % 2) == 1)).collect(),
     });
 
@@ -407,7 +407,7 @@ fn bench_encode_messages_into_reused_vec(b: &mut Bencher) {
 fn bench_encode_nested_bundles(b: &mut Bencher) {
     // Encoded bundle contains 1000 sub-bundles, each of which are empty.
     let mut packet = OscPacket::Message(OscMessage {
-        addr: "/OSC/Nssted".into(),
+        addr: "/OSC/nested".into(),
         args: vec![],
     });
 
