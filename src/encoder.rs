@@ -219,14 +219,6 @@ fn encode_time_tag_into<O: Output>(time: &OscTime, out: &mut O) -> Result<usize,
     Ok(8)
 }
 
-#[test]
-fn test_pad() {
-    assert_eq!(4, pad(4));
-    assert_eq!(8, pad(5));
-    assert_eq!(8, pad(6));
-    assert_eq!(8, pad(7));
-}
-
 /// A trait for values that can receive encoded OSC output
 /// via `encode_into`. This allows more flexibility in how
 /// the output is handled, including reusing part of an

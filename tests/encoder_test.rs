@@ -1,7 +1,16 @@
 extern crate rosc;
 
+use rosc::encoder::pad;
 use rosc::{decoder, encoder};
 use rosc::{OscArray, OscBundle, OscColor, OscMessage, OscMidiMessage, OscPacket, OscType};
+
+#[test]
+fn test_pad() {
+    assert_eq!(4, pad(4));
+    assert_eq!(8, pad(5));
+    assert_eq!(8, pad(6));
+    assert_eq!(8, pad(7));
+}
 
 #[test]
 fn test_encode_message_wo_args() {
