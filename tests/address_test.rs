@@ -92,7 +92,7 @@ fn test_matcher() {
     ));
 
     // Single wildcard
-    // A single wildcard '?' matches excatly one alphanumeric character
+    // A single wildcard '?' matches exactly one alphanumeric character
     matcher = Matcher::new("/oscillator/?/frequency").expect("Should be valid");
     assert!(matcher.match_address(
         &OscAddress::new(String::from("/oscillator/1/frequency")).expect("Valid address pattern")

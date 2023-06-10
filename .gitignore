@@ -6,3 +6,4 @@ target/
 /.idea/
 /target-install/
 /Makefile
+/.vscode/
