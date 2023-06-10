@@ -1,3 +1,5 @@
+use std::convert::TryInto;
+
 use crate::alloc::{string::String, vec::Vec};
 use crate::types::{OscBundle, OscMessage, OscPacket, OscTime, OscType};
 
@@ -25,6 +27,50 @@ pub fn encode(packet: &OscPacket) -> crate::types::Result<Vec<u8>> {
     encode_into(packet, &mut bytes).expect("Failed to write encoded packet into Vec");
 
     Ok(bytes)
+}
+
+/// Takes a slice of OSC packet and returns a stream encoded byte vector on success.
+/// If the packet was invalid an `OscError` is returned instead.
+///
+/// Note this prepends the size of each encoded packet as a 32-bit integer before the
+/// encoded byte data of each OSC packet, as required by the [OSC packet specification].
+/// For example, assume you want to send two OSC packets, then the message layout will
+/// look like this: `[<size-of-packet-1><packet-1><size-of-packet-2><packet-2>...]`.
+///
+/// # Example
+///
+/// ```
+/// use rosc::{OscPacket,OscMessage,OscType};
+/// use rosc::encoder;
+///
+/// let packets = [
+///     OscPacket::Message(OscMessage{
+///         addr: "/osc1/freq".to_string(),
+///         args: vec![OscType::Float(82.5)]
+///     }),
+///     OscPacket::Message(OscMessage{
+///         addr: "/osc2/freq".to_string(),
+///         args: vec![OscType::Float(144.0)]
+///     }),
+/// ];
+/// assert!(encoder::encode_tcp(&packets).is_ok())
+/// ```
+///
+/// [OSC specification]: https://opensoundcontrol.stanford.edu/spec-1_0.html#osc-packets
+pub fn encode_tcp(packets: &[OscPacket]) -> crate::types::Result<Vec<u8>> {
+    // TODO(2023-05-14): Do we need to make the pre-allocation amount configurable?
+    let mut encoded_bytes = Vec::with_capacity(1024);
+    for packet in packets.iter() {
+        let bytes = encode(packet)?;
+        let size: u32 = bytes
+            .len()
+            .try_into()
+            .map_err(|_| crate::OscError::BadPacket(""))?;
+        encoded_bytes.extend(size.to_be_bytes());
+        encoded_bytes.extend(bytes);
+    }
+
+    Ok(encoded_bytes)
 }
 
 /// Takes a reference to an OSC packet and writes the
