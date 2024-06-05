@@ -282,7 +282,7 @@ fn pad_to_32_bit_boundary<'a>(
     original_input: &'a [u8],
 ) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], (), OscError> {
     move |input| {
-        let offset = 4 - original_input.offset(input) % 4;
+        let offset = (4 - original_input.offset(input) % 4) % 4;
         let (input, _) = take(offset)(input)?;
         Ok((input, ()))
     }
