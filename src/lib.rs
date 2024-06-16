@@ -16,6 +16,9 @@ extern crate std as alloc;
 extern crate byteorder;
 extern crate nom;
 
+#[cfg(feature = "std")]
+extern crate time;
+
 /// Crate specific error types.
 mod errors;
 /// OSC data types, see [OSC 1.0 specification](https://opensoundcontrol.stanford.edu/spec-1_0.html) for details.
