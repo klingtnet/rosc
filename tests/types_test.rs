@@ -1,6 +1,9 @@
 extern crate rosc;
 
-use rosc::{OscArray, OscTime, OscType};
+use rosc::{OscArray, OscType};
+
+#[cfg(feature = "std")]
+use rosc::{OscBundle, OscColor, OscMessage, OscMidiMessage, OscPacket, OscTime};
 
 #[cfg(feature = "std")]
 use std::{
@@ -124,4 +127,195 @@ fn assert_eq_osc_times(a: OscTime, b: OscTime) {
             a, b, tolerance_fractional_seconds,
         );
     }
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_type_int() {
+    let arg = OscType::Int(123);
+    assert_eq!(arg.to_string(), "(i) 123".to_string());
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_type_float() {
+    let arg = OscType::Float(123.4);
+    assert_osc_type_display_eq(&arg, "(f) 123.4");
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_type_string() {
+    let arg = OscType::String("abc".to_string());
+    assert_osc_type_display_eq(&arg, "(s) abc");
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_type_blob() {
+    let arg = OscType::Blob(vec![0, 1, 2, 255]);
+    assert_osc_type_display_eq(&arg, "(b) 0x000102FF");
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_type_time() {
+    let arg = OscType::Time(OscTime::try_from(UNIX_EPOCH).unwrap());
+    assert_osc_type_display_eq(&arg, "(t) 1970-01-01T00:00:00.000000000Z");
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_type_long() {
+    let arg = OscType::Long(123);
+    assert_osc_type_display_eq(&arg, "(h) 123");
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_type_double() {
+    let arg = OscType::Double(123.4);
+    assert_osc_type_display_eq(&arg, "(d) 123.4");
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_type_char() {
+    let arg = OscType::Char('a');
+    assert_osc_type_display_eq(&arg, "(c) a");
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_type_color() {
+    let arg = OscType::Color(OscColor {
+        red: 255,
+        green: 127,
+        blue: 63,
+        alpha: 255,
+    });
+    assert_osc_type_display_eq(&arg, "(r) {255,127,63,255}");
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_type_midi() {
+    let arg = OscType::Midi(OscMidiMessage {
+        port: 3,
+        status: 0xF0,
+        data1: 0x12,
+        data2: 0x34,
+    });
+    assert_osc_type_display_eq(&arg, "(m) {port:3, status:0xF0, data:0x1234}");
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_type_bool() {
+    let arg_true = OscType::Bool(true);
+    assert_osc_type_display_eq(&arg_true, "(T)");
+
+    let arg_false = OscType::Bool(false);
+    assert_osc_type_display_eq(&arg_false, "(F)");
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_type_array() {
+    let arg = OscType::Array(OscArray {
+        content: vec![
+            OscType::Int(123),
+            OscType::Float(123.4),
+            OscType::String("abc".to_string()),
+        ],
+    });
+    assert_osc_type_display_eq(&arg, "[(i) 123,(f) 123.4,(s) abc]");
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_type_nil() {
+    let arg = OscType::Nil;
+    assert_osc_type_display_eq(&arg, "(N)");
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_type_infinitum() {
+    let arg = OscType::Inf;
+    assert_osc_type_display_eq(&arg, "(I)");
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_packet_message() {
+    let packet = OscPacket::Message(OscMessage {
+        addr: "/oscillator/1/frequency".to_string(),
+        args: vec![OscType::Float(123.4), OscType::Bool(true)],
+    });
+    assert_eq!(
+        packet.to_string(),
+        "/oscillator/1/frequency, (f) 123.4, (T)"
+    )
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_packet_bundle() {
+    let timetag = OscTime::try_from(UNIX_EPOCH).unwrap();
+    let packet = OscPacket::Bundle(OscBundle {
+        timetag,
+        content: vec![
+            OscPacket::Message(OscMessage {
+                addr: "/oscillator/1/frequency".to_string(),
+                args: vec![OscType::Float(123.4), OscType::Bool(true)],
+            }),
+            OscPacket::Message(OscMessage {
+                addr: "/oscillator/2/frequency".to_string(),
+                args: vec![OscType::Float(246.8), OscType::Bool(false)],
+            }),
+        ],
+    });
+    assert_eq!(
+        packet.to_string(),
+        "#bundle 1970-01-01T00:00:00.000000000Z { /oscillator/1/frequency, (f) 123.4, (T); \
+         /oscillator/2/frequency, (f) 246.8, (F) }"
+    )
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn display_osc_packet_nested_bundle() {
+    let timetag = OscTime::try_from(UNIX_EPOCH).unwrap();
+    let packet = OscPacket::Bundle(OscBundle {
+        timetag,
+        content: vec![
+            OscPacket::Message(OscMessage {
+                addr: "/oscillator/1/frequency".to_string(),
+                args: vec![OscType::Float(123.4), OscType::Bool(true)],
+            }),
+            OscPacket::Message(OscMessage {
+                addr: "/oscillator/2/frequency".to_string(),
+                args: vec![OscType::Float(246.8), OscType::Bool(false)],
+            }),
+            OscPacket::Bundle(OscBundle {
+                timetag,
+                content: vec![OscPacket::Message(OscMessage {
+                    addr: "/oscillator/3/frequency".to_string(),
+                    args: vec![OscType::Float(123.4), OscType::Bool(true)],
+                })],
+            }),
+        ],
+    });
+    assert_eq!(
+        packet.to_string(),
+        "#bundle 1970-01-01T00:00:00.000000000Z { /oscillator/1/frequency, (f) 123.4, (T); \
+        /oscillator/2/frequency, (f) 246.8, (F); #bundle 1970-01-01T00:00:00.000000000Z \
+        { /oscillator/3/frequency, (f) 123.4, (T) } }"
+    )
+}
+
+#[cfg(feature = "std")]
+fn assert_osc_type_display_eq(arg: &OscType, expected: &str) {
+    assert_eq!(arg.to_string(), expected.to_string());
 }

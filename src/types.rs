@@ -9,6 +9,9 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
+#[cfg(feature = "std")]
+use time::{format_description::well_known::Iso8601, OffsetDateTime};
+
 use crate::alloc::{
     string::{String, ToString},
     vec::Vec,
@@ -99,6 +102,15 @@ impl From<OscTime> for SystemTime {
         let duration_since_unix_epoch =
             duration_since_osc_epoch - Duration::new(OscTime::UNIX_OFFSET, 0);
         UNIX_EPOCH + duration_since_unix_epoch
+    }
+}
+
+#[cfg(feature = "std")]
+impl Display for OscTime {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let time: OffsetDateTime = SystemTime::from(*self).into();
+        let formatted = time.format(&Iso8601::DEFAULT).map_err(|_| fmt::Error)?;
+        f.write_str(&formatted)
     }
 }
 
@@ -207,6 +219,44 @@ impl From<(u32, u32)> for OscType {
 }
 
 #[cfg(feature = "std")]
+impl Display for OscType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            OscType::Int(v) => write!(f, "(i) {v}"),
+            OscType::Float(v) => write!(f, "(f) {v}"),
+            OscType::String(v) => write!(f, "(s) {v}"),
+            OscType::Blob(v) => {
+                f.write_str("(b)")?;
+                if v.is_empty() {
+                    return Ok(());
+                }
+
+                f.write_str(" 0x")?;
+                write_hex(f, v)
+            }
+            OscType::Time(v) => write!(f, "(t) {v}"),
+            OscType::Long(v) => write!(f, "(h) {v}"),
+            OscType::Double(v) => write!(f, "(d) {v}"),
+            OscType::Char(v) => write!(f, "(c) {v}"),
+            OscType::Color(v) => write!(f, "(r) {v}", ),
+            OscType::Midi(v) => write!(f, "(m) {v}", ),
+            OscType::Bool(v) => f.write_str(if *v { "(T)" } else { "(F)" }),
+            OscType::Array(v) => write!(f, "{v}"),
+            OscType::Nil => f.write_str("(N)"),
+            OscType::Inf => f.write_str("(I)"),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+fn write_hex(f: &mut dyn fmt::Write, v: &Vec<u8>) -> fmt::Result {
+    for octet in v {
+        write!(f, "{:02X}", octet)?;
+    }
+    Ok(())
+}
+
+#[cfg(feature = "std")]
 impl TryFrom<SystemTime> for OscType {
     type Error = OscTimeError;
 
@@ -238,12 +288,33 @@ pub struct OscMidiMessage {
     pub data2: u8,
 }
 
+#[cfg(feature = "std")]
+impl Display for OscMidiMessage {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{{port:{}, status:0x{:02X}, data:0x{:02X}{:02X}}}",
+            self.port, self.status, self.data1, self.data2,
+        )
+    }
+}
+
 /// An *osc packet* can contain an *osc message* or a bundle of nested messages
 /// which is called *osc bundle*.
 #[derive(Clone, Debug, PartialEq)]
 pub enum OscPacket {
     Message(OscMessage),
     Bundle(OscBundle),
+}
+
+#[cfg(feature = "std")]
+impl Display for OscPacket {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            OscPacket::Message(m) => m.fmt(f),
+            OscPacket::Bundle(b) => b.fmt(f),
+        }
+    }
 }
 
 /// An OSC message consists of an address and
@@ -258,6 +329,19 @@ pub struct OscMessage {
     pub args: Vec<OscType>,
 }
 
+#[cfg(feature = "std")]
+impl Display for OscMessage {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let args = self
+            .args
+            .iter()
+            .map(OscType::to_string)
+            .collect::<Vec<String>>()
+            .join(", ");
+        write!(f, "{}, {}", self.addr, args)
+    }
+}
+
 /// An OSC bundle contains zero or more OSC packets
 /// and a time tag. The contained packets *should* be
 /// applied at the given time tag.
@@ -267,6 +351,19 @@ pub struct OscBundle {
     pub content: Vec<OscPacket>,
 }
 
+#[cfg(feature = "std")]
+impl Display for OscBundle {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let content = self
+            .content
+            .iter()
+            .map(OscPacket::to_string)
+            .collect::<Vec<String>>()
+            .join("; ");
+        write!(f, "#bundle {} {{ {} }}", self.timetag, content)
+    }
+}
+
 /// An RGBA color.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct OscColor {
@@ -274,6 +371,20 @@ pub struct OscColor {
     pub green: u8,
     pub blue: u8,
     pub alpha: u8,
+}
+
+#[cfg(feature = "std")]
+impl Display for OscColor {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{{{r},{g},{b},{a}}}",
+            r = self.red,
+            g = self.green,
+            b = self.blue,
+            a = self.alpha
+        )
+    }
 }
 
 /// An OscArray color.
@@ -287,6 +398,19 @@ impl<T: Into<OscType>> FromIterator<T> for OscArray {
         OscArray {
             content: iter.into_iter().map(T::into).collect(),
         }
+    }
+}
+
+#[cfg(feature = "std")]
+impl Display for OscArray {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let items = self
+            .content
+            .iter()
+            .map(OscType::to_string)
+            .collect::<Vec<String>>()
+            .join(",");
+        write!(f, "[{items}]")
     }
 }
 
