@@ -1,0 +1,26 @@
+name: Continuous Integration
+
+on:
+  push:
+    paths-ignore:
+      - "**/README.md"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  rust-checks:
+    name: Rust Checks
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup --version
+      - run: cargo test
+      - run: cargo build --release
+      - run: cargo fmt --check
+      - run: cargo clippy -- -Dclippy::all
+      - run: cargo clippy -- -Dclippy::all -Dclippy::pedantic
+        continue-on-error: true
+      - run: rustup toolchain install nightly
+      - run: cargo +nightly bench
