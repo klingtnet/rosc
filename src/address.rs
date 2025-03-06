@@ -256,7 +256,7 @@ fn map_address_pattern_component(input: &str) -> IResult<&str, AddressPatternCom
         // Anything that's alphanumeric gets matched literally
         take_while1(is_address_character)
             .map(|s: &str| AddressPatternComponent::Tag(String::from(s))),
-        // Slashes must be seperated into their own tag for the non-greedy implementation of wildcards
+        // Slashes must be separated into their own tag for the non-greedy implementation of wildcards
         char('/').map(|c: char| AddressPatternComponent::Tag(c.to_string())),
         tag("?").map(|_| AddressPatternComponent::WildcardSingle),
         // Combinations of wildcards are a bit tricky.

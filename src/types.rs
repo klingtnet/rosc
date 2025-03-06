@@ -147,7 +147,7 @@ impl Display for OscTimeError {
 #[cfg(feature = "std")]
 impl std::error::Error for OscTimeError {}
 
-/// see OSC Type Tag String: [OSC Spec. 1.0](http://opensoundcontrol.org/spec-1_0)
+/// see OSC Type Tag String: [OSC Spec. 1.0](https://opensoundcontrol.stanford.edu/spec-1_0.html)
 /// padding: zero bytes (n*4)
 #[derive(Clone, Debug, PartialEq)]
 pub enum OscType {
