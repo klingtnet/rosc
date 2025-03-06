@@ -300,7 +300,7 @@ impl From<String> for OscMessage {
         }
     }
 }
-impl<'a> From<&'a str> for OscMessage {
+impl From<&str> for OscMessage {
     fn from(s: &str) -> OscMessage {
         OscMessage {
             addr: s.to_string(),
