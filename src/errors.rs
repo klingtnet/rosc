@@ -69,7 +69,7 @@ impl<I> FromExternalError<I, OscError> for OscError {
 impl error::Error for OscError {
     fn source(&self) -> Option<&(dyn error::Error + 'static)> {
         match self {
-            OscError::StringError(ref err) => Some(err),
+            OscError::StringError(err) => Some(err),
             _ => None,
         }
     }
