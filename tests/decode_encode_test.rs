@@ -24,6 +24,23 @@ fn test_message_wo_args() {
     assert_eq!(0, tail.len());
     assert_eq!(packet, decoded_packet)
 }
+#[test]
+fn test_message_wo_args_tcp() {
+    let packet = OscPacket::Message(OscMessage {
+        addr: "/some/addr".to_string(),
+        args: vec![],
+    });
+
+    let bytes = encoder::encode_tcp(&packet).expect("encode failed");
+    assert_eq!(
+        hex::decode(GOLDEN_MESSAGE_WO_ARGS).unwrap(),
+        bytes[4..bytes.len()]
+    );
+    assert_eq!((bytes.len() as u32 - 4).to_be_bytes(), bytes[0..4]);
+    let (tail, decoded_packet) = decoder::decode_tcp(&bytes).expect("decode failed");
+    assert_eq!(0, tail.len());
+    assert_eq!(Some(packet), decoded_packet)
+}
 
 #[test]
 fn test_encode_message_with_all_types() {
@@ -78,7 +95,63 @@ fn test_encode_message_with_all_types() {
     assert_eq!(0, tail.len());
     assert_eq!(packet, decoded_packet)
 }
+#[test]
+fn test_encode_message_with_all_types_tcp() {
+    let packet = OscPacket::Message(OscMessage {
+        addr: "/another/address/1".to_string(),
+        args: vec![
+            4i32.into(),
+            42i64.into(),
+            3.1415926f32.into(),
+            3.14159265359f64.into(),
+            "This is a string.".to_string().into(),
+            "This is a string too.".into(),
+            vec![1u8, 2u8, 3u8].into(),
+            (123, 456).into(),
+            'c'.into(),
+            false.into(),
+            true.into(),
+            OscType::Nil,
+            OscType::Inf,
+            OscMidiMessage {
+                port: 4,
+                status: 41,
+                data1: 42,
+                data2: 129,
+            }
+            .into(),
+            OscColor {
+                red: 255,
+                green: 192,
+                blue: 42,
+                alpha: 13,
+            }
+            .into(),
+            OscArray {
+                content: vec![
+                    42i32.into(),
+                    OscArray {
+                        content: vec![1.23.into(), 3.21.into()],
+                    }
+                    .into(),
+                    "Yay".into(),
+                ],
+            }
+            .into(),
+        ],
+    });
 
+    let bytes = encoder::encode_tcp(&packet).expect("encode failed");
+    assert_eq!(
+        hex::decode(GOLDEN_MESSAGE_WITH_ALL_TYPES).unwrap(),
+        bytes[4..bytes.len()]
+    );
+    assert_eq!((bytes.len() as u32 - 4).to_be_bytes(), bytes[0..4]);
+
+    let (tail, decoded_packet) = decoder::decode_tcp(&bytes).expect("decode failed");
+    assert_eq!(0, tail.len());
+    assert_eq!(Some(packet), decoded_packet)
+}
 #[test]
 fn test_empty_bundle() {
     let packet = OscPacket::Bundle(OscBundle {
