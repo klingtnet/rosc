@@ -27,6 +27,17 @@ pub fn encode(packet: &OscPacket) -> crate::types::Result<Vec<u8>> {
     Ok(bytes)
 }
 
+/// Works exactly the same as [encode()]. Except that it prepends the length of the message into
+/// the first 4 bytes of the returned Vec, as per the OSC 1.0 specification.
+pub fn encode_tcp(packet: &OscPacket) -> crate::types::Result<Vec<u8>> {
+    let mut bytes = Vec::new();
+
+    // NOTE: The Output implementation for Vec<u8> can't actually produce an error!
+    encode_into_tcp(packet, &mut bytes).expect("Failed to write encoded packet into Vec");
+
+    Ok(bytes)
+}
+
 /// Takes a reference to an OSC packet and writes the
 /// encoded bytes to the given output. On success, the
 /// number of bytes written will be returned. If an error
@@ -60,6 +71,15 @@ pub fn encode_into<O: Output>(packet: &OscPacket, out: &mut O) -> Result<usize, 
     }
 }
 
+/// Works exactly the same as [encode_into()]. Except that it prepends the length of the message into
+/// the first 4 bytes of the provided [Output], as per the OSC 1.0 specification.
+pub fn encode_into_tcp<O: Output>(packet: &OscPacket, out: &mut O) -> Result<usize, O::Err> {
+    match *packet {
+        OscPacket::Message(ref msg) => encode_message_tcp(msg, out),
+        OscPacket::Bundle(ref bundle) => encode_bundle(bundle, out),
+    }
+}
+
 fn encode_message<O: Output>(msg: &OscMessage, out: &mut O) -> Result<usize, O::Err> {
     let mut written = encode_string_into(&msg.addr, out)?;
 
@@ -76,6 +96,15 @@ fn encode_message<O: Output>(msg: &OscMessage, out: &mut O) -> Result<usize, O::
     }
 
     Ok(written)
+}
+
+fn encode_message_tcp<O: Output>(msg: &OscMessage, out: &mut O) -> Result<usize, O::Err> {
+    let length_mark = out.mark(4)?;
+
+    let length = encode_message(msg, out)?;
+    out.place(length_mark, &(length as u32).to_be_bytes())?;
+
+    Ok(length + 4)
 }
 
 fn encode_bundle<O: Output>(bundle: &OscBundle, out: &mut O) -> Result<usize, O::Err> {
