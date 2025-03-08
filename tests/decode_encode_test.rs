@@ -243,3 +243,25 @@ fn test_bundle_cursor() {
     assert_eq!(140, n);
     assert_eq!(hex::decode(GOLDEN_BUNDLE).unwrap(), bytes);
 }
+
+#[test]
+fn test_decode_encoded_message_four_byte_aligned_blob() {
+    let message = OscPacket::Message(OscMessage {
+        addr: "/view/1".to_string(),
+        args: vec![OscType::Blob(vec![1, 2, 3, 4])],
+    });
+    let encoded_message = encoder::encode(&message).unwrap();
+    let (_, decoded_packet) = decoder::decode_udp(&encoded_message).unwrap();
+    assert_eq!(message, decoded_packet)
+}
+
+#[test]
+fn test_decode_encoded_message_four_byte_aligned_blob_and_string() {
+    let message = OscPacket::Message(OscMessage {
+        addr: "/view/12".to_string(),
+        args: vec![OscType::Blob(vec![1, 2, 3, 4])],
+    });
+    let encoded_message = encoder::encode(&message).unwrap();
+    let (_, decoded_packet) = decoder::decode_udp(&encoded_message).unwrap();
+    assert_eq!(message, decoded_packet)
+}

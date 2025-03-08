@@ -7,7 +7,7 @@ use crate::types::{
     OscArray, OscBundle, OscColor, OscMessage, OscMidiMessage, OscPacket, OscTime, OscType,
 };
 
-use nom::bytes::complete::{take, take_till};
+use nom::bytes::complete::{tag, take, take_till};
 use nom::combinator::{map, map_parser};
 use nom::multi::many0;
 use nom::number::complete::{be_f32, be_f64, be_i32, be_i64, be_u32};
@@ -151,10 +151,10 @@ fn read_osc_string<'a>(
 ) -> IResult<&'a [u8], String, OscError> {
     map_res(
         terminated(
-            take_till(|c| c == 0u8),
+            tuple((take_till(|c| c == 0u8), tag(b"\0"))),
             pad_to_32_bit_boundary(original_input),
         ),
-        |str_buf: &'a [u8]| {
+        |(str_buf, _null_byte)| {
             String::from_utf8(str_buf.into())
                 .map_err(OscError::StringError)
                 .map(|s| s.trim_matches(0u8 as char).to_string())
@@ -282,7 +282,10 @@ fn pad_to_32_bit_boundary<'a>(
     original_input: &'a [u8],
 ) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], (), OscError> {
     move |input| {
-        let offset = 4 - original_input.offset(input) % 4;
+        let offset = match original_input.offset(input) % 4 {
+            0 => 0,
+            r => 4 - r % 4,
+        };
         let (input, _) = take(offset)(input)?;
         Ok((input, ()))
     }
