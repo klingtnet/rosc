@@ -9,7 +9,7 @@ name = "rosc"
 readme = "README.md"
 repository = "https://github.com/klingtnet/rosc"
 rust-version = "1.56"
-version = "0.11.2"
+version = "0.11.3"
 
 [features]
 default = ["std"]
