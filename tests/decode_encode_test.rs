@@ -1,3 +1,5 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+
 extern crate rosc;
 
 use rosc::{decoder, encoder};
@@ -10,6 +12,7 @@ const GOLDEN_MESSAGE_WITH_ALL_TYPES: &str = "2f616e6f746865722f616464726573732f3
 const GOLDEN_EMPTY_BUNDLE: &str = "2362756e646c65000000000400000002";
 const GOLDEN_BUNDLE: &str = "2362756e646c6500000004d2000010e10000000c2f766965772f31002c000000000000202f6d697865722f6368616e6e656c2f312f616d70000000002c6600003f666666000000442362756e646c65000000162e0000223d000000142f6f73632f312f66726571002c690000000001b8000000182f6f73632f312f7068617365000000002c660000becccccd";
 
+#[cfg(feature = "std")]
 #[test]
 fn test_message_wo_args() {
     let packet = OscPacket::Message(OscMessage {
@@ -24,6 +27,8 @@ fn test_message_wo_args() {
     assert_eq!(0, tail.len());
     assert_eq!(packet, decoded_packet)
 }
+
+#[cfg(feature = "std")]
 #[test]
 fn test_message_wo_args_tcp() {
     let packet = OscPacket::Message(OscMessage {
@@ -42,6 +47,7 @@ fn test_message_wo_args_tcp() {
     assert_eq!(Some(packet), decoded_packet)
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn test_encode_message_with_all_types() {
     let packet = OscPacket::Message(OscMessage {
@@ -95,6 +101,8 @@ fn test_encode_message_with_all_types() {
     assert_eq!(0, tail.len());
     assert_eq!(packet, decoded_packet)
 }
+
+#[cfg(feature = "std")]
 #[test]
 fn test_encode_message_with_all_types_tcp() {
     let packet = OscPacket::Message(OscMessage {
@@ -152,6 +160,8 @@ fn test_encode_message_with_all_types_tcp() {
     assert_eq!(0, tail.len());
     assert_eq!(Some(packet), decoded_packet)
 }
+
+#[cfg(feature = "std")]
 #[test]
 fn test_empty_bundle() {
     let packet = OscPacket::Bundle(OscBundle {
@@ -167,6 +177,7 @@ fn test_empty_bundle() {
     assert_eq!(packet, decoded_packet)
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn test_bundle() {
     let packet = OscPacket::Bundle(OscBundle {
@@ -244,6 +255,7 @@ fn test_bundle_cursor() {
     assert_eq!(hex::decode(GOLDEN_BUNDLE).unwrap(), bytes);
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn test_decode_encoded_message_four_byte_aligned_blob() {
     let message = OscPacket::Message(OscMessage {
@@ -255,6 +267,7 @@ fn test_decode_encoded_message_four_byte_aligned_blob() {
     assert_eq!(message, decoded_packet)
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn test_decode_encoded_message_four_byte_aligned_blob_and_string() {
     let message = OscPacket::Message(OscMessage {
