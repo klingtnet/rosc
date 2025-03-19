@@ -17,10 +17,12 @@ lints = ["clippy"]
 std = ["time"]
 
 [dependencies]
-byteorder = {version = "1", default-features = false}
-clippy = {version = "^0", optional = true}
-nom = {version = "7", default-features = false, features = ["alloc"]}
-time = { version = "0.3.9", default-features = false, features = ["formatting"], optional = true }
+byteorder = { version = "1", default-features = false }
+clippy = { version = "^0", optional = true }
+nom = { version = "7", default-features = false, features = ["alloc"] }
+time = { version = "0.3.9", default-features = false, features = [
+    "formatting",
+], optional = true }
 
 [dev-dependencies]
-hex = {version = "0.4"}
+hex = { version = "0.4" }
