@@ -1,3 +1,5 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+
 extern crate rosc;
 
 use rosc::{OscArray, OscType};
@@ -11,6 +13,7 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
+#[cfg(feature = "std")]
 #[test]
 fn test_osc_array_from_iter() {
     use std::iter::FromIterator;
